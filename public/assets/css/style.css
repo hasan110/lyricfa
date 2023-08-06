@@ -1,0 +1,141 @@
+:root{
+  --theme : #874afd;
+
+  --md-section-height : 80px;
+  --sm-section-height : 48px;
+}
+@font-face {
+  font-family: iransans;
+  font-style: normal;
+  font-weight: bold;
+  src: url('../fonts/IRANSans.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: iransansBold;
+  font-style: normal;
+  font-weight: bold;
+  src: url('../fonts/IRANSansBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: iransansLight;
+  font-style: normal;
+  src: url('../fonts/IRANSansLight.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: iransansMedium;
+  font-style: normal;
+  src: url('../fonts/IRANSansMedium.ttf') format('truetype');
+}
+
+
+* {
+  scrollbar-width: normal;
+  scrollbar-color: rgb(233, 233, 233) #fff;
+  font-family: iransans;
+    user-select: none;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: rgb(239 239 239);
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgb(145 139 139);
+  border-radius: 20px;
+}
+
+
+/* vuetify */
+.v-application a {
+  color: inherit !important;
+  text-decoration: none;
+}
+.v-application--is-rtl .v-list-item__icon:first-child {
+  margin-left: 16px !important;
+}
+
+
+/* styles */
+.font-en-input input{
+    font-family: "Roboto", sans-serif !important;
+}
+.v-data-table tbody tr:nth-of-type(odd) {
+  background-color: rgba(0, 0, 0, .03);
+}
+.edit-texts-wrapper{
+    height: calc(100vh - var(--sm-section-height) - var(--sm-section-height));
+    overflow-y: auto;
+    direction: ltr;
+    scroll-behavior:smooth;
+}
+.btn--float{
+    position: fixed !important;
+    z-index: 10;
+}
+.btn--float.down{
+    bottom: 10px;
+    left: 10px;
+}
+.btn--float.up{
+    bottom: 10px;
+    left: 60px;
+}
+.btn--float.save{
+    bottom: 10px;
+    left: 110px;
+}
+.page-head{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e9e8eb;
+  padding: 0 .75rem;
+  height: var(--sm-section-height);
+}
+.page-head .titr{
+  font-size: 1.25rem;
+}
+.page-head .back{
+  color: var(--theme);
+}
+.md-section{
+  height: var(--md-section-height);
+}
+.sm-section-3{
+  height: var(--sm-section-height);
+}
+.main-section{
+  height: calc(100vh - var(--md-section-height) - var(--sm-section-height) - var(--sm-section-height) - var(--sm-section-height) - var(--sm-section-height));
+}
+
+
+.item-profile{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-top: 8px;
+}
+
+.v-application table{
+    position: relative;
+}
+.fetch-loading{
+    position: absolute;
+    width: 100%;
+}
+.edit-texts-wrapper  textarea {
+    unicode-bidi: plaintext;
+}
+
+.main-section table{
+    white-space: nowrap;
+}
+
+.rtl-dir{
+    direction: rtl !important;
+}
