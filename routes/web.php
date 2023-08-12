@@ -20,7 +20,6 @@ use App\Http\Controllers\admin\TextIdiomsController;
 use App\Http\Controllers\admin\IdiomController;
 
 Route::get('/get_id', [MusicController::class, 'getGuessId']);
-Route::get('/generateCodeIntroduce/run', [\App\Http\Controllers\TestController::class, 'generateCodeIntroduce']);
 
 //Admin
 Route::post('/login_admin', [AdminController::class, 'login']);
