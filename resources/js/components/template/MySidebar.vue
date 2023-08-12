@@ -17,12 +17,6 @@
     </v-app-bar>
 
     <v-list>
-      <v-list-item>
-        <v-list-item-avatar>
-          <v-img src="https://cdn.vuetifyjs.com/images/john.png"></v-img>
-        </v-list-item-avatar>
-      </v-list-item>
-
       <v-list-item link>
         <v-list-item-content>
           <v-list-item-title class="text-h6">
@@ -106,48 +100,52 @@
 
   </v-navigation-drawer>
 </template>
+
 <script>
 export default {
-  name:'MySidebar',
-  data: () => ({
-    selectedItem: null,
-    items: [
-      { id:1, index:0, parent_id:0, title: 'صفحه اصلی', type:'item', link:'dashboard', icon: 'mdi-view-dashboard-outline' },
-      { id:2, index:1, parent_id:0, title: 'کاربران', type:'item', link:'users', icon: 'mdi-account-group-outline' },
-      { id:3, index:2, parent_id:0, title: 'آهنگ ها', type:'item', link:'musics', icon: 'mdi-music' },
-      { id:4, index:3, parent_id:0, title: 'خواننده ها', type:'item', link:'singers', icon: 'mdi-account-voice' },
-      { id:5, index:4, parent_id:0, title: 'آلبوم ها', type:'item', link:'albums', icon: 'mdi-album' },
-      { id:6, index:5, parent_id:0, title: 'اسلایدر ها', type:'item', link:'sliders', icon: 'mdi-panorama-variant-outline' },
-      { id:7, index:6, parent_id:0, title: 'پرداخت ها', type:'item', link:'pays', icon: 'mdi-cash-plus' },
-      { id:8, index:7, parent_id:0, title: 'پشتیبانی', type:'item', link:'support', icon: 'mdi-face-agent' },
-      { id:9, index:8, parent_id:0, title: 'تنظیمات', type:'item', link:'settings', icon: 'mdi-cog-outline' },
-      { id:10, index:9, parent_id:0, title: 'سفارش آهنگ', type:'item', link:'music_orders', icon: 'mdi-account-cash-outline' }
-    ],
-  }),
-  props: {
-    value: {
-      type: Boolean,
-      default: true,
+    name:'MySidebar',
+    data: () => ({
+        selectedItem: null,
+        items: [
+            { id:1, index:0, parent_id:0, title: 'صفحه اصلی', type:'item', link:'dashboard', icon: 'mdi-view-dashboard-outline' },
+            { id:2, index:1, parent_id:0, title: 'کاربران', type:'item', link:'users', icon: 'mdi-account-group-outline' },
+            { id:3, index:2, parent_id:0, title: 'آهنگ ها', type:'item', link:'musics', icon: 'mdi-music' },
+            { id:4, index:3, parent_id:0, title: 'خواننده ها', type:'item', link:'singers', icon: 'mdi-account-voice' },
+            { id:5, index:4, parent_id:0, title: 'آلبوم ها', type:'item', link:'albums', icon: 'mdi-album' },
+            { id:6, index:5, parent_id:0, title: 'اسلایدر ها', type:'item', link:'sliders', icon: 'mdi-panorama-variant-outline' },
+            { id:7, index:6, parent_id:0, title: 'پرداخت ها', type:'item', link:'pays', icon: 'mdi-cash-plus' },
+            { id:8, index:7, parent_id:0, title: 'پشتیبانی', type:'item', link:'support', icon: 'mdi-face-agent' },
+            { id:9, index:8, parent_id:0, title: 'تنظیمات', type:'item', link:'settings', icon: 'mdi-cog-outline' },
+            { id:10, index:9, parent_id:0, title: 'سفارش آهنگ', type:'item', link:'music_orders', icon: 'mdi-account-cash-outline' },
+            { id:11, index:10, parent_id:0, title: 'نظرات', type:'item', link:'comments', icon: 'mdi-comment-outline' },
+            { id:12, index:11, parent_id:0, title: 'فیلم ها', type:'item', link:'movies', icon: 'mdi-movie-settings-outline' },
+            { id:13, index:12, parent_id:0, title: 'نوتیفیکیشن ها', type:'item', link:'notifications', icon: 'mdi-bell-outline' }
+        ],
+    }),
+    props: {
+        value: {
+            type: Boolean,
+            default: true,
+        },
     },
-  },
-  methods: {
-    close() {
-      this.$emit("input", !this.value);
+    methods: {
+        close() {
+            this.$emit("input", !this.value);
+        },
+        logout(){
+            this.removeToken()
+            this.$router.replace({ name:'login' });
+        }
     },
-    logout(){
-      this.removeToken()
-      this.$router.replace({ name:'login' });
+    beforeMount(){
+        const link = this.$route.name;
+        for(let i = 0; i < this.items.length; i++)
+        {
+            if(link === this.items[i].link)
+            {
+                this.selectedItem = this.items[i].index
+            }
+        }
     }
-  },
-  beforeMount(){
-    const link = this.$route.name;
-    for(let i = 0; i < this.items.length; i++)
-    {
-      if(link === this.items[i].link)
-      {
-        this.selectedItem = this.items[i].index
-      }
-    }
-  }
 }
 </script>

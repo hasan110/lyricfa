@@ -122,7 +122,7 @@ class UserController extends Controller
         $api_token = $request->header("ApiToken");
 //        $data = User::header('ApiToken', $api_token)->first();
 
-        $data = $this->getUserByToken($api_token);
+        $data = self::getUserByToken($api_token);
 
         $id = $data->id;
         if ($id != null) {
@@ -162,7 +162,43 @@ class UserController extends Controller
 
     public function usersList(Request $request)
     {
-        $users = User::where('phone_number', 'LIKE', "%{$request->search_key}%")->paginate(50);
+        $users = User::query();
+
+        if($request->search_key){
+            $users = $users->where('phone_number', 'LIKE', "%{$request->search_key}%");
+        }
+        if($request->sort_by){
+            switch ($request->sort_by){
+                case 'newest':
+                    $users = $users->orderBy('id' , 'desc');
+                break;
+                case 'oldest':
+                    $users = $users->orderBy('id' , 'asc');
+                break;
+                case 'most_subscribed':
+                    $users = $users->orderBy('expired_at' , 'desc');
+                break;
+            }
+        }
+
+        $users = $users->paginate(50);
+
+        foreach ($users as $user)
+        {
+            $expire = '<span class="red--text">منقضی شده</span>';
+
+            if ($user->expired_at)
+            {
+                $expired_at = Carbon::parse($user->expired_at);
+                $diff = Carbon::now()->diffInDays($expired_at , false);
+                if($diff > 0)
+                {
+                    $expire = '<b>'. $diff .' روز </b>';
+                }
+            }
+
+            $user['expire'] = $expire;
+        }
 
         $response = [
             'data' => $users,

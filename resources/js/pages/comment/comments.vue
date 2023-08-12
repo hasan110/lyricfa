@@ -1,0 +1,262 @@
+<template>
+  <div>
+
+    <div class="page-head">
+      <div class="titr">نظرات</div>
+      <div class="back">
+        <router-link :to="{ name : 'dashboard' }">بازگشت
+          <v-icon>
+            mdi-chevron-left
+          </v-icon>
+        </router-link>
+      </div>
+    </div>
+
+    <v-container>
+      <v-row class="md-section">
+
+        <v-col cols="4" class="pb-0">
+
+          <v-text-field
+            v-model="filter.search_key"
+            :append-outer-icon="'mdi-magnify'"
+            outlined
+            clearable
+            dense
+            label="جست و جو"
+            type="text"
+            @click:append-outer="reset()"
+          ></v-text-field>
+
+        </v-col>
+        <v-col cols="4" class="pb-0">
+        </v-col>
+        <v-col cols="4" class="pb-0">
+        </v-col>
+
+      </v-row>
+
+      <div class="sm-section">
+
+      </div>
+
+      <div class="main-section">
+        <v-simple-table
+          fixed-header
+          height="100%"
+          style="height:100%"
+        >
+          <template v-slot:default>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>کاربر</th>
+                <th>متن نظر</th>
+                <th>آهنگ</th>
+                <th>عملیات</th>
+              </tr>
+            </thead>
+              <div class="fetch-loading">
+                  <v-progress-linear
+                      v-if="fetch_loading"
+                      indeterminate
+                      color="cyan"
+                  ></v-progress-linear>
+              </div>
+            <tbody>
+              <tr
+                v-for="item in list"
+                :key="item.id"
+              >
+                <td>{{ item.id }}</td>
+                <td>
+                  <template v-if="item.user">
+                    <router-link :to="{ name:'user' , params:{ id:item.user.id } }">
+                      {{item.user.phone_number}}
+                    </router-link>
+                  </template>
+                  <template v-else>
+                    ---
+                  </template>
+                <td>{{item.comment}}</td>
+                <td>
+                  <template v-if="item.music">
+                    <router-link :to="{name:'edit_music' , params:{id:item.music.id}}">{{item.music.persian_name}}</router-link>
+                  </template>
+                  <template v-else>
+                    ---
+                  </template>
+                </td>  
+                <td>
+                    <v-btn
+                      class="mx-2"
+                      fab small
+                      dark
+                      @click="toggleStatusModal(item.id , 1)"
+                      color="indigo"
+                    >
+                      <v-icon dark>
+                        mdi-check-bold
+                      </v-icon>
+                    </v-btn>
+
+                    <v-btn
+                      class="mx-2"
+                      fab small
+                      dark
+                      @click="toggleStatusModal(item.id , 0)"
+                      color="red"
+                    >
+                      <v-icon dark>
+                        mdi-close-thick
+                      </v-icon>
+                    </v-btn>
+                </td>
+              </tr>
+            </tbody>
+          </template>
+        </v-simple-table>
+      </div>
+
+      <div class="sm-section">
+        <v-pagination
+          v-model="current_page"
+          :length="last_page"
+          :total-visible="7"
+        ></v-pagination>
+      </div>
+
+    </v-container>
+
+      <v-dialog
+          v-model="change_status_modal"
+          persistent
+          max-width="600px"
+      >
+          <v-card>
+              <v-card-title>
+                  <h4>
+                      <template v-if="comment_status === 1">
+                          تایید نظر
+                      </template>
+                      <template v-else>
+                          رد کردن نظر
+                      </template>
+                  </h4>
+              </v-card-title>
+              <v-card-text>
+
+                  <template v-if="comment_status === 1">
+                      آیا مطمئنید می خواهید این نظر را تایید کنید؟
+                  </template>
+                  <template v-else>
+                      آیا مطمئنید می خواهید این نظر را رد کنید؟
+                  <p>(با رد کردن , این نظر حذف خواهد شد.)</p>
+                  </template>
+
+              </v-card-text>
+              <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn
+                      color="red"
+                      dark
+                      @click="change_status_modal = false"
+                  >
+                      بستن
+                  </v-btn>
+                  <v-btn
+                      :loading="loading"
+                      :disabled="loading"
+                      color="blue"
+                      @click="changeStatus()"
+                  >
+                      ادامه
+                  </v-btn>
+              </v-card-actions>
+          </v-card>
+      </v-dialog>
+
+  </div>
+</template>
+<script>
+export default {
+  name:'comments',
+  data: () => ({
+    list:[],
+    filter:{},
+    errors:{},
+    current_page:1,
+    per_page:0,
+    last_page:1,
+    comment_id:null,
+    change_status_modal:false,
+    fetch_loading:false,
+    loading:false,
+  }),
+  watch:{
+    current_page(){
+      this.getList();
+    }
+  },
+  methods:{
+    getList(){
+      this.fetch_loading = true
+      this.$http.post(`user_comments/list` , this.filter)
+      .then(res => {
+        this.fetch_loading = false
+        this.list = res.data.data
+      })
+      .catch( () => {
+        this.fetch_loading = false
+      });
+    },
+    Search(e){
+      if (e.keyCode === 13) {
+        this.current_page = 1
+        this.list = []
+        this.getList()
+      }
+    },
+    reset(){
+        this.current_page = 1
+        this.list = []
+        this.getList()
+    },
+    toggleStatusModal(id , status){
+        this.comment_id = id
+        this.comment_status = status
+        this.change_status_modal = true
+    },
+    changeStatus(){
+      this.loading = true
+      this.$http.post(`user_comments/change_status` , {id:this.comment_id , status:this.comment_status})
+      .then( () => {
+        this.reset()
+        this.loading = false
+        this.change_status_modal = false
+      })
+      .catch( err => {
+        this.loading = false
+        const e = err.response.data
+        if(e.errors){ this.errors = e.errors }
+
+          this.$fire({
+            title: "خطا",
+            text: e.message ? e.message : 'خطا در پردازش درخواست !',
+            type: "error",
+            timer: 5000
+          })
+
+      });
+    }
+  },
+  mounted(){
+    this.getList();
+  },
+  beforeMount(){
+    this.checkAuth()
+  }
+}
+</script>
+<style>
+</style>

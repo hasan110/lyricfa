@@ -20,15 +20,16 @@ use App\Http\Controllers\admin\TextIdiomsController;
 use App\Http\Controllers\admin\IdiomController;
 
 Route::get('/get_id', [MusicController::class, 'getGuessId']);
-
+Route::get('/generateCodeIntroduce/run', [\App\Http\Controllers\TestController::class, 'generateCodeIntroduce']);
 
 //Admin
 Route::post('/login_admin', [AdminController::class, 'login']);
 
 Route::middleware('CheckAdminApiAuthentication')->group(function () {
 
-
-
+    Route::prefix('index')->group(function () {
+        Route::get('/statistics', [IndexController::class, 'statistics'])->name('index/statistics');
+    });
 
     Route::prefix('idioms')->group(function () {
         Route::post('/create', [IdiomController::class, 'createIdiom'])->name('idioms/create');

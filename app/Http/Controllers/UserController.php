@@ -26,9 +26,9 @@ class UserController extends Controller
             return 0;
 
     }
-    
-    
-    
+
+
+
     public function saveFcmRefreshTokenInServer(Request $request)
     {
 
@@ -80,7 +80,7 @@ class UserController extends Controller
         }
     }
 
-    
+
     public function addRewardsByUser(Request $request)
     {
         $api_token = $request->header("ApiToken");
@@ -104,7 +104,7 @@ class UserController extends Controller
                 'message' => "اشتراک شما با موفقیت تمدید شد",
             ];
             return response()->json($response, 200);
-    
+
         } else {
 
             $response = [
@@ -169,19 +169,39 @@ class UserController extends Controller
         return $user;
     }
 
-    public static function addUser($phone_number)
+    public static function addUser($phone_number , $referral_code = null)
     {
         $phone_number = str_replace("+98", "", $phone_number);
         if (substr($phone_number, 0, 1) == "0") {
             $phone_number = substr($phone_number, -strlen($phone_number) + 1);
         }
+
+        do{
+            $code_introduce = Str::random(6);
+            $code_introduce_exists = User::where('code_introduce' , $code_introduce)->exists();
+        }while($code_introduce_exists);
+
         $user = new User();
         $user->phone_number = $phone_number;
-        $user->expired_at = Carbon::now()->addDays(5); //Free subscription
+        $user->expired_at = Carbon::now()->addDays(3); //Free subscription
         $user->api_token = Str::random(64);
+        $user->code_introduce = $code_introduce;
+        $user->referral_code = $referral_code;
 
         $user->save();
         return $user;
+    }
+
+    public static function checkReferralCode($referral_code)
+    {
+        if (!$referral_code) return null;
+
+        if(User::where('code_introduce' , $referral_code)->exists())
+        {
+            return $referral_code;
+        }
+
+        return null;
     }
 
     public static function setUserNewSubscription(Request $request)
@@ -251,7 +271,7 @@ class UserController extends Controller
             return response()->json($response, 400);
         }
     }
-    
+
         public static function getUserById($id){
         return  User::where('id', $id)->first();
     }

@@ -73,6 +73,13 @@
                 <th>عملیات</th>
               </tr>
             </thead>
+              <div class="fetch-loading">
+                  <v-progress-linear
+                      v-if="fetch_loading"
+                      indeterminate
+                      color="cyan"
+                  ></v-progress-linear>
+              </div>
             <tbody>
               <tr
                 v-for="item in list"
@@ -92,10 +99,8 @@
                   <span class="pa-2">آهنگ ها : {{ item.num_musics }}</span>
                 </td>
                 <td>
-                  <v-btn color="primary" dens>
-                    <!-- <router-link :to="{ name:'edit_music_text' , params:{ id:item.id } }"> -->
+                  <v-btn color="primary" dens @click="getSinger(item.id)">
                     ویرایش
-                    <!-- </router-link> -->
                   </v-btn>
                 </td>
               </tr>
@@ -132,15 +137,6 @@
 
               <v-col cols="6" class="pb-0">
                 <v-text-field
-                  v-model="form_data.persian_name"
-                  outlined
-                  clearable
-                  dense
-                  label="نام گروه یا خواننده به فارسی"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="6" class="pb-0">
-                <v-text-field
                   v-model="form_data.english_name"
                   outlined
                   clearable
@@ -148,6 +144,15 @@
                   label="نام گروه یا خواننده به انگلیسی"
                 ></v-text-field>
               </v-col>
+                <v-col cols="6" class="pb-0">
+                    <v-text-field
+                        v-model="form_data.persian_name"
+                        outlined
+                        clearable
+                        dense
+                        label="نام گروه یا خواننده به فارسی"
+                    ></v-text-field>
+                </v-col>
 
             </v-row>
 
@@ -158,7 +163,8 @@
                   v-model="form_data.singer_picture"
                   outlined
                   show-size
-                  dense
+                  dense persistent-hint
+                  hint="فرمت تصویر باید jpg و سایز آن 300*300 باشد"
                   label="آپلود تصویر خواننده"
                   accept="image/*"
                 ></v-file-input>
@@ -172,7 +178,81 @@
 
         <v-card-actions class="justify-end">
           <v-btn color="danger" @click="create_modal = false">بستن</v-btn>
-          <v-btn color="success" @click="saveSinger()">ایجاد</v-btn>
+          <v-btn
+            :loading="create_loading"
+            :disabled="create_loading"
+            color="success"
+            @click="saveSinger()"
+          >ایجاد</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      transition="dialog-top-transition"
+      max-width="600"
+      v-model="edit_modal"
+    >
+      <v-card>
+        <v-toolbar
+          color="accent"
+          dark
+        >ویرایش خواننده</v-toolbar>
+        <v-card-text>
+
+          <v-container>
+
+            <v-row class="pt-3">
+
+              <v-col cols="6" class="pb-0">
+                <v-text-field
+                  v-model="edit_form_data.english_name"
+                  outlined
+                  clearable
+                  dense
+                  label="نام گروه یا خواننده به انگلیسی"
+                ></v-text-field>
+              </v-col>
+                <v-col cols="6" class="pb-0">
+                    <v-text-field
+                        v-model="edit_form_data.persian_name"
+                        outlined
+                        clearable
+                        dense
+                        label="نام گروه یا خواننده به فارسی"
+                    ></v-text-field>
+                </v-col>
+
+            </v-row>
+
+            <v-row class="pt-3">
+
+              <v-col cols="12" class="pb-0">
+                <v-file-input
+                  v-model="edit_form_data.singer_picture"
+                  outlined
+                  show-size
+                  dense persistent-hint
+                  hint="فرمت تصویر باید jpg و سایز آن 300*300 باشد"
+                  label="آپلود تصویر جدید خواننده"
+                  accept="image/*"
+                ></v-file-input>
+              </v-col>
+
+            </v-row>
+
+          </v-container>
+
+        </v-card-text>
+
+        <v-card-actions class="justify-end">
+          <v-btn color="danger" @click="edit_modal = false">بستن</v-btn>
+          <v-btn
+            :loading="edit_loading"
+            :disabled="edit_loading"
+            color="success"
+            @click="updateSinger()"
+          >ویرایش</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -185,6 +265,7 @@ export default {
   data: () => ({
     list:[],
     form_data:{},
+    edit_form_data:{},
     filter:{},
     errors:{},
     sort_by_list: [
@@ -197,6 +278,10 @@ export default {
     per_page:0,
     last_page:5,
     create_modal:false,
+    create_loading:false,
+    edit_modal:false,
+    edit_loading:false,
+    fetch_loading:false,
   }),
   watch:{
     current_page(){
@@ -205,12 +290,15 @@ export default {
   },
   methods:{
     getList(){
+      this.fetch_loading = true
       this.$http.post(`singers/list?page=${this.current_page}` , this.filter)
       .then(res => {
         this.list = res.data.data.data
         this.last_page = res.data.data.last_page;
+        this.fetch_loading = false
       })
       .catch( () => {
+        this.fetch_loading = false
       });
     },
     Search(e){
@@ -226,16 +314,21 @@ export default {
         this.getList()
     },
     saveSinger(){
+      this.create_loading = true
       const d = new FormData();
       const x = this.form_data;
 
       x.english_name ? d.append('english_name', x.english_name) : '';
       x.persian_name ? d.append('persian_name', x.persian_name) : '';
-      x.singer_picture ? d.append('singer_picture', x.singer_picture) : '';
+      x.singer_picture ? d.append('image', x.singer_picture) : '';
 
       this.$http.post(`singers/create` , d)
       .then(res => {
+        this.create_loading = false
         this.form_data = {};
+        this.create_modal = false
+
+        this.reset()
 
         this.$fire({
           title: "موفق",
@@ -245,10 +338,9 @@ export default {
         })
       })
       .catch( err => {
-        this.loading = false
+        this.create_loading = false
         const e = err.response.data
         if(e.errors){ this.errors = e.errors }
-        else if(e.message){
 
           this.$fire({
             title: "خطا",
@@ -256,12 +348,61 @@ export default {
             type: "error",
             timer: 5000
           })
+      });
+    },
+    getSinger(singer_id){
+      this.$store.commit('SHOW_APP_LOADING' , 1)
+      this.$http.post(`singers/single` , {id:singer_id})
+      .then(res => {
+        this.edit_form_data = res.data.data
+        this.edit_modal = true
+        this.$store.commit('SHOW_APP_LOADING' , 0)
+      })
+      .catch( () => {
+        this.$store.commit('SHOW_APP_LOADING' , 0)
+      });
+    },
+    updateSinger(){
+      this.edit_loading = true
+      const d = new FormData();
+      const x = this.edit_form_data;
 
-        }
+      d.append('id', x.id);
+      x.english_name ? d.append('english_name', x.english_name) : '';
+      x.persian_name ? d.append('persian_name', x.persian_name) : '';
+      x.singer_picture ? d.append('image', x.singer_picture) : '';
+
+      this.$http.post(`singers/update` , d)
+      .then(res => {
+        this.edit_loading = false
+        this.edit_form_data = {};
+        this.edit_modal = false
+        this.reset()
+
+        this.$fire({
+          title: "موفق",
+          text: res.message,
+          type: "success",
+          timer: 5000
+        })
+      })
+      .catch( err => {
+        this.edit_loading = false
+        const e = err.response.data
+        if(e.errors){ this.errors = e.errors }
+
+          this.$fire({
+            title: "خطا",
+            text: e.message ? e.message : 'خطا در پردازش درخواست !',
+            type: "error",
+            timer: 5000
+          })
+
       });
     },
   },
   mounted(){
+    this.filter.sort_by = 'newest';
     this.getList();
   },
   beforeMount(){

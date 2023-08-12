@@ -67,7 +67,7 @@ class SmsVerifyController extends Controller
 //        $fromNum = "+989000145";
         $toNum = array($request->phone_number);
         $pattern_code = "1ydwawpvjy";
-        $activate_code = rand(1000, 9999);       
+        $activate_code = rand(1000, 9999);
         $input_data = array("verification-code" => $activate_code, "name" => "");
         $client->sendPatternSms($fromNum, $toNum, $user, $pass, $pattern_code, $input_data);
 
@@ -80,7 +80,7 @@ class SmsVerifyController extends Controller
           }else{
                    $smsVerify->code = $activate_code;
           }
-   
+
 
         $smsVerify->save();
 
@@ -118,8 +118,8 @@ class SmsVerifyController extends Controller
             ];
             return response()->json($arr, 400);
         }
-        
-                        if( $request->phone_number == 1234567890 && $request->code == 1234 && $request->type == "login"){ // account google play
+
+        if( $request->phone_number == 1234567890 && $request->code == 1234 && $request->type == "login"){ // account google play
             $user = UserController::changeTokenAndReturnUser($request->phone_number);
             $arr = [
                 'data' => $user,
@@ -166,7 +166,8 @@ class SmsVerifyController extends Controller
                 }
             } else {
                 if ($request->code == $sms->code) {
-                    $user = UserController::addUser($request->phone_number);
+                    $referral_code = UserController::checkReferralCode($request->referral_code);
+                    $user = UserController::addUser($request->phone_number , $referral_code);
                     $arr = [
                         'data' => $user,
                         'errors' => [

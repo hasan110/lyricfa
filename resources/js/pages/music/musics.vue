@@ -73,6 +73,13 @@
                 <th>عملیات</th>
               </tr>
             </thead>
+              <div class="fetch-loading">
+                  <v-progress-linear
+                      v-if="fetch_loading"
+                      indeterminate
+                      color="cyan"
+                  ></v-progress-linear>
+              </div>
             <tbody>
               <tr
                 v-for="item in list"
@@ -101,14 +108,26 @@
                 </td>
                 <td>-</td>
                 <td>
-                  <v-btn color="primary" dens>
-                    ویرایش آهنگ
+                  <v-btn color="primary" small>
+                    <router-link :to="{ name:'edit_music' , params:{ id:item.id } }">
+                      ویرایش آهنگ
+                    </router-link>
                   </v-btn>
-                  <v-btn color="primary" dens>
+                  <v-btn color="primary" small>
                     <router-link :to="{ name:'edit_music_text' , params:{ id:item.id } }">
                       ویرایش متن آهنگ
                     </router-link>
                   </v-btn>
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn color="primary" x-small fab v-bind="attrs" v-on="on">
+                        <a target="_blank" :href="Url + 'musics/128/' + item.id + '.mp3'" download>
+                          <v-icon>mdi-download</v-icon>
+                        </a>
+                      </v-btn>
+                    </template>
+                    <span>دانلود آهنگ</span>
+                  </v-tooltip>
                 </td>
               </tr>
             </tbody>
@@ -144,12 +163,13 @@ export default {
         {text: 'متوسط',value: 'normal'},
         {text: 'سخت',value: 'hard'},
         {text: 'خیلی سخت',value: 'expert'},
-        {text: 'بیشترین بازدید',value: 'seen'},
+        {text: 'بیشترین بازدید',value: 'most_seen'},
         {text: 'آلبوم دار ها',value: 'has_album'},
     ],
     current_page:1,
     per_page:0,
     last_page:5,
+    fetch_loading:false,
   }),
   watch:{
     current_page(){
@@ -158,12 +178,15 @@ export default {
   },
   methods:{
     getList(){
+      this.fetch_loading = true
       this.$http.post(`musics/list?page=${this.current_page}` , this.filter)
       .then(res => {
+        this.fetch_loading = false
         this.list = res.data.data.data
         this.last_page = res.data.data.last_page;
       })
       .catch( () => {
+        this.fetch_loading = false
       });
     },
     Search(e){

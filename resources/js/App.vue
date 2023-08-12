@@ -30,18 +30,24 @@
       <router-view></router-view>
     </v-main>
 
+    <loadings v-if="$store.state.loadings.APP_LOADING === 1" :type="1"></loadings>
+    <loadings v-if="$store.state.loadings.APP_LOADING === 2" :type="2"></loadings>
+    <loadings v-if="loading" :type="1"></loadings>
+
   </v-app>
 
 </template>
 <script>
-import removeToken from "./plugins/Auth";
-
+import loadings from './components/UI/Loadings'
 export default {
   name:'App',
   data: () => ({
     isDrawerOpen:true,
     loading:true
   }),
+  components:{
+      loadings
+  },
   methods: {
     get_admin_data(){
       this.loading = true
@@ -59,7 +65,6 @@ export default {
   },
   beforeMount(){
     this.checkAuth()
-
     this.get_admin_data();
   }
 }

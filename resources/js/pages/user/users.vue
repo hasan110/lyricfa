@@ -48,12 +48,9 @@
         </v-col>
 
       </v-row>
-      
+
       <div class="sm-section">
 
-        <v-btn color="success" dens>
-          ایجاد
-        </v-btn>
 
       </div>
 
@@ -66,23 +63,42 @@
           <template v-slot:default>
             <thead>
               <tr>
+                <th>#</th>
                 <th>نام</th>
                 <th>شماره تلفن</th>
+                <th>اشتراک</th>
+                <th>جزییات</th>
               </tr>
             </thead>
+              <div class="fetch-loading">
+                  <v-progress-linear
+                      v-if="fetch_loading"
+                      indeterminate
+                      color="cyan"
+                  ></v-progress-linear>
+              </div>
             <tbody>
               <tr
-                v-for="item in desserts"
-                :key="item.name"
+                v-for="(item , key) in list"
+                :key="key"
               >
-                <td>{{ item.name }}</td>
-                <td>{{ item.calories }}</td>
+                <td>{{ item.id }}</td>
+                <td>{{ item.full_name }}</td>
+                <td>{{ item.phone_number }}</td>
+                <td><div v-html="item.expire"></div></td>
+                <td>
+                  <v-btn color="primary" dens>
+                    <router-link :to="{ name:'user' , params:{ id:item.id } }">
+                      <v-icon>mdi-information-outline</v-icon>
+                    </router-link>
+                  </v-btn>
+                </td>
               </tr>
             </tbody>
           </template>
         </v-simple-table>
       </div>
-      
+
       <div class="sm-section">
         <v-pagination
           v-model="current_page"
@@ -99,100 +115,20 @@ export default {
   name:'users',
   data: () => ({
     list:{},
-    desserts: [
-      {
-        name: 'Frozen Yogurt',
-        calories: 159,
-      },
-      {
-        name: 'Ice cream sandwich',
-        calories: 237,
-      },
-      {
-        name: 'Eclair',
-        calories: 262,
-      },
-      {
-        name: 'Cupcake',
-        calories: 305,
-      },
-      {
-        name: 'Gingerwrtybread',
-        calories: 356,
-      },
-      {
-        name: 'Jellty bean',
-        calories: 375,
-      },
-      {
-        name: 'Lolliertttpop',
-        calories: 392,
-      },
-      {
-        name: 'Honeytyucomb',
-        calories: 408,
-      },
-      {
-        name: 'Donuoput',
-        calories: 452,
-      },
-      {
-        name: 'KitKsdfkuat',
-        calories: 518,
-      },
-      {
-        name: 'Jelly beaddn',
-        calories: 375,
-      },
-      {
-        name: 'Lollisdfgspop',
-        calories: 392,
-      },
-      {
-        name: 'Honeycsdfgomb',
-        calories: 408,
-      },
-      {
-        name: 'Donutyy',
-        calories: 452,
-      },
-      {
-        name: 'KiggtKat',
-        calories: 518,
-      },
-      {
-        name: 'Jeslly bean',
-        calories: 375,
-      },
-      {
-        name: 'Lollasdipop',
-        calories: 392,
-      },
-      {
-        name: 'Honeggfycomb',
-        calories: 408,
-      },
-      {
-        name: 'Dossnut',
-        calories: 452,
-      },
-      {
-        name: 'KitKdfat',
-        calories: 518,
-      },
-    ],
     filter:{},
     errors:{},
     sort_by_list: [
-      {text: 'جدید ترین ها',value: 'newest'},
-      {text: 'آخرین بازدید',value: 'last_seen'},
-      {text: 'اشتراک طلایی',value: 'gold_plan'},
-      {text: 'اشتراک نقره ای',value: 'silver_plan'},
-      {text: 'اشتراک الماس',value: 'diamond_plan'},
+      {text: 'جدید ترین',value: 'newest'},
+      {text: 'قدیمی ترین',value: 'oldest'},
+      {text: 'بیشترین اشتراک',value: 'most_subscribed'},
+      //{text: 'اشتراک طلایی',value: 'gold_plan'},
+      //{text: 'اشتراک نقره ای',value: 'silver_plan'},
+      //{text: 'اشتراک الماس',value: 'diamond_plan'},
     ],
     current_page:1,
     per_page:0,
     last_page:5,
+    fetch_loading:false,
   }),
   watch:{
     current_page(){
@@ -201,12 +137,15 @@ export default {
   },
   methods:{
     getList(){
+      this.fetch_loading = true
       this.$http.post(`users/list?page=${this.current_page}` , this.filter)
       .then(res => {
         this.list = res.data.data.data
         this.last_page = res.data.data.last_page;
+        this.fetch_loading = false
       })
       .catch( () => {
+        this.fetch_loading = false
       });
     },
     Search(e){
@@ -218,6 +157,8 @@ export default {
     },
   },
   mounted(){
+      this.filter.sort_by = 'newest';
+      this.getList();
   },
   beforeMount(){
     this.checkAuth()

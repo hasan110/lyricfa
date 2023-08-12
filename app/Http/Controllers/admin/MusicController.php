@@ -29,6 +29,7 @@ class MusicController extends Controller
         if ($request->sort_by) {
             switch ($request->sort_by) {
                 case 'newest':
+                default:
                     $musics = $musics->orderBy('created_at', 'desc');
                     break;
                 case 'oldest':

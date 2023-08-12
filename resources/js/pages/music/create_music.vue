@@ -142,6 +142,12 @@
             ></v-radio>
           </v-radio-group>
         </v-col>
+        <v-col cols="2" class="pa-0">
+            <v-checkbox
+                v-model="form_data.is_user_request"
+                label="درخواستی کاربر"
+            ></v-checkbox>
+        </v-col>
       </v-row>
 
       <v-row>
@@ -152,7 +158,8 @@
             dense
             outlined
             label="تصویر بنر"
-            v-model="form_data.image"
+            v-model="form_data.image" persistent-hint
+            hint="فرمت تصویر باید jpg و سایز آن 300*300 باشد"
             accept="image/*"
           ></v-file-input>
         </v-col>
@@ -223,6 +230,7 @@ export default {
   data: () => ({
     form_data:{
       has_album: false,
+      is_user_request: false,
       singers: [],
     },
     singers_count: 1,
@@ -257,29 +265,22 @@ export default {
       this.banner_image = URL.createObjectURL(this.form_data.image);
       this.errors.image = null
     },
-    getList(){
-      this.$http.post(`musics/list?page=${this.current_page}` , this.filter)
-      .then(res => {
-        this.list = res.data.data.data
-        this.last_page = res.data.data.last_page;
-      })
-      .catch( () => {
-      });
-    },
     saveMusic(){
+      this.$store.commit('SHOW_APP_LOADING' , 2)
       const d = new FormData();
       const x = this.form_data;
 
       x.english_title ? d.append('english_title', x.english_title) : '';
       x.persian_title ? d.append('persian_title', x.persian_title) : '';
       x.date_publication ? d.append('date_publication', x.date_publication) : '';
-      x.has_album ? d.append('has_album', x.has_album) : '';
+      x.has_album ? d.append('has_album', 1) : d.append('has_album', 0);
+      x.is_user_request ? d.append('is_user_request', 1) : d.append('is_user_request', 0);
       x.album_id ? d.append('album_id', x.album_id) : '';
-      x.hardest_degree ? d.append('hardest_degree', x.hardest_degree) : '';
+      d.append('hardest_degree', x.hardest_degree);
       x.image ? d.append('image', x.image) : '';
       x.music ? d.append('music', x.music) : '';
-      x.start_demo ? d.append('start_demo', x.start_demo) : '';
-      x.end_demo ? d.append('end_demo', x.end_demo) : '';
+      d.append('start_demo', x.start_demo);
+      d.append('end_demo', x.end_demo);
 
       if(x.singers.length){
 
@@ -303,12 +304,12 @@ export default {
           type: "success",
           timer: 5000
         })
-
+          this.$store.commit('SHOW_APP_LOADING' , 0)
           this.$router.push({name:'musics'})
 
       })
       .catch( err => {
-        this.loading = false
+        this.$store.commit('SHOW_APP_LOADING' , 0)
         const e = err.response.data
         // if(e.errors){ this.errors = e.errors }
         // else if(e.message){

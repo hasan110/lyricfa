@@ -27,6 +27,7 @@ class SingerController extends Controller
         if ($request->sort_by) {
             switch ($request->sort_by) {
                 case 'newest':
+                default:
                     $list = $list->orderBy('created_at', 'desc');
                     break;
                 case 'oldest':

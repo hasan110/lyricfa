@@ -1,14 +1,14 @@
 const Plugin = {};
 
 Plugin.install = function(Vue) {
-   
+
   Vue.mixin({
     data: function() {
       return {
-        Url:'http://localhost:8000/uploads/',
-        StaticUrl:'http://localhost:8000/',
-        // Url:'https://example.com/uploads/',
-        // StaticUrl:'https://example.com/',
+        // Url:'http://localhost:8000/uploads/',
+        // StaticUrl:'http://localhost:8000/',
+        Url:'https://dl.lyricfa.app/uploads/',
+        StaticUrl:'https://panel.lyricfa.app/',
       }
     },
     computed: {
@@ -54,7 +54,7 @@ Plugin.install = function(Vue) {
         }
       }
     }
-    
+
   });
 
 

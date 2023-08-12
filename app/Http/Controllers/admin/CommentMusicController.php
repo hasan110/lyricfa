@@ -72,7 +72,7 @@ class CommentMusicController extends Controller
 
     public function getMusicCommentsNotConfirmed(Request $request)
     {
-        $response = CommentMusic::where("id_admin_confirmed", 0)->get();
+        $response = CommentMusic::where("id_admin_confirmed", 0)->with('music')->get();
 
         $arr = [
             'data' => $response,

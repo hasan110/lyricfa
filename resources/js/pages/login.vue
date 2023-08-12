@@ -53,8 +53,7 @@ export default {
       .then(res => {
         this.loading = false
         this.saveToken(res.data.data.api_token);
-        this.$store.commit('SET_ADMIN_DATA' , res.data.data)
-        this.$router.replace({name:'dashboard'})
+        location.reload()
       })
       .catch( err => {
         this.loading = false
@@ -73,7 +72,7 @@ export default {
       });
     }
   },
-  mounted(){
+  beforeMount(){
     this.checkNotAuthenticated()
   }
 }
