@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\Notification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use PharIo\Manifest\ElementCollectionException;
 
 class UserController extends Controller
 {
@@ -189,7 +191,63 @@ class UserController extends Controller
         $user->referral_code = $referral_code;
 
         $user->save();
+
+        if ($referral_code)
+        {
+            try {
+                self::referOperations('register' , $user , 2);
+            }catch (Exception $e){}
+        }
+
         return $user;
+    }
+
+    private static function referOperations(string $type , $user , $addDays)
+    {
+        if(!$user->referral_code) return false;
+        $referral_code_user = self::getReferralCodeUser($user->referral_code);
+        if(!$referral_code_user) return false;
+
+        switch ($type){
+            case 'register':
+
+                $number = substr($type->phone_number , 4) . '****' . substr($type->phone_number , -4);
+                $message = 'شما کاربر '.$number.' را به اپلیکیشن لیریکفا معرفی کردید. به ازای آن '. $addDays .' روز اشتراک رایگان دریافت کردید که هم اکنون میتوانید استفاده کنید.';
+                $notification_data = [
+                    'title' => 'معرفی کاربر',
+                    'body' => $message,
+                    'token' => $referral_code_user->fcm_refresh_token,
+                ];
+                Notification::send('google_notification' , $notification_data);
+
+            break;
+            case 'subscription':
+
+                $number = substr($type->phone_number , 4) . '****' . substr($type->phone_number , -4);
+                $message = 'شما از معرفی کاربر '.$number.' و خرید اشتراک توسط این کاربر '.$addDays.' روز اشتراک رایگان دریافت کردید که هم اکنون میتوانید استفاده کنید.';
+                $notification_data = [
+                    'title' => 'اشتراک رایگان',
+                    'body' => $message,
+                    'token' => $referral_code_user->fcm_refresh_token,
+                ];
+                Notification::send('google_notification' , $notification_data);
+
+            break;
+            default:
+                return false;
+        }
+
+        if($referral_code_user->expired_at > Carbon::now())
+        {
+            $new_expiry = Carbon::parse($referral_code_user->expired_at)->addDays($addDays);
+        }else{
+            $new_expiry = Carbon::now()->addDays($addDays);
+        }
+
+        $referral_code_user->expired_at = $new_expiry;
+        $referral_code_user->save();
+
+        return true;
     }
 
     public static function checkReferralCode($referral_code)
@@ -199,6 +257,18 @@ class UserController extends Controller
         if(User::where('code_introduce' , $referral_code)->exists())
         {
             return $referral_code;
+        }
+
+        return null;
+    }
+
+    public static function getReferralCodeUser($referral_code)
+    {
+        if (!$referral_code) return null;
+
+        if($user = User::where('code_introduce' , $referral_code)->first())
+        {
+            return $user;
         }
 
         return null;
@@ -222,6 +292,15 @@ class UserController extends Controller
             unset($user['hours_remain']);
             unset($user['minutes_remain']);
             $user->save();
+
+            if ($user->referral_code)
+            {
+                try {
+                    $addDays = floor($daysSubscription * 0.1);
+                    self::referOperations('subscription' , $user , $addDays);
+                }catch (Exception $e){}
+            }
+
         } else {
 
             $response = [

@@ -225,7 +225,7 @@ class NotificationController extends Controller
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($notifBody));
-    
+
             //Execute
             curl_exec($ch);
             curl_close($ch);
