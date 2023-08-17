@@ -211,7 +211,7 @@ class UserController extends Controller
         switch ($type){
             case 'register':
 
-                $number = substr($type->phone_number , 4) . '****' . substr($type->phone_number , -4);
+                $number = substr($user->phone_number , 0 , 3) . '***' . substr($user->phone_number , -4);
                 $message = 'شما کاربر '.$number.' را به اپلیکیشن لیریکفا معرفی کردید. به ازای آن '. $addDays .' روز اشتراک رایگان دریافت کردید که هم اکنون میتوانید استفاده کنید.';
                 $notification_data = [
                     'title' => 'معرفی کاربر',
@@ -223,7 +223,7 @@ class UserController extends Controller
             break;
             case 'subscription':
 
-                $number = substr($type->phone_number , 4) . '****' . substr($type->phone_number , -4);
+                $number = substr($user->phone_number , 0 , 3) . '***' . substr($user->phone_number , -4);
                 $message = 'شما از معرفی کاربر '.$number.' و خرید اشتراک توسط این کاربر '.$addDays.' روز اشتراک رایگان دریافت کردید که هم اکنون میتوانید استفاده کنید.';
                 $notification_data = [
                     'title' => 'اشتراک رایگان',
