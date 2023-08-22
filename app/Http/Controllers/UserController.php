@@ -185,7 +185,7 @@ class UserController extends Controller
 
         $user = new User();
         $user->phone_number = $phone_number;
-        $user->expired_at = Carbon::now()->addDays(3); //Free subscription
+        $user->expired_at = Carbon::now()->addDays(2); //Free subscription
         $user->api_token = Str::random(64);
         $user->code_introduce = $code_introduce;
         $user->referral_code = $referral_code;

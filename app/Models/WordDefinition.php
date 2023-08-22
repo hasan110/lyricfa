@@ -5,10 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Word extends Model
+class WordDefinition extends Model
 {
     use HasFactory;
     protected $guarded = [];
-    protected $table = "words";
-    public $timestamps = false;
+    protected $table = 'word_definitions';
 }
