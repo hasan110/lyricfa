@@ -87,13 +87,14 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/remove_comment_singer', [CommentSingerController::class, 'removeSingerComment']);
 
 
-    //lightner
+    //lightener
     Route::post('/get_user_words', [UserWordController::class, 'getUserWordsById']);
     Route::post('/get_user_words_review', [UserWordController::class, 'getUserWordsReviews']);
+    Route::post('/get_lightener_box_data', [UserWordController::class, 'getLightenerBoxData']);
     Route::post('/add_word_user', [UserWordController::class, 'insertUserWord']);
     Route::post('/edit_words_user', [UserWordController::class, 'editWordsUser']);
-    
-      Route::post('/remove_word_user', [UserWordController::class, 'removeWordUser']);
+
+    Route::post('/remove_word_user', [UserWordController::class, 'removeWordUser']);
 
     //playlist
     Route::post('/insert_user_play_list', [PlayListController::class, 'insertUserPlayList']);
@@ -137,7 +138,7 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     //text film
     Route::post('/get_text_film', [FilmTextController::class, 'getTextList']);
     Route::post('/get_times', [FilmTextController::class, 'getTimesForPagin']);
-    
+
     //english persian words
     Route::post('/get_all_words', [WordController::class, 'getAllWords']);
     Route::post('/get_word', [WordController::class, 'getWord']);
@@ -148,12 +149,12 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/get_english_all_words', [WordEnEnController::class, 'getAllWords']);
     Route::post('/get_english_word', [WordEnEnController::class, 'getWord']);
 
-
     //idioms
     Route::post('/get_idioms_word', [IdiomController::class, 'getIdiomsWord']);
     Route::post('/search_in_idioms', [IdiomController::class, 'searchIdiom']);
+    Route::post('/get_word_idioms_by_rate', [IdiomController::class, 'getWordIdiomsByRate']);
+    Route::post('/get_word_idioms', [IdiomController::class, 'getWordIdioms']);
     Route::post('/get_text_idioms', [TextIdiomsController::class, 'getTextIdioms']);
-
 
     //map
     Route::post('/get_base_word', [MapController::class, 'getBaseWord']);

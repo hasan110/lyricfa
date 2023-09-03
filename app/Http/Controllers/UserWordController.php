@@ -16,7 +16,6 @@ use App\Models\Map;
 
 class UserWordController extends Controller
 {
-
     function getUserWordsById(Request $request ){
 
 
@@ -42,8 +41,11 @@ class UserWordController extends Controller
             $user_id = $user->id;
 
 
-            $words = UserWord::orderBy('status', "DESC")->where('user_id', $user_id)->get();
-
+            $words = UserWord::orderBy('status', "DESC")->where('user_id', $user_id);
+            if($request->status){
+                $words = $words->where('status' , $request->status);
+            }
+            $words = $words->get();
             $reviews = [];
             foreach ($words as $item) {
 
@@ -136,6 +138,61 @@ class UserWordController extends Controller
         }
     }
 
+    function getLightenerBoxData(Request $request )
+    {
+        $api_token = $request->header("ApiToken");
+
+        $user = UserController::getUserByToken($api_token);
+        if($user) {
+            $user_id = $user->id;
+            $box_data = [];
+            for($i = 0 ; $i <= 5 ; $i++)
+            {
+                $count = UserWord::where('user_id', $user_id)->where('status', $i)->count();
+                $words_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('type', 0)->count();
+                $idioms_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('type', 1)->count();
+                $comment_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('type', 2)->count();
+                $reviews_count = 0;
+                $date = Carbon::now();
+                switch ($i) {
+                    case 0:
+                        $reviews_count = $count;
+                        break;
+                    case 1:
+                        $reviews_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('updated_at', '<=' , $date->subDays(1))->count();
+                        break;
+                    case 2:
+                        $reviews_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('updated_at', '<=' , $date->subDays(2))->count();
+                        break;
+                    case 3:
+                        $reviews_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('updated_at', '<=' , $date->subDays(4))->count();
+                        break;
+                    case 4:
+                        $reviews_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('updated_at', '<=' , $date->subDays(8))->count();
+                        break;
+                    case 5:
+                        $reviews_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('updated_at', '<=' , $date->subDays(16))->count();
+                        break;
+                }
+
+                $data = [
+                    'status' => $i,
+                    'total_count' => $count,
+                    'words_count' => $words_count,
+                    'idioms_count' => $idioms_count,
+                    'comments_count' => $comment_count,
+                    'reviews_count' => $reviews_count,
+                ];
+                $box_data[$i] = $data;
+            }
+            $response = ['data' => $box_data, 'errors' => [], 'message' => "اطلاعات با موفقیت گرفته شد"];
+            return response()->json($response, 200);
+        }else{
+            $responseCheck = ['data' => null, 'errors' => [], 'message' => "خطا در اجراز هویت کاربر"];
+            return response()->json($responseCheck, 401);
+        }
+    }
+
     function insertUserWord(Request $request ){
 
 
@@ -200,6 +257,7 @@ class UserWordController extends Controller
             $userWord->word = $request->word;
             $userWord->comment_user = $request->comment_user;
             $userWord->status = 0;
+            $userWord->type = $request->type ?? 0;
 
             $userWord->save();
 
@@ -247,7 +305,6 @@ class UserWordController extends Controller
 
     function editWordsUser(Request $request)
     {
-
         $messsages = array(
             'words_not_learn.required' => 'لیست لغاتی که بلد هستید الزامی است',
             'words_learned.required' => 'لیست لغاتی که بلد نیستید الزامی است',
@@ -284,7 +341,7 @@ class UserWordController extends Controller
                 $wordInfo = $this->getWordInfo($userId, $item);
                 if (isset($wordInfo)) {
                     $getItem = $wordInfo;
-                    $getItem->status = (int)$getItem->status + 1;
+                    $getItem->status = (int)$getItem->status >= 6 ? 6 : (int)$getItem->status++;
                     $getItem->save();
                 }
             }
@@ -293,7 +350,7 @@ class UserWordController extends Controller
                 $wordInfo = $this->getWordInfo($userId, $item);
                 if (isset($wordInfo)) {
                     $getItem = $wordInfo;
-                    $getItem->status = 1;
+                    $getItem->status = $getItem->status <= 1 ? $getItem->status : $getItem->status--;
                     $getItem->updated_at =  Carbon::now();
                     $getItem->save();
                 }
@@ -316,15 +373,11 @@ class UserWordController extends Controller
             return response()->json($arr, 401);
         }
     }
-    
-    
-    
 
     function getWordById($id){
 
         return UserWord::where('id',$id)->first();
     }
-
 
     function removeWordUser(Request $request){
         $messsages = array(
@@ -365,7 +418,7 @@ class UserWordController extends Controller
                 return response()->json($arr, 200);
             }
 
-       
+
         }else{
             $arr = [
                 'data' => null,
@@ -376,9 +429,6 @@ class UserWordController extends Controller
             return response()->json($arr, 401);
         }
     }
-
-
-
 }
 
 
