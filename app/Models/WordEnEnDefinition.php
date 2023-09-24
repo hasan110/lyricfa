@@ -9,4 +9,5 @@ class WordEnEnDefinition extends Model
 {
     use HasFactory;
     protected $table = "english_word_definitions";
+    protected $guarded = [];
 }

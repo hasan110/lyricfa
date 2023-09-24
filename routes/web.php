@@ -18,6 +18,7 @@ use App\Http\Controllers\admin\TextController;
 use App\Http\Controllers\admin\AdminController;
 use App\Http\Controllers\admin\TextIdiomsController;
 use App\Http\Controllers\admin\IdiomController;
+use App\Http\Controllers\admin\WordController;
 
 Route::get('/get_id', [MusicController::class, 'getGuessId']);
 
@@ -31,8 +32,11 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
     });
 
     Route::prefix('idioms')->group(function () {
+        Route::post('/list', [IdiomController::class, 'idiomsList'])->name('idioms/list');
+        Route::post("/single", [IdiomController::class, "getIdiom"])->name('idioms/single');
         Route::post('/create', [IdiomController::class, 'createIdiom'])->name('idioms/create');
         Route::post('/update', [IdiomController::class, 'updateIdiom'])->name('idioms/update');
+        Route::post("/remove", [IdiomController::class, "removeIdiom"])->name('idioms/remove');
     });
 
 
@@ -128,6 +132,14 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
         Route::post('/list', [FilmTextController::class, 'getTextList'])->name('film_texts/list');
         Route::post("/create", [FilmTextController::class, "insertListTexts"])->name('film_texts/create');
         Route::post("/update", [FilmTextController::class, "updateListTexts"])->name('film_texts/update');
+    });
+
+    Route::prefix('words')->group(function () {
+        Route::post('/list', [WordController::class, 'WordsList'])->name('words/list');
+        Route::post("/single", [WordController::class, "getWord"])->name('words/single');
+        Route::post("/update", [WordController::class, "updateWord"])->name('words/update');
+        Route::post("/create", [WordController::class, "createWord"])->name('words/create');
+        Route::post("/remove", [WordController::class, "removeWord"])->name('words/remove');
     });
 
 });

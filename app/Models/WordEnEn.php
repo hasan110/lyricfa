@@ -10,6 +10,8 @@ class WordEnEn extends Model
 {
     use HasFactory;
     protected $table = "english_words";
+    protected $guarded = [];
+    public $timestamps = false;
 
     public function english_word_definitions()
     {

@@ -154,6 +154,7 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/search_in_idioms', [IdiomController::class, 'searchIdiom']);
     Route::post('/get_word_idioms_by_rate', [IdiomController::class, 'getWordIdiomsByRate']);
     Route::post('/get_word_idioms', [IdiomController::class, 'getWordIdioms']);
+    Route::post('/get_idiom_data', [IdiomController::class, 'getIdiomData']);
     Route::post('/get_text_idioms', [TextIdiomsController::class, 'getTextIdioms']);
 
     //map

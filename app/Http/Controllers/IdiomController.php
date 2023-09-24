@@ -292,4 +292,41 @@ class IdiomController extends Controller
 
         return response()->json($response, 200);
     }
+
+    public function getIdiomData(Request $request)
+    {
+        $messsages = array(
+            'idiom.required' => 'اصطلاح الزامی است.'
+        );
+
+        $validator = Validator::make($request->all(), [
+            'idiom' => 'required'
+        ], $messsages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => null,
+                'errors' => $validator->errors(),
+                'message' => "خطا در اعتبار سنجی رخ داد.",
+            ], 400);
+        }
+        $idiom = $request->idiom;
+
+        $get_idiom = Idiom::with('idiom_definitions')->where('phrase' , $idiom)->first();
+        if($get_idiom){
+            $response = [
+                'data' => $get_idiom,
+                'errors' => [],
+                'message' => "اطلاعات با موفقیت گرفته شد",
+            ];
+            return response()->json($response, 200);
+        }else{
+            $response = [
+                'data' => null,
+                'errors' => [],
+                'message' => "اصطلاح یافت نشد",
+            ];
+            return response()->json($response, 200);
+        }
+    }
 }

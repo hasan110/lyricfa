@@ -33,13 +33,11 @@ class UserWordController extends Controller
 
     function getUserWordsReviews(Request $request ){
 
-
         $api_token = $request->header("ApiToken");
 
         $user = UserController::getUserByToken($api_token);
         if($user) {
             $user_id = $user->id;
-
 
             $words = UserWord::orderBy('status', "DESC")->where('user_id', $user_id);
             if($request->status){
@@ -52,7 +50,6 @@ class UserWordController extends Controller
                 $t1 = Carbon::parse($item->updated_at);
                 $t2 = Carbon::now();
                 $diff = $t1->diff($t2);
-
 
                 switch ($item->status) {
                     case 0:
@@ -93,16 +90,14 @@ class UserWordController extends Controller
 
                     default:
                 }
-
             }
-
 
             $response = [];
             foreach ($reviews as $itemMain) {
 
                 $item = $itemMain->word;
                 $id = $itemMain->id;
-
+                $type = $itemMain->type;
 
                 $comment_user = UserWordController::getCommentUser($item, $user_id );
 
@@ -111,23 +106,22 @@ class UserWordController extends Controller
                     $map = Map::where('word', $item)->first();
 
                     if (!$map) {
-                        $mainResponse = ['id' => $id, 'word' => $item, 'mean' => null, "english_mean" => null, "idioms" => null, "user_comment" => $comment_user];
+                        $mainResponse = ['id' => $id, 'word' => $item, 'type' => $type, 'mean' => null, "english_mean" => null, "idioms" => null, "user_comment" => $comment_user];
                         $response[] = $mainResponse;
                     } else {
                         $ciBase = $map->ci_base;
                         $get_base_word = Word::where('english_word', $ciBase)->first();
                         $get_english_word = WordEnEn::where('ci_word', $ciBase)->first();
                         $get_idioms = Idiom::where('base', $ciBase)->get();
-                        $mainResponse = ['id' => $id, 'word' => $item, 'mean' => $get_base_word, "english_mean" => $get_english_word, "idioms" => $get_idioms, "user_comment" => $comment_user];
+                        $mainResponse = ['id' => $id, 'word' => $item, 'type' => $type, 'mean' => $get_base_word, "english_mean" => $get_english_word, "idioms" => $get_idioms, "user_comment" => $comment_user];
                         $response[] = $mainResponse;
                     }
                 } else {
                     $get_english_word = WordEnEn::where('ci_word', $item)->first();
                     $get_idioms = Idiom::where('base', $item)->get();
-                    $mainResponse = ['id' => $id, 'word' => $item, 'mean' => $get_word, "english_mean" => $get_english_word, "idioms" => $get_idioms, "user_comment" => $comment_user];
+                    $mainResponse = ['id' => $id, 'word' => $item, 'type' => $type, 'mean' => $get_word, "english_mean" => $get_english_word, "idioms" => $get_idioms, "user_comment" => $comment_user];
                     $response[] = $mainResponse;
                 }
-
 
             }
             $responseCheck = ['data' => $response, 'errors' => [], 'message' => "اطلاعات با موفقیت گرفته شد"];
@@ -194,19 +188,13 @@ class UserWordController extends Controller
     }
 
     function insertUserWord(Request $request ){
-
-
-
         $messsages = array(
-        'word.required'=>'لغت الزامی است'
-
+            'word.required'=>'لغت الزامی است'
         );
 
         $validator = Validator::make($request->all(), [
             'word' => 'required',
         ], $messsages);
-
-
 
         if($validator->fails()){
             $arr = [
@@ -216,7 +204,6 @@ class UserWordController extends Controller
             ];
             return response()->json($arr, 400);
         }
-
 
         $api_token = $request->header("ApiToken");
         $user = UserController::getUserByToken($api_token);
@@ -229,7 +216,6 @@ class UserWordController extends Controller
                 ],
                 'message'=>"کاربر احراز هویت نشده است"
             ];
-
 
             return response()->json($arr , 401);
         }
@@ -337,11 +323,15 @@ class UserWordController extends Controller
             $arrWordsDont = $request->words_not_learn;
 
             foreach ($arrWordsLearn as $item) {
-
                 $wordInfo = $this->getWordInfo($userId, $item);
                 if (isset($wordInfo)) {
                     $getItem = $wordInfo;
-                    $getItem->status = (int)$getItem->status >= 6 ? 6 : (int)$getItem->status++;
+                    if((int)$getItem->status >= 6){
+                        $new_status = 6;
+                    }else{
+                        $new_status = $getItem->status + 1;
+                    }
+                    $getItem->status = $new_status;
                     $getItem->save();
                 }
             }
@@ -350,7 +340,12 @@ class UserWordController extends Controller
                 $wordInfo = $this->getWordInfo($userId, $item);
                 if (isset($wordInfo)) {
                     $getItem = $wordInfo;
-                    $getItem->status = $getItem->status <= 1 ? $getItem->status : $getItem->status--;
+                    if((int)$getItem->status <= 1){
+                        $new_status = $getItem->status;
+                    }else{
+                        $new_status = $getItem->status - 1;
+                    }
+                    $getItem->status = $new_status;
                     $getItem->updated_at =  Carbon::now();
                     $getItem->save();
                 }

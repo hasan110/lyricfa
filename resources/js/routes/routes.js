@@ -37,6 +37,14 @@ import music_orders from '../pages/music_order/music_orders.vue';
 
 import notifications from '../pages/notifications/notifications.vue';
 
+import words from '../pages/dictionary/words.vue';
+import create_word from '../pages/dictionary/create_word.vue';
+import edit_word from '../pages/dictionary/edit_word.vue';
+
+import idioms from '../pages/idioms/idioms.vue';
+import create_idiom from '../pages/idioms/create_idiom.vue';
+import edit_idiom from '../pages/idioms/edit_idiom.vue';
+
 const allUrl = [
     {
         path: '/',
@@ -78,5 +86,13 @@ const allUrl = [
     { path: '/music_orders', name: 'music_orders', component: music_orders },
 
     { path: '/notifications', name: 'notifications', component: notifications },
+
+    { path: '/words', name: 'words', component: words },
+    { path: '/words/create', name: 'create_word', component: create_word },
+    { path: '/words/edit/:id', name: 'edit_word', component: edit_word },
+
+    { path: '/idioms', name: 'idioms', component: idioms },
+    { path: '/idioms/create', name: 'create_idiom', component: create_idiom },
+    { path: '/idioms/edit/:id', name: 'edit_idiom', component: edit_idiom },
 ];
 export default allUrl;

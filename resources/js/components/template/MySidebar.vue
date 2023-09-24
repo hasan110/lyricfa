@@ -119,7 +119,9 @@ export default {
             { id:10, index:9, parent_id:0, title: 'سفارش آهنگ', type:'item', link:'music_orders', icon: 'mdi-account-cash-outline' },
             { id:11, index:10, parent_id:0, title: 'نظرات', type:'item', link:'comments', icon: 'mdi-comment-outline' },
             { id:12, index:11, parent_id:0, title: 'فیلم ها', type:'item', link:'movies', icon: 'mdi-movie-settings-outline' },
-            { id:13, index:12, parent_id:0, title: 'نوتیفیکیشن ها', type:'item', link:'notifications', icon: 'mdi-bell-outline' }
+            { id:13, index:12, parent_id:0, title: 'نوتیفیکیشن ها', type:'item', link:'notifications', icon: 'mdi-bell-outline' },
+            { id:14, index:13, parent_id:0, title: 'لغات', type:'item', link:'words', icon: 'mdi-format-color-text' },
+            { id:15, index:14, parent_id:0, title: 'اصطلاحات', type:'item', link:'idioms', icon: 'mdi-alphabetical' },
         ],
     }),
     props: {
