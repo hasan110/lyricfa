@@ -129,19 +129,19 @@ class WordController extends Controller
         $messages = array(
             'id.required' => 'شناسه نمی تواند خالی باشد',
             'english_word.required' => 'لغت نمی تواند خالی باشد',
-            'definitions.*.definition.filled' => 'معنی لغت نمی تواند خالی باشد.',
+            'word_definitions.*.definition.filled' => 'معنی لغت نمی تواند خالی باشد.',
             'english_definitions.*.definition.filled' => 'معنی انگلیسی لغت نمی تواند خالی باشد.',
-            'definitions.*.definition_examples.*.definition.filled' => 'معنی مثال لغت نمی تواند خالی باشد.',
-            'definitions.*.definition_examples.*.phrase.filled' => 'عبارت مثال لغت نمی تواند خالی باشد.',
+            'word_definitions.*.word_definition_examples.*.definition.filled' => 'معنی مثال لغت نمی تواند خالی باشد.',
+            'word_definitions.*.word_definition_examples.*.phrase.filled' => 'عبارت مثال لغت نمی تواند خالی باشد.',
         );
 
         $validator = Validator::make($request->all(), [
             'id' => 'required',
             'english_word' => 'required',
-            'definitions.*.definition' => 'filled',
+            'word_definitions.*.definition' => 'filled',
             'english_definitions.*.definition' => 'filled',
-            'definitions.*.definition_examples.*.definition' => 'filled',
-            'definitions.*.definition_examples.*.phrase' => 'filled',
+            'word_definitions.*.word_definition_examples.*.definition' => 'filled',
+            'word_definitions.*.word_definition_examples.*.phrase' => 'filled',
         ], $messages);
 
         if ($validator->fails()) {
@@ -264,5 +264,40 @@ class WordController extends Controller
             'message' => " گرفتن اطلاعات موفقیت آمیز بود",
         ];
         return response()->json($arr, 200);
+    }
+
+    public function removeWord(Request $request)
+    {
+        $word = Word::with('word_definitions')->find($request->id);
+        if(!$word){
+            return response()->json([
+                'data' => null,
+                'errors' => null,
+                'message' => " لغت یافت نشد.",
+            ], 404);
+        }
+        $english_word = WordEnEn::where('ci_word' , $word->english_word)->with('english_word_definitions')->first();
+
+        foreach ($word->word_definitions as $word_definition){
+            foreach ($word_definition->word_definition_examples as $word_definition_example) {
+                $word_definition_example->delete();
+            }
+            $word_definition->delete();
+        }
+        $word->delete();
+
+        if ($english_word){
+            foreach ($english_word->english_word_definitions as $english_word_definition){
+                $english_word_definition->delete();
+            }
+            $english_word->delete();
+        }
+
+        $arr = [
+            'data' => null,
+            'errors' => null,
+            'message' => " تمامی اطلاعات این لغت با موفقیت حذف شد.",
+        ];
+        return response()->json($arr);
     }
 }

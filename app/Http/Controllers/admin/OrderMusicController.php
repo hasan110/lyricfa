@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\LikeSingerController;
 use App\Models\OrderMusic;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -66,13 +67,26 @@ class OrderMusicController extends Controller
 
     public function ordersList(Request $request)
     {
-        $orders = OrderMusic::where('condition_order', 0)->paginate(50);
+        $orders = OrderMusic::with('user')->where('condition_order', 0)->paginate(50);
 
+        $now = Carbon::now();
         foreach ($orders as $item) {
+            $expiredAt = $item->user->expired_at;
+            $diff = $now->diffInDays($expiredAt);
+            if ($now > $expiredAt) {
+                $subscription_days_remain = 0;
+            } else {
+                $subscription_days_remain = $diff;
+            }
 
-            $item->user = UserController::getUserById($item->user_id);
-            unset($item->user['api_token']);
+            $order_created_spent_days = $now->diffInDays(Carbon::parse($item->created_at));
+
+            $item->rate = $subscription_days_remain + $order_created_spent_days;
         }
+
+        $sortedResult = $orders->getCollection()->sortByDesc('rate')->values();
+        $orders->setCollection($sortedResult);
+
         $response = [
             'data' => $orders,
             'errors' => null,

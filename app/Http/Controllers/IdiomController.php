@@ -110,7 +110,7 @@ class IdiomController extends Controller
         $seprateds = preg_split("/[- ,?;_!.}{)(]+/" , $phrase);
         $seprated_words = [];
         foreach ($seprateds as $seprated){
-            if(strlen($seprated) > 0 && !in_array($seprated , $seprated_words)){
+            if(strlen($seprated) > 0){
                 $seprated_words[] = $seprated;
             }
         }
@@ -213,7 +213,7 @@ class IdiomController extends Controller
         $all_idioms = $all_idioms->sortByDesc('rate');
 
         $response = [
-            'data' => array_values($all_idioms->toArray()),
+            'data' => array_values($all_idioms->take(30)->toArray()),
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
         ];

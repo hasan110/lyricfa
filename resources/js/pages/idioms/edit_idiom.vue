@@ -16,6 +16,15 @@
             <v-container>
 
                 <v-row class="pt-3">
+                    <v-col cols="12" xs="12" sm="12" class="pb-0 text-left">
+                        <v-btn
+                            color="red" dark
+                            @click="deleteIdiom()"
+                        >حذف اصطلاح</v-btn>
+                    </v-col>
+                </v-row>
+
+                <v-row class="pt-3">
                     <v-col cols="12" xs="12" sm="12" class="pb-0">
                         <v-text-field
                             v-model="form_data.base"
@@ -191,6 +200,35 @@ export default {
                     })
                 }
             });
+        },
+        deleteIdiom(){
+            if (confirm('باحذف این اصطلاح تمامی معانی و مثال های مرتبط باآن حذف خواهد شد. \n \n از حذف اصطلاح اطمینان دارید؟')){
+                this.$http.post(`idioms/remove` , {id:this.form_data.id})
+                .then(res => {
+                    this.$fire({
+                        title: "موفق",
+                        text: res.data.message,
+                        type: "success",
+                        timer: 5000
+                    })
+                    this.$router.push({name:'idioms'})
+                })
+                .catch( err => {
+                    this.loading = false;
+                    const e = err.response.data
+                    if(e.errors){ this.errors = e.errors }
+                    else if(e.message){
+
+                        this.$fire({
+                            title: "خطا",
+                            text: e.message,
+                            type: "error",
+                            timer: 5000
+                        })
+
+                    }
+                });
+            }
         }
     },
     beforeMount(){

@@ -272,4 +272,33 @@ class IdiomController extends Controller
 
         return response()->json($arr);
     }
+
+    public function removeIdiom(Request $request)
+    {
+        $idiom = Idiom::with('idiom_definitions')->find($request->id);
+        if(!$idiom){
+            return response()->json([
+                'data' => null,
+                'errors' => null,
+                'message' => " اصطلاح یافت نشد.",
+            ], 404);
+        }
+
+        // delete all word relations and ...
+        foreach ($idiom->idiom_definitions as $item){
+            foreach ($item->idiom_definition_examples as $example_item){
+                $example_item->delete();
+            }
+            $item->delete();
+        }
+        $idiom->delete();
+
+        $arr = [
+            'data' => null,
+            'errors' => null,
+            'message' => "اصطلاح باموفقیت حذف شد"
+        ];
+
+        return response()->json($arr);
+    }
 }

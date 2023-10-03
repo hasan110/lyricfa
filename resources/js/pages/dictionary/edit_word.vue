@@ -16,6 +16,15 @@
       <v-container>
 
           <v-row class="pt-3">
+              <v-col cols="12" xs="12" sm="12" class="pb-0 text-left">
+                  <v-btn
+                      color="red" dark
+                      @click="deleteWord()"
+                  >حذف لغت</v-btn>
+              </v-col>
+          </v-row>
+
+          <v-row class="pt-3">
               <v-col cols="12" xs="12" sm="6" class="pb-0">
                   <v-text-field
                       v-model="form_data.english_word"
@@ -65,7 +74,7 @@
                               outlined clearable
                               append-outer-icon="mdi-delete"
                               @click:append-outer="removeDefinition(1 , key)"
-                              :error-messages="errors[`definitions.${key}.definition`] ? errors[`definitions.${key}.definition`] : null"
+                              :error-messages="errors[`word_definitions.${key}.definition`] ? errors[`word_definitions.${key}.definition`] : null"
                               dense :label="'معنی ' + (key + 1)"
                           ></v-text-field>
                       </v-col>
@@ -80,7 +89,7 @@
                                   v-model="example.phrase"
                                   outlined clearable
                                   dense :label="'عبارت ' + (example_key + 1)"
-                                  :error-messages="errors[`definitions.${key}.definition_examples.${example_key}.phrase`] ? errors[`definitions.${key}.definition_examples.${example_key}.phrase`] : null"
+                                  :error-messages="errors[`word_definitions.${key}.word_definition_examples.${example_key}.phrase`] ? errors[`word_definitions.${key}.word_definition_examples.${example_key}.phrase`] : null"
                               ></v-text-field>
                           </v-col>
                           <v-col cols="12" xs="12" sm="6" class="pb-0">
@@ -90,7 +99,7 @@
                                   append-outer-icon="mdi-delete"
                                   @click:append-outer="removeExample(key , example_key)"
                                   dense :label="'معنی عبارت ' + (example_key + 1)"
-                                  :error-messages="errors[`definitions.${key}.definition_examples.${example_key}.definition`] ? errors[`definitions.${key}.definition_examples.${example_key}.definition`] : null"
+                                  :error-messages="errors[`word_definitions.${key}.word_definition_examples.${example_key}.definition`] ? errors[`word_definitions.${key}.word_definition_examples.${example_key}.definition`] : null"
                               ></v-text-field>
                           </v-col>
                       </v-row>
@@ -269,6 +278,35 @@ export default {
 
         }
       });
+    },
+    deleteWord(){
+      if (confirm('باحذف این لغت تمامی معانی و مثال های فارسی و انگلیسی حذف خواهد شد. \n \n از حذف لغت اطمینان دارید؟')){
+        this.$http.post(`words/remove` , {id:this.form_data.id})
+        .then(res => {
+          this.$fire({
+            title: "موفق",
+            text: res.data.message,
+            type: "success",
+            timer: 5000
+          })
+          this.$router.push({name:'words'})
+        })
+        .catch( err => {
+          this.loading = false;
+          const e = err.response.data
+          if(e.errors){ this.errors = e.errors }
+          else if(e.message){
+
+            this.$fire({
+              title: "خطا",
+              text: e.message,
+              type: "error",
+              timer: 5000
+            })
+
+          }
+        });
+      }
     }
   },
   beforeMount(){
