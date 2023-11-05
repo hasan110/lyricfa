@@ -134,9 +134,11 @@ class MusicController extends Controller
         $music->singers = $this->set4digit($request->id_first_singer);
         if ($request->id_second_singer) {
             $music->singers = $music->singers . "," . $this->set4digit($request->id_second_singer);
-        } else if ($request->id_third_singer) {
+        }
+        if ($request->id_third_singer) {
             $music->singers = $music->singers . "," . $this->set4digit($request->id_third_singer);
-        } else if ($request->id_fourth_singer) {
+        } 
+        if ($request->id_fourth_singer) {
             $music->singers = $music->singers . "," . $this->set4digit($request->id_fourth_singer);
         }
 
