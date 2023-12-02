@@ -14,7 +14,6 @@ class WordController extends Controller
 {
     function getAllWords(Request $request)
     {
-
         $words = Word::paginate(25);
 
         $arr = [
@@ -25,7 +24,6 @@ class WordController extends Controller
         ];
         return response()->json($arr, 200);
     }
-
 
     function getWord(Request $request)
     {
@@ -102,7 +100,6 @@ class WordController extends Controller
 
 
     }
-
 
     public function charIsBigLetter($char)
     {
@@ -192,5 +189,39 @@ class WordController extends Controller
         }
 
 
+    }
+
+    function checkWord(Request $request)
+    {
+        $word = $request->word;
+        if (!$word) {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => "لغت نمیتواند خالی باشد."
+            ], 400);
+        }
+
+        $check_lower_case = Word::where('english_word' , lcfirst($word))->exists();
+        $check_upper_case = Word::where('english_word' , ucfirst($word))->exists();
+
+        if(!$check_lower_case) {
+            $check_lower_case = Map::where('word' , lcfirst($word))->orWhere('ci_base' , lcfirst($word))->exists();
+        }
+        if(!$check_upper_case) {
+            $check_upper_case = Map::where('word' , ucfirst($word))->orWhere('ci_base' , ucfirst($word))->exists();
+        }
+
+        $arr = [
+            'data' => [
+                'word' => $word,
+                'uppercase' => $check_upper_case,
+                'lowercase' => $check_lower_case,
+            ],
+            'errors' => [],
+            'message' => "اطلاعات با موفقیت گرفته شد"
+        ];
+
+        return response()->json($arr);
     }
 }

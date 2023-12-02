@@ -38,6 +38,9 @@ Route::get('/show_profit_banner', [PositionController::class, 'showProfitBanner'
 Route::post('/send_sms', [SmsVerifyController::class, 'sendSms']);
 Route::post('/check_activate_code', [SmsVerifyController::class, 'checkActivateCode']);
 
+Route::post('/send-verify-code', [SmsVerifyController::class, 'sendVerifyCode']);
+Route::post('/check-verify-code', [SmsVerifyController::class, 'checkVerifyCode']);
+
 //setting
 Route::get('/get_setting', [SettingController::class, 'getSetting']);
 
@@ -143,6 +146,7 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/get_all_words', [WordController::class, 'getAllWords']);
     Route::post('/get_word', [WordController::class, 'getWord']);
     Route::post('/get_word_or_base', [WordController::class, 'getListWordMapEnEf']);
+    Route::post('/check_word', [WordController::class, 'checkWord']);
 
 
     //english english words

@@ -159,6 +159,16 @@ class UserController extends Controller
 
     }
 
+    public static function getUserIdByCPhoneNumber($phone_number , $prefix)
+    {
+        $user = User::where('phone_number', $phone_number)->where('prefix_code', $prefix)->first();
+        if ($user) {
+            return $user->id;
+        } else {
+            return null;
+        }
+    }
+
     public static function changeTokenAndReturnUser($phone_number)
     {
         $phone_number = str_replace("+98", "", $phone_number);
@@ -171,7 +181,15 @@ class UserController extends Controller
         return $user;
     }
 
-    public static function addUser($phone_number , $referral_code = null)
+    public static function changeTokenAndCReturnUser($phone_number , $prefix)
+    {
+        $user = User::where('phone_number', $phone_number)->where('prefix_code', $prefix)->first();
+        $user->api_token = Str::random(64);
+        $user->save();
+        return $user;
+    }
+
+    public static function addUser($phone_number , $referral_code = null , $prefix = '98')
     {
         $phone_number = str_replace("+98", "", $phone_number);
         if (substr($phone_number, 0, 1) == "0") {
@@ -185,6 +203,7 @@ class UserController extends Controller
 
         $user = new User();
         $user->phone_number = $phone_number;
+        $user->prefix_code = $prefix;
         $user->expired_at = Carbon::now()->addDays(2); //Free subscription
         $user->api_token = Str::random(64);
         $user->code_introduce = $code_introduce;
