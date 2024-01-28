@@ -257,7 +257,7 @@ class SmsVerifyController extends Controller
         $receiver = $prefix_code == '98' ? $phone_number : '00'.$prefix_code.$phone_number;
         $url = config('kavehnegar.kavehnegar_base_url') . config('kavehnegar.kavehnegar_api_key') . config('kavehnegar.kavehnegar_lookup_url');
         try {
-            $response = Http::post($url , [
+            $response = Http::asForm()->post($url , [
                 'receptor' => $receiver,
                 'token' => $activate_code,
                 'template' => 'verify'

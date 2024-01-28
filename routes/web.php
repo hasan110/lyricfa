@@ -19,6 +19,7 @@ use App\Http\Controllers\admin\AdminController;
 use App\Http\Controllers\admin\TextIdiomsController;
 use App\Http\Controllers\admin\IdiomController;
 use App\Http\Controllers\admin\WordController;
+use App\Http\Controllers\admin\GrammerController;
 
 Route::get('/get_id', [MusicController::class, 'getGuessId']);
 
@@ -140,6 +141,18 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
         Route::post("/update", [WordController::class, "updateWord"])->name('words/update');
         Route::post("/create", [WordController::class, "createWord"])->name('words/create');
         Route::post("/remove", [WordController::class, "removeWord"])->name('words/remove');
+    });
+
+    Route::prefix('grammers')->group(function () {
+        Route::post('/list', [GrammerController::class, 'GrammersList'])->name('grammers/list');
+        Route::post("/single", [GrammerController::class, "getGrammer"])->name('grammers/single');
+        Route::post("/update", [GrammerController::class, "updateGrammer"])->name('grammers/update');
+        Route::post("/create", [GrammerController::class, "createGrammer"])->name('grammers/create');
+        Route::post("/remove", [GrammerController::class, "removeGrammer"])->name('grammers/remove');
+        Route::prefix('rules')->group(function () {
+            Route::post('/list', [GrammerController::class, 'GrammerRulesList'])->name('grammer_rules/list');
+            Route::post('/create', [GrammerController::class, 'createGrammerRule'])->name('grammer_rules/create');
+        });
     });
 
 });

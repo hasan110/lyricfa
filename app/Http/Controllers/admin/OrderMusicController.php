@@ -67,7 +67,7 @@ class OrderMusicController extends Controller
 
     public function ordersList(Request $request)
     {
-        $orders = OrderMusic::with('user')->where('condition_order', 0)->paginate(50);
+        $orders = OrderMusic::with('user')->where('condition_order', 0)->paginate(1000);
 
         $now = Carbon::now();
         foreach ($orders as $item) {

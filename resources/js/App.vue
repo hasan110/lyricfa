@@ -42,7 +42,7 @@ import loadings from './components/UI/Loadings'
 export default {
   name:'App',
   data: () => ({
-    isDrawerOpen:true,
+    isDrawerOpen:false,
     loading:true
   }),
   components:{

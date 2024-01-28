@@ -5,7 +5,7 @@
     :value="value"
     right
     width="250"
-    @input="val => $emit('update:is-drawer-open', val)"
+    @input="val => $emit('input', val)"
   >
     <v-app-bar
       dense
@@ -122,12 +122,13 @@ export default {
             { id:13, index:12, parent_id:0, title: 'نوتیفیکیشن ها', type:'item', link:'notifications', icon: 'mdi-bell-outline' },
             { id:14, index:13, parent_id:0, title: 'لغات', type:'item', link:'words', icon: 'mdi-format-color-text' },
             { id:15, index:14, parent_id:0, title: 'اصطلاحات', type:'item', link:'idioms', icon: 'mdi-alphabetical' },
+            { id:16, index:15, parent_id:0, title: 'گرامر', type:'item', link:'grammers', icon: 'mdi-book-open-page-variant' },
         ],
     }),
     props: {
         value: {
             type: Boolean,
-            default: true,
+            default: false,
         },
     },
     methods: {

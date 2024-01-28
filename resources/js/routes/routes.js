@@ -45,6 +45,9 @@ import idioms from '../pages/idioms/idioms.vue';
 import create_idiom from '../pages/idioms/create_idiom.vue';
 import edit_idiom from '../pages/idioms/edit_idiom.vue';
 
+import grammers from '../pages/grammers/grammers.vue';
+import create_grammer from '../pages/grammers/create_grammer.vue';
+
 const allUrl = [
     {
         path: '/',
@@ -94,5 +97,8 @@ const allUrl = [
     { path: '/idioms', name: 'idioms', component: idioms },
     { path: '/idioms/create', name: 'create_idiom', component: create_idiom },
     { path: '/idioms/edit/:id', name: 'edit_idiom', component: edit_idiom },
+
+    { path: '/grammers', name: 'grammers', component: grammers },
+    { path: '/grammers/create', name: 'create_grammer', component: create_grammer },
 ];
 export default allUrl;

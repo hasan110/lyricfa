@@ -2,7 +2,7 @@
   <div>
 
     <div class="page-head">
-      <div class="titr">لیست سفارش آهنگ ها</div>
+      <div class="titr">گرامر</div>
       <div class="back">
         <router-link :to="{ name : 'dashboard' }">بازگشت
           <v-icon>
@@ -50,6 +50,14 @@
       </v-row>
 
       <div class="sm-section">
+
+        <v-btn color="success" dens :to="{name:'create_grammer'}">
+          افزودن گرامر
+        </v-btn>
+        <v-btn color="primary" dens @click="add_grammer_rule_modal = true">
+          افزودن قانون گرامر
+        </v-btn>
+
       </div>
 
       <div class="main-section">
@@ -62,10 +70,9 @@
             <thead>
               <tr>
                 <th>#</th>
-                <th>نام موزیک</th>
-                <th>نام خواننده</th>
-                <th>کاربر</th>
-                <th>امتیاز</th>
+                <th>عنوان فارسی</th>
+                <th>عنوان انگلیسی</th>
+                <th>سطح</th>
                 <th>عملیات</th>
               </tr>
             </thead>
@@ -82,17 +89,11 @@
                 :key="item.id"
               >
                 <td>{{ item.id }}</td>
-                <td>{{item.music_name}}</td>
-                <td>{{item.singer_name}}</td>
+                <td>{{ item.english_name }}</td>
+                <td>{{ item.persian_name }}</td>
+                <td>{{ item.level }}</td>
                 <td>
-                  <router-link v-if="item.user" :to="{name : 'user' , params : { id : item.user.id}}">
-                      {{item.user.phone_number}}
-                  </router-link>
-                  <span v-else>--</span>
-                </td>
-                  <td>{{item.rate}}</td>
-                <td>
-                  <v-btn color="primary" dens @click="getItem(item.id)">
+                  <v-btn color="primary" dark dens :to="{name:'edit_idiom' , params:{id : item.id}}">
                     ویرایش
                   </v-btn>
                 </td>
@@ -113,78 +114,67 @@
     </v-container>
 
     <v-dialog
-      transition="dialog-top-transition"
-      max-width="600"
-      v-model="edit_modal"
+      v-model="add_grammer_rule_modal"
+      width="500"
     >
       <v-card>
-        <v-toolbar
-          color="accent"
-          dark
-        >ویرایش درخواست موزیک</v-toolbar>
-        <v-card-text>
+        <v-card-title>
+        افزودن قانون گرامر
+        </v-card-title>
+        <hr>
+        <v-container>
+          <v-row class="pt-3">
+            <v-col cols="12" xs="12" sm="12" class="pb-0">
+              <v-text-field
+                v-model="form_data.type"
+                outlined clearable
+                :error-messages="errors.type"
+                dense label="نوع قانون"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" xs="12" sm="12" class="pb-0">
+              <v-text-field
+                v-model="form_data.words"
+                outlined clearable
+                :error-messages="errors.words"
+                dense label="لغات"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </v-container>
 
-          <v-container>
+        <v-divider></v-divider>
 
-            <v-row class="pt-3">
-
-              <v-col cols="6" class="pb-0">
-                  <v-select
-                      label="تغییر وضعیت"
-                      :items="order_statuses"
-                      v-model="form_data.condition_order"
-                      item-text="text"
-                      item-value="value"
-                      outlined
-                      clearable
-                      dense
-                  ></v-select>
-              </v-col>
-
-            </v-row>
-
-          </v-container>
-
-        </v-card-text>
-
-        <v-card-actions class="justify-end">
-          <v-btn color="danger" @click="edit_modal = false">بستن</v-btn>
-          <v-btn
-            :loading="edit_loading"
-            :disabled="edit_loading"
-            color="success"
-            @click="updateMusicOrder()"
-          >ویرایش</v-btn>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="danger" text @click="add_grammer_rule_modal = false">
+            انصراف
+          </v-btn>
+          <v-btn color="success" :disabled="loading" :loading="loading" @click="saveGrammerRule()">
+              ثبت
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-
   </div>
 </template>
 <script>
 export default {
-  name:'music_orders',
+  name:'words',
   data: () => ({
-    order_statuses: [
-      {text: 'بررسی نشده',value: 0},
-      {text: 'قبول شده',value: 1},
-      {text: 'رد شده',value: 2},
-      {text: 'موجود',value: 3},
-    ],
     list:[],
     form_data:{},
     filter:{},
     errors:{},
     sort_by_list: [
-      {text: 'جدید ترین ها',value: 'newest'},
-      {text: 'قدیمی ترین ها',value: 'oldest'},
+      {text: 'اول به آخر',value: 'asc'},
+      {text: 'آخر به اول',value: 'desc'},
     ],
     current_page:1,
-    per_page:0,
-    last_page:5,
-    edit_modal:false,
-    edit_loading:false,
+    last_page:0,
     fetch_loading:false,
+    loading:false,
+    add_grammer_rule_modal:false,
   }),
   watch:{
     current_page(){
@@ -194,11 +184,11 @@ export default {
   methods:{
     getList(){
       this.fetch_loading = true
-      this.$http.post(`orders/list?page=${this.current_page}` , this.filter)
+      this.$http.post(`grammers/list?page=${this.current_page}` , this.filter)
       .then(res => {
-        this.fetch_loading = false
         this.list = res.data.data.data
         this.last_page = res.data.data.last_page;
+        this.fetch_loading = false
       })
       .catch( () => {
         this.fetch_loading = false
@@ -216,48 +206,37 @@ export default {
         this.list = []
         this.getList()
     },
-    getItem(id){
-      this.$http.post(`orders/single` , {id})
-      .then(res => {
-        this.form_data = res.data.data
-        this.edit_modal = true
-      })
-      .catch( () => {
-      });
-    },
-    updateMusicOrder(){
-      this.edit_loading = true
-
-      this.$http.post(`orders/edit` , this.form_data)
-      .then(res => {
-        this.edit_loading = false
-        this.edit_form_data = {};
-        this.edit_modal = false
-        this.reset()
-
-        this.$fire({
-          title: "موفق",
-          text: res.data.message,
-          type: "success",
-          timer: 5000
-        })
-      })
-      .catch( err => {
-        this.edit_loading = false
-        const e = err.response.data
-        if(e.errors){ this.errors = e.errors }
-
+    saveGrammerRule(){
+      this.loading = true;
+      this.$http.post(`grammers/rules/create` , this.form_data)
+        .then(res => {
+          this.form_data = {};
+          this.loading = false;
           this.$fire({
-            title: "خطا",
-            text: e.message ? e.message : 'خطا در پردازش درخواست !',
-            type: "error",
+            title: "موفق",
+            text: res.data.message,
+            type: "success",
             timer: 5000
           })
-
-      });
-    },
+          this.add_grammer_rule_modal = false;
+        })
+        .catch( err => {
+          this.loading = false;
+          const e = err.response.data
+          if(e.errors){ this.errors = e.errors }
+          else if(e.message){
+            this.$fire({
+              title: "خطا",
+              text: e.message,
+              type: "error",
+              timer: 5000
+            })
+          }
+        });
+    }
   },
   mounted(){
+    this.filter.sort_by = 'asc';
     this.getList();
   },
   beforeMount(){

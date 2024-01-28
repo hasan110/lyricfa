@@ -3,5 +3,5 @@
 return [
     'kavehnegar_base_url'=>"https://api.kavenegar.com/v1/",
     'kavehnegar_lookup_url'=>"/verify/lookup.json",
-    'kavehnegar_api_key'=>"6852514E5A532F706F424171634C6E466556675A447A736C6C5446687543762B356F7258504642346A5A303D"
+    'kavehnegar_api_key'=>"45444E6F3230475A72364F62694830434968666E7075534E7238736C65516B4F42375757656B4133496F343D"
 ];

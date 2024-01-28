@@ -10,6 +10,7 @@ class Idiom extends Model
 {
     use HasFactory;
     protected $table = 'idioms';
+    protected $guarded = [];
 
     public function idiom_definitions()
     {

@@ -39,8 +39,8 @@ class UserWordController extends Controller
         if($user) {
             $user_id = $user->id;
 
-            $words = UserWord::orderBy('status', "DESC")->where('user_id', $user_id);
-            if($request->status){
+            $words = UserWord::orderBy('updated_at', "ASC")->where('user_id', $user_id);
+            if(isset($request->status)){
                 $words = $words->where('status' , $request->status);
             }
             $words = $words->get();
@@ -326,8 +326,8 @@ class UserWordController extends Controller
                 $wordInfo = $this->getWordInfo($userId, $item);
                 if (isset($wordInfo)) {
                     $getItem = $wordInfo;
-                    if((int)$getItem->status >= 6){
-                        $new_status = 6;
+                    if((int)$getItem->status >= 5){
+                        $new_status = 5;
                     }else{
                         $new_status = $getItem->status + 1;
                     }
@@ -340,11 +340,12 @@ class UserWordController extends Controller
                 $wordInfo = $this->getWordInfo($userId, $item);
                 if (isset($wordInfo)) {
                     $getItem = $wordInfo;
-                    if((int)$getItem->status <= 1){
-                        $new_status = $getItem->status;
-                    }else{
-                        $new_status = $getItem->status - 1;
-                    }
+//                    if((int)$getItem->status <= 1){
+//                        $new_status = $getItem->status;
+//                    }else{
+//                        $new_status = $getItem->status - 1;
+//                    }
+                    $new_status = 0;
                     $getItem->status = $new_status;
                     $getItem->updated_at =  Carbon::now();
                     $getItem->save();

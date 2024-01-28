@@ -87,7 +87,7 @@
               >
                 <td>{{ item.id }}</td>
                 <td>
-                    <img :src="Url + 'singers/'+item.id+'.jpg'" class="item-profile">
+                    <img :src="Url + 'singers/'+item.id+'.jpg?v='+Date.now()" class="item-profile">
                 <td>
                   <div class="d-flex flex-column">
                     <span>{{item.english_name}}</span>

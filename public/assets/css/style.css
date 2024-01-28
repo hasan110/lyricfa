@@ -52,13 +52,14 @@
 
 /* vuetify */
 .v-application a {
-  color: inherit !important;
   text-decoration: none;
 }
 .v-application--is-rtl .v-list-item__icon:first-child {
   margin-left: 16px !important;
 }
-
+.theme--light.v-btn a {
+    color: #fff !important;
+}
 
 /* styles */
 .font-en-input input{
