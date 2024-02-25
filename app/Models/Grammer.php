@@ -13,7 +13,7 @@ class Grammer extends Model
 
     public function grammer_rules()
     {
-        return $this->belongsToMany(GrammerRule::class, 'grammer_rule', 'grammer_id', 'grammer_rule_id');
+        return $this->belongsToMany(GrammerRule::class, 'grammer_rule', 'grammer_id', 'grammer_rule_id')->withPivot('level')->orderBy('grammer_rule.level');
     }
 
     public function grammer_prerequisites()

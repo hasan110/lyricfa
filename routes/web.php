@@ -20,6 +20,7 @@ use App\Http\Controllers\admin\TextIdiomsController;
 use App\Http\Controllers\admin\IdiomController;
 use App\Http\Controllers\admin\WordController;
 use App\Http\Controllers\admin\GrammerController;
+use App\Http\Controllers\admin\MapController;
 
 Route::get('/get_id', [MusicController::class, 'getGuessId']);
 
@@ -136,11 +137,12 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
     });
 
     Route::prefix('words')->group(function () {
-        Route::post('/list', [WordController::class, 'WordsList'])->name('words/list');
+        Route::post('/list',   [WordController::class, 'WordsList'])->name('words/list');
         Route::post("/single", [WordController::class, "getWord"])->name('words/single');
         Route::post("/update", [WordController::class, "updateWord"])->name('words/update');
         Route::post("/create", [WordController::class, "createWord"])->name('words/create');
         Route::post("/remove", [WordController::class, "removeWord"])->name('words/remove');
+        Route::get( "/types",  [WordController::class, "getTypes"])->name('words/types');
     });
 
     Route::prefix('grammers')->group(function () {
@@ -152,6 +154,23 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
         Route::prefix('rules')->group(function () {
             Route::post('/list', [GrammerController::class, 'GrammerRulesList'])->name('grammer_rules/list');
             Route::post('/create', [GrammerController::class, 'createGrammerRule'])->name('grammer_rules/create');
+            Route::post('/update', [GrammerController::class, 'updateGrammerRule'])->name('grammer_rules/update');
+            Route::post('/remove', [GrammerController::class, 'removeGrammerRule'])->name('grammer_rules/remove');
+        });
+    });
+
+    Route::prefix('maps')->group(function () {
+        Route::post('/list', [MapController::class, 'MapsList'])->name('maps/list');
+        Route::post("/single", [MapController::class, "getMap"])->name('maps/single');
+        Route::post("/update", [MapController::class, "updateMap"])->name('maps/update');
+        Route::post("/create", [MapController::class, "createMap"])->name('maps/create');
+        Route::post("/remove", [MapController::class, "removeMap"])->name('maps/remove');
+        Route::prefix('reasons')->group(function () {
+            Route::post('/list', [MapController::class, 'MapReasonsList'])->name('map_reasons/list');
+            Route::post('/create', [MapController::class, 'createMapReason'])->name('map_reasons/create');
+            Route::post('/update', [MapController::class, 'updateMapReason'])->name('map_reasons/update');
+            Route::post('/remove', [MapController::class, 'removeMapReason'])->name('map_reasons/remove');
+            Route::post('/group-edit', [MapController::class, 'groupEditWordMapReason'])->name('map_reasons/group_edit');
         });
     });
 

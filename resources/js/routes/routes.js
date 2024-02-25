@@ -47,6 +47,13 @@ import edit_idiom from '../pages/idioms/edit_idiom.vue';
 
 import grammers from '../pages/grammers/grammers.vue';
 import create_grammer from '../pages/grammers/create_grammer.vue';
+import edit_grammer from '../pages/grammers/edit_grammer.vue';
+import grammer_rules from "../pages/grammers/grammer_rules";
+
+import maps from '../pages/maping/maps.vue';
+import create_map from '../pages/maping/create_map.vue';
+import edit_map from '../pages/maping/edit_map.vue';
+import map_reasons from '../pages/maping/map_reasons.vue';
 
 const allUrl = [
     {
@@ -100,5 +107,12 @@ const allUrl = [
 
     { path: '/grammers', name: 'grammers', component: grammers },
     { path: '/grammers/create', name: 'create_grammer', component: create_grammer },
+    { path: '/grammers/edit/:id', name: 'edit_grammer', component: edit_grammer },
+    { path: '/grammers/rules', name: 'grammer_rules', component: grammer_rules },
+
+    { path: '/maps', name: 'maps', component: maps },
+    { path: '/maps/create', name: 'create_map', component: create_map },
+    { path: '/maps/edit/:id', name: 'edit_map', component: edit_map },
+    { path: '/maps/reasons', name: 'map_reasons', component: map_reasons },
 ];
 export default allUrl;

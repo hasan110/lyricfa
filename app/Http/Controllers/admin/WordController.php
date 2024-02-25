@@ -300,4 +300,13 @@ class WordController extends Controller
         ];
         return response()->json($arr);
     }
+
+    public function getTypes(Request $request)
+    {
+        return response()->json([
+            'data' => Word::getWordTypes(),
+            'errors' => null,
+            'message' => "لیست انواع لغات با موفقیت دریافت شد.",
+        ]);
+    }
 }

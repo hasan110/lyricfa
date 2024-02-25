@@ -17,4 +17,25 @@ class Word extends Model
     {
         return $this->hasMany(WordDefinition::class);
     }
+
+    public static function getWordTypes()
+    {
+        return [
+            'adverb',
+            'adjective',
+            'noun',
+            'plural',
+            'transitive-verb',
+            'intransitive-verb',
+            'conjunction',
+            'interjection',
+            'pronominal',
+            'superlative',
+            'auxiliary',
+            'adverb',
+            'singular',
+            'verb',
+            'preposition',
+        ];
+    }
 }

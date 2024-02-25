@@ -28,6 +28,7 @@ use App\Http\Controllers\SmsVerifyController;
 use App\Http\Controllers\UserSuggestionController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\OrderMusicController;
+use App\Http\Controllers\GrammerController;
 use Illuminate\Support\Facades\Route;
 
 //panel
@@ -46,11 +47,9 @@ Route::get('/get_setting', [SettingController::class, 'getSetting']);
 
 Route::middleware('CheckApiAuthentication')->group(function () {
 
-
     Route::get('/get_user', [UserController::class, 'getUser']);
     Route::post('/add_rewards', [UserController::class, 'addRewardsByUser']);
-   Route::post('/save_fcm_refresh_token', [UserController::class, 'saveFcmRefreshTokenInServer']);
-
+    Route::post('/save_fcm_refresh_token', [UserController::class, 'saveFcmRefreshTokenInServer']);
 
     //music
     Route::post('/get_music_all_info', [MusicController::class, 'getMusicCompleteInfo']);
@@ -69,12 +68,9 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/get_requested_music', [MusicController::class, 'getRequestedMusic']);
     Route::post('/get_n_requested_music', [MusicController::class, 'getNRequestedMusic']);
 
-
     //films
     Route::post('/get_films', [FilmController::class, 'getListForShow']);
     Route::post('/get_childs_by_id', [FilmController::class, 'getChildById']);
-
-
 
     //comment music
     Route::post('/get_comment_music', [CommentMusicController::class, 'getMusicComment']);
@@ -82,13 +78,11 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/edit_comment_music', [CommentMusicController::class, 'editMusicComment']);
     Route::post('/remove_comment_music', [CommentMusicController::class, 'removeMusicComment']);
 
-
     //comment singer
     Route::post('/get_comment_singer', [CommentSingerController::class, 'getSingerComment']);
     Route::post('/add_comment_singer', [CommentSingerController::class, 'addSingerComment']);
     Route::post('/edit_comment_singer', [CommentSingerController::class, 'editSingerComment']);
     Route::post('/remove_comment_singer', [CommentSingerController::class, 'removeSingerComment']);
-
 
     //lightener
     Route::post('/get_user_words', [UserWordController::class, 'getUserWordsById']);
@@ -96,32 +90,30 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/get_lightener_box_data', [UserWordController::class, 'getLightenerBoxData']);
     Route::post('/add_word_user', [UserWordController::class, 'insertUserWord']);
     Route::post('/edit_words_user', [UserWordController::class, 'editWordsUser']);
-
     Route::post('/remove_word_user', [UserWordController::class, 'removeWordUser']);
 
     //playlist
     Route::post('/insert_user_play_list', [PlayListController::class, 'insertUserPlayList']);
     Route::post('/get_user_play_list', [PlayListController::class, 'getUserPlayList']);
+    Route::post('/remove_play_list_by_id', [PlayListController::class, 'removePlayListById']);
+    Route::post('/edit_play_list_by_id', [PlayListController::class, 'editPlayListById']);
     Route::post('/insert_music_user_play_list', [PlayListMusicController::class, 'insertMusicPlayList']);
     Route::post('/insert_musics_user_play_list', [PlayListMusicController::class, 'insertMusicsPlayList']);
     Route::post('/get_user_playlist_musics', [PlayListMusicController::class, 'getMusicPlayListUser']);
     Route::post('/get_all_musics_playlist_musics', [PlayListMusicController::class, 'getAllMusicWithPlayList']);
-    Route::post('/remove_play_list_by_id', [PlayListController::class, 'removePlayListById']);
-    Route::post('/edit_play_list_by_id', [PlayListController::class, 'editPlayListById']);
-
     Route::post('/remove_music_from_playlist', [PlayListMusicController::class, 'removeMusicFromPlayList']);
+
 
     //singer
     Route::post('/get_singer_by_id', [SingerController::class, 'getSingerById']);
     Route::post('/get_singers', [SingerController::class, 'getSingersList']);
     Route::post('/get_n_singer', [SingerController::class, 'getNSingerList']);
-
+    Route::post('/get_singer_by_id_complete', [SingerController::class, 'getSingerByIdWithLike']);
 
     //album
     Route::post('/get_album_by_id', [AlbumController::class, 'getAlbumById']);
     Route::post('/get_albums', [AlbumController::class, 'getAlbumsList']);
     Route::post('/get_n_album', [AlbumController::class, 'getNAlbumList']);
-
 
     //like music
     Route::post('/add_like_music', [LikeMusicController::class, 'addMusicLike']);
@@ -131,12 +123,10 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/add_like_singer', [LikeSingerController::class, 'addSingerLike']);
     Route::post('/remove_like_singer', [LikeSingerController::class, 'removeSingerLike']);
 
-
     //text
     Route::post('/get_text_list', [TextController::class, 'getTextList']);
     Route::post('/get_text_include_word', [TextController::class, 'getTextIncludeWord']);
     Route::post('/get_text_music', [MusicController::class, 'getMusicWithTextPaginate']);
-
 
     //text film
     Route::post('/get_text_film', [FilmTextController::class, 'getTextList']);
@@ -164,34 +154,26 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     //map
     Route::post('/get_base_word', [MapController::class, 'getBaseWord']);
 
-
     //user suggestion
     Route::post('/insert_user_suggestion', [UserSuggestionController::class, 'insertUserSuggestion']);
 
     //order music
     Route::post('/add_order_music', [OrderMusicController::class, 'addOrderMusic']);
 
-
-    //singer
-    Route::post('/get_singer_by_id_complete', [SingerController::class, 'getSingerByIdWithLike']);
-
-
     //score
     Route::post('/get_average_music_score', [ScoreMusicController::class, 'getAverageMusicScore']);
     Route::post('/get_user_score', [ScoreMusicController::class, 'getUserScore']);
     Route::post('/add_music_score', [ScoreMusicController::class, 'addMusicScore']);
-
-
-
 
     //zarin
     Route::post('/get_merchent_id', [MerchentZarinPalController::class, 'getMerchentId']);
     Route::post('/get_subscriptions', [SubscriptionController::class, 'getSubscriptions']);
     Route::post('/account_active', [ReportController::class, 'addPayReports']);
 
-
     // slider
     Route::post('/get_slider_show', [SliderController::class, 'getSlidersForShow']);
 
+    // grammer
+    Route::post('/find_grammar', [GrammerController::class, 'findGrammer']);
 
 });

@@ -123,6 +123,7 @@ export default {
             { id:14, index:13, parent_id:0, title: 'لغات', type:'item', link:'words', icon: 'mdi-format-color-text' },
             { id:15, index:14, parent_id:0, title: 'اصطلاحات', type:'item', link:'idioms', icon: 'mdi-alphabetical' },
             { id:16, index:15, parent_id:0, title: 'گرامر', type:'item', link:'grammers', icon: 'mdi-book-open-page-variant' },
+            { id:17, index:16, parent_id:0, title: 'مپ لغات', type:'item', link:'maps', icon: 'mdi-connection' },
         ],
     }),
     props: {

@@ -35,7 +35,6 @@
   scrollbar-width: normal;
   scrollbar-color: rgb(233, 233, 233) #fff;
   font-family: iransans;
-    user-select: none;
 }
 *::-webkit-scrollbar {
   width: 8px;
@@ -59,6 +58,9 @@
 }
 .theme--light.v-btn a {
     color: #fff !important;
+}
+.v-btn {
+    letter-spacing: 0 !important;
 }
 
 /* styles */

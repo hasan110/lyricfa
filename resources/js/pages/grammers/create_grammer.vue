@@ -65,20 +65,30 @@
                       chips deletable-chips dense multiple small-chips
                       v-model="form_data.rules"
                       outlined :items="rules_list"
-                      item-value="id"
-                      item-text="type"
+                      item-value="id" return-object
+                      :item-text="getRuleTitle"
                       :error-messages="errors.rules"
                       label="انتخاب قوانین"
+                      :search-input.sync="rules_filter.search_key"
                   ></v-autocomplete>
+              </v-col>
+              <v-col cols="12" xs="12" sm="12" class="pb-0">
+                  <div v-for="(item , key) in form_data.rules">
+                      <v-text-field
+                          v-model="form_data.rules[key]['level']"
+                          outlined clearable
+                          dense :label="' سطح قانون شماره ' + getRuleTitle(item)"
+                      ></v-text-field>
+                  </div>
               </v-col>
           </v-row>
 
           <div class="text-center pt-3">
               <v-btn
-                  :loading="loading"
-                  :disabled="loading"
-                  color="success"
-                  @click="saveGrammer()"
+                :loading="loading"
+                :disabled="loading"
+                color="success"
+                @click="saveGrammer()"
               >ایجاد</v-btn>
           </div>
 
@@ -92,39 +102,34 @@ export default {
   name:'create_idiom',
   data: () => ({
     grammers_filter:{},
-    rules_filter:{},
-    form_data:{},
+    rules_filter:{
+        search_key:''
+    },
+    form_data:{
+        rules_level:[]
+    },
     errors:{},
     grammers_list:[],
     rules_list:[],
     loading: false,
   }),
+  watch:{
+    rules_filter: {
+      handler(){
+        this.getGrammerRulesList();
+      },
+      deep: true
+    }
+  },
   methods:{
-    addDefinition(){
-        this.form_data.idiom_definitions.push({
-            definition:'',
-            idiom_definition_examples: []
-        })
-        return true;
-    },
-    removeDefinition(definition_key){
-        if(this.form_data.idiom_definitions.length == 1){
-            alert('حداقل یک معنی باید تعریف شود');
-            return false;
+    getRuleTitle(item){
+        if (item.proccess_method === 1) {
+            return item.id + " - جستجو در مپ - علت مپ: " + item.map_reason.english_title;
+        } else if (item.proccess_method === 2) {
+            return item.id + " - جستجو در متن - " + (item.words && item.words.length > 20 ? item.words.slice(0,20) + ' ...' : item.words) + ' - ' + item.type;
+        } else if (item.proccess_method === 3) {
+            return item.id + " - جستجو در نوع لغت - " + item.type;
         }
-        this.form_data.idiom_definitions.splice(definition_key , 1)
-        return true;
-    },
-    addExample(definition_key){
-        this.form_data.idiom_definitions[definition_key].idiom_definition_examples.push({
-            definition:'',
-            phrase:''
-        })
-        return true;
-    },
-    removeExample(definition_key , example_key){
-        this.form_data.idiom_definitions[definition_key].idiom_definition_examples.splice(example_key , 1)
-        return true;
     },
     saveGrammer(){
       this.loading = true;

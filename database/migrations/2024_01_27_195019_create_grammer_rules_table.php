@@ -15,8 +15,12 @@ class CreateGrammerRulesTable extends Migration
     {
         Schema::create('grammer_rules', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('type');
-            $table->string('words');
+            $table->enum('proccess_method' , ['1' , '2'])->default('1');
+            $table->bigInteger('map_reason_id')->unsigned()->nullable();
+            $table->foreign('map_reason_id')->references('id')->on('map_reasons')->onDelete('cascade');
+            $table->string('type')->nullable();
+            $table->string('type')->nullable();
+            $table->string('words')->nullable();
             $table->timestamps();
         });
     }

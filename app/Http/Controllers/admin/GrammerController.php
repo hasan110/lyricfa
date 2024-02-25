@@ -45,11 +45,12 @@ class GrammerController extends Controller
 
     public function GrammerRulesList(Request $request)
     {
-        $list = GrammerRule::query();
+        $list = GrammerRule::with('map_reason');
 
         if ($request->search_key) {
             $list = $list->where('type', 'LIKE', "%{$request->search_key}%")
-                ->orWhere('words', 'LIKE', "%{$request->search_key}%");
+                ->orWhere('words', 'LIKE', "%{$request->search_key}%")
+                ->orWhere('id', $request->search_key);
         }
         if ($request->sort_by) {
             switch ($request->sort_by) {
@@ -109,7 +110,11 @@ class GrammerController extends Controller
         $grammer->save();
 
         if($request->has('rules')) {
-            $grammer->grammer_rules()->sync($request->rules);
+            $rules = [];
+            foreach ($request->rules as $rule) {
+                $rules[$rule['id']] = ['level' => $rule['level']];
+            }
+            $grammer->grammer_rules()->sync($rules);
         }
         if($request->has('prerequisite')) {
             $grammer->grammer_prerequisites()->sync($request->prerequisite);
@@ -126,28 +131,49 @@ class GrammerController extends Controller
 
     public function createGrammerRule(Request $request)
     {
-        $messages = array(
-            'type.required' => 'نوع قانون نمی تواند خالی باشد',
-            'words.required' => 'فیلد لغات نمی تواند خالی باشد',
-        );
-
         $validator = Validator::make($request->all(), [
-            'type' => 'required',
-            'words' => 'required',
-        ], $messages);
+            'proccess_method' => 'required',
+        ], [
+            'proccess_method.required' => 'نوع جستجو نمی تواند خالی باشد',
+        ]);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "افزودن قانون گرامر با مشکل اعتبارسنجی مواجه شد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
+        $proccess_method = $request->input('proccess_method');
+        $map_reason = null;
+        $type = null;
+        $words = null;
+        switch ($proccess_method) {
+            case 1:
+                $map_reason = $request->map_reason_id;
+            break;
+            case 2:
+                $type = $request->type;
+                $words = $request->words;
+            break;
+            case 3:
+                $type = $request->word_type;
+            break;
+            default:
+            return response()->json([
+                'data' => null,
+                'errors' => null,
+                'message' => "نوع جستجو نامعتبر می باشد.",
+            ], 400);
+        }
+
+
         $grammer_rule = new GrammerRule();
-        $grammer_rule->type = $request->type;
-        $grammer_rule->words = $request->words;
+        $grammer_rule->proccess_method = $proccess_method;
+        $grammer_rule->map_reason_id = $map_reason;
+        $grammer_rule->type = $type;
+        $grammer_rule->words = $words;
         $grammer_rule->save();
 
         $arr = [
@@ -159,113 +185,149 @@ class GrammerController extends Controller
         return response()->json($arr);
     }
 
+    public function updateGrammerRule(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+            'proccess_method' => 'required',
+        ], [
+            'id.required' => 'شناسه نمی تواند خالی باشد',
+            'proccess_method.required' => 'نوع جستجو نمی تواند خالی باشد',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => null,
+                'errors' => $validator->errors(),
+                'message' => "ویرایش قانون گرامر با مشکل اعتبارسنجی مواجه شد",
+            ], 400);
+        }
+
+        $proccess_method = $request->input('proccess_method');
+        $map_reason = null;
+        $type = null;
+        $words = null;
+        switch ($proccess_method) {
+            case 1:
+                $map_reason = $request->map_reason_id;
+            break;
+            case 2:
+                $type = $request->type;
+                $words = $request->words;
+            break;
+            case 3:
+                $type = $request->word_type;
+            break;
+            default:
+            return response()->json([
+                'data' => null,
+                'errors' => null,
+                'message' => "نوع جستجو نامعتبر می باشد.",
+            ], 400);
+        }
+
+
+        $grammer_rule = GrammerRule::find($request->id);
+        $grammer_rule->proccess_method = $proccess_method;
+        $grammer_rule->map_reason_id = $map_reason;
+        $grammer_rule->type = $type;
+        $grammer_rule->words = $words;
+        $grammer_rule->save();
+
+        $arr = [
+            'data' => $grammer_rule,
+            'errors' => null,
+            'message' => "قانون گرامر با موفقیت ویرایش شد"
+        ];
+
+        return response()->json($arr);
+    }
+
+    public function removeGrammerRule(Request $request)
+    {
+        $item = GrammerRule::find($request->id);
+        if(!$item){
+            return response()->json([
+                'data' => null,
+                'errors' => null,
+                'message' => " قانون یافت نشد.",
+            ], 404);
+        }
+
+        $item->delete();
+
+        $arr = [
+            'data' => null,
+            'errors' => null,
+            'message' => " تمامی اطلاعات این قانون با موفقیت حذف شد.",
+        ];
+        return response()->json($arr);
+    }
+
 
     public function updateGrammer(Request $request)
     {
         $messages = array(
             'id.required' => 'شناسه نمی تواند خالی باشد',
-            'english_word.required' => 'لغت نمی تواند خالی باشد',
-            'word_definitions.*.definition.filled' => 'معنی لغت نمی تواند خالی باشد.',
-            'english_definitions.*.definition.filled' => 'معنی انگلیسی لغت نمی تواند خالی باشد.',
-            'word_definitions.*.word_definition_examples.*.definition.filled' => 'معنی مثال لغت نمی تواند خالی باشد.',
-            'word_definitions.*.word_definition_examples.*.phrase.filled' => 'عبارت مثال لغت نمی تواند خالی باشد.',
+            'english_name.required' => 'نام انگلیسی نمی تواند خالی باشد',
+            'persian_name.required' => 'نام فارسی نمی تواند خالی باشد',
+            'description.required' => 'توضیحات نمی تواند خالی باشد',
+            'level.required' => 'انتخاب سطح اجباری است.',
+            'rules.required' => 'انتخاب قوانین اجباری است.',
+            'rules.array' => 'قوانین باید آرایه باشد.',
+            'prerequisite.array' => 'گرامر های پیش نیاز باید آرایه باشد.',
         );
 
         $validator = Validator::make($request->all(), [
             'id' => 'required',
-            'english_word' => 'required',
-            'word_definitions.*.definition' => 'filled',
-            'english_definitions.*.definition' => 'filled',
-            'word_definitions.*.word_definition_examples.*.definition' => 'filled',
-            'word_definitions.*.word_definition_examples.*.phrase' => 'filled',
+            'english_name' => 'required',
+            'persian_name' => 'required',
+            'description' => 'required',
+            'level' => 'required',
+            'rules' => 'required|array',
+            'prerequisite' => 'array',
         ], $messages);
 
         if ($validator->fails()) {
             $arr = [
                 'data' => null,
                 'errors' => $validator->errors(),
-                'message' => "افزودن لغت با مشکل اعتبارسنجی مواجه شد",
+                'message' => "ویرایش گرامر با مشکل اعتبارسنجی مواجه شد",
             ];
             return response()->json($arr, 400);
         }
 
-        $word = Word::with('word_definitions')->find($request->id);
-        if(!$word){
-            return response()->json([
-                'data' => null,
-                'errors' => null,
-                'message' => " لغت یافت نشد.",
-            ], 404);
+        $grammer = Grammer::find($request->id);
+        $grammer->english_name = $request->english_name;
+        $grammer->persian_name = $request->persian_name;
+        $grammer->description = $request->description;
+        $grammer->level = $request->level;
+        $grammer->save();
+
+        if($request->has('rules')) {
+            $rules = [];
+            foreach ($request->rules as $rule) {
+                $rules[$rule['id']] = ['level' => $rule['level']];
+            }
+            $grammer->grammer_rules()->sync($rules);
         }
-        // delete all word relations and ...
-        foreach ($word->word_definitions as $item){
-            foreach ($item->word_definition_examples as $example_item){
-                $example_item->delete();
-            }
-            $item->delete();
-        }
-
-        $word->english_word = $request->english_word;
-        $word->pronunciation = $request->pronunciation;
-        $word->word_types = $request->word_types;
-        $word->save();
-
-        foreach ($request->word_definitions as $definition)
-        {
-            $word_definition = new WordDefinition();
-            $word_definition->word_id = $word->id;
-            $word_definition->definition = $definition['definition'];
-            $word_definition->save();
-
-            foreach ($definition['word_definition_examples'] as $definition_example)
-            {
-                $word_definition_example = new WordDefinitionExample();
-                $word_definition_example->word_definition_id = $word_definition->id;
-                $word_definition_example->phrase = $definition_example['phrase'];
-                $word_definition_example->definition = $definition_example['definition'];
-                $word_definition_example->save();
-            }
-        }
-
-        if($request->english_definitions)
-        {
-            $check = WordEnEn::with('english_word_definitions')->where('ci_word' , $request->english_word)->first();
-            if ($check){
-                $english_word = $check;
-            }else{
-                $english_word = WordEnEn::create([
-                    'ci_word' => $request->english_word
-                ]);
-            }
-            foreach ($english_word->english_word_definitions as $english_item){
-                $english_item->delete();
-            }
-
-            foreach ($request->english_definitions as $english_definition)
-            {
-                $english_word_definition = new WordEnEnDefinition();
-                $english_word_definition->english_word_id = $english_word->id;
-                $english_word_definition->pronounciation = $english_definition['pronounciation'] ?? null;
-                $english_word_definition->word_type = $english_definition['word_type'] ?? null;
-                $english_word_definition->definition = $english_definition['definition'];
-                $english_word_definition->save();
-
-            }
+        if($request->has('prerequisite')) {
+            $grammer->grammer_prerequisites()->sync($request->prerequisite);
         }
 
         $arr = [
-            'data' => $word,
+            'data' => $grammer,
             'errors' => null,
-            'message' => "لغت با موفقیت اضافه شد"
+            'message' => "گرامر با موفقیت ویرایش شد"
         ];
 
-        return response()->json($arr, 200);
+        return response()->json($arr);
     }
 
     public function getGrammer(Request $request)
     {
         $messsages = array(
-            'id.required' => 'شناسه لغت نمی تواند خالی باشد'
+            'id.required' => 'شناسه گرامر نمی تواند خالی باشد'
         );
 
         $validator = Validator::make($request->all(), [
@@ -276,63 +338,58 @@ class GrammerController extends Controller
             $arr = [
                 'data' => null,
                 'errors' => $validator->errors(),
-                'message' => "دریافت اطلاعات لغت شکست خورد",
+                'message' => "دریافت اطلاعات گرامر شکست خورد",
             ];
             return response()->json($arr, 400);
         }
 
-        $get = Word::with('word_definitions')->find($request->id);
+        $get = Grammer::find($request->id);
         if(!$get){
             return response()->json([
                 'data' => null,
                 'errors' => null,
-                'message' => " لغت یافت نشد.",
+                'message' => " گرامر یافت نشد.",
             ], 404);
         }
-        $english_word = WordEnEn::where('ci_word' , $get->english_word)->first();
-        if($english_word){
-            $get['english_definitions'] = $english_word->english_word_definitions;
+        $get['prerequisite'] = $get->grammer_prerequisites()->pluck('id')->toArray();
+        $rules = [];
+        foreach ($get->grammer_rules()->get() as $item) {
+            $rules[] = [
+                'id' => intval($item->pivot->grammer_rule_id),
+                'proccess_method' => intval($item->proccess_method),
+                'type' => $item->type,
+                'words' => $item->words,
+                'level' => intval($item->pivot->level),
+                'map_reason' => $item->map_reason
+            ];
         }
+        $get['rules'] = $rules;
 
         $arr = [
             'data' => $get,
             'errors' => null,
             'message' => " گرفتن اطلاعات موفقیت آمیز بود",
         ];
-        return response()->json($arr, 200);
+        return response()->json($arr);
     }
 
     public function removeGrammer(Request $request)
     {
-        $word = Word::with('word_definitions')->find($request->id);
-        if(!$word){
+        $grammer = Grammer::find($request->id);
+        if(!$grammer){
             return response()->json([
                 'data' => null,
                 'errors' => null,
-                'message' => " لغت یافت نشد.",
+                'message' => " گرامر یافت نشد.",
             ], 404);
         }
-        $english_word = WordEnEn::where('ci_word' , $word->english_word)->with('english_word_definitions')->first();
 
-        foreach ($word->word_definitions as $word_definition){
-            foreach ($word_definition->word_definition_examples as $word_definition_example) {
-                $word_definition_example->delete();
-            }
-            $word_definition->delete();
-        }
-        $word->delete();
-
-        if ($english_word){
-            foreach ($english_word->english_word_definitions as $english_word_definition){
-                $english_word_definition->delete();
-            }
-            $english_word->delete();
-        }
+        $grammer->delete();
 
         $arr = [
             'data' => null,
             'errors' => null,
-            'message' => " تمامی اطلاعات این لغت با موفقیت حذف شد.",
+            'message' => " تمامی اطلاعات این گرامر با موفقیت حذف شد.",
         ];
         return response()->json($arr);
     }

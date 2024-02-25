@@ -54,8 +54,8 @@
         <v-btn color="success" dens :to="{name:'create_grammer'}">
           افزودن گرامر
         </v-btn>
-        <v-btn color="primary" dens @click="add_grammer_rule_modal = true">
-          افزودن قانون گرامر
+        <v-btn color="primary" dens :to="{name:'grammer_rules'}">
+          قانون گرامر
         </v-btn>
 
       </div>
@@ -93,8 +93,11 @@
                 <td>{{ item.persian_name }}</td>
                 <td>{{ item.level }}</td>
                 <td>
-                  <v-btn color="primary" dark dens :to="{name:'edit_idiom' , params:{id : item.id}}">
+                  <v-btn color="primary" dark dens :to="{name:'edit_grammer' , params:{id : item.id}}">
                     ویرایش
+                  </v-btn>
+                  <v-btn color="danger" small fab dark @click="deleteGrammer(item.id)">
+                      <v-icon>mdi-delete</v-icon>
                   </v-btn>
                 </td>
               </tr>
@@ -113,49 +116,6 @@
 
     </v-container>
 
-    <v-dialog
-      v-model="add_grammer_rule_modal"
-      width="500"
-    >
-      <v-card>
-        <v-card-title>
-        افزودن قانون گرامر
-        </v-card-title>
-        <hr>
-        <v-container>
-          <v-row class="pt-3">
-            <v-col cols="12" xs="12" sm="12" class="pb-0">
-              <v-text-field
-                v-model="form_data.type"
-                outlined clearable
-                :error-messages="errors.type"
-                dense label="نوع قانون"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" xs="12" sm="12" class="pb-0">
-              <v-text-field
-                v-model="form_data.words"
-                outlined clearable
-                :error-messages="errors.words"
-                dense label="لغات"
-              ></v-text-field>
-            </v-col>
-          </v-row>
-        </v-container>
-
-        <v-divider></v-divider>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="danger" text @click="add_grammer_rule_modal = false">
-            انصراف
-          </v-btn>
-          <v-btn color="success" :disabled="loading" :loading="loading" @click="saveGrammerRule()">
-              ثبت
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </div>
 </template>
 <script>
@@ -163,9 +123,12 @@ export default {
   name:'words',
   data: () => ({
     list:[],
+    map_reasons_filter:{},
     form_data:{},
     filter:{},
     errors:{},
+    map_reasons:[],
+    word_types:[],
     sort_by_list: [
       {text: 'اول به آخر',value: 'asc'},
       {text: 'آخر به اول',value: 'desc'},
@@ -206,24 +169,21 @@ export default {
         this.list = []
         this.getList()
     },
-    saveGrammerRule(){
-      this.loading = true;
-      this.$http.post(`grammers/rules/create` , this.form_data)
+    deleteGrammer(id){
+      if (confirm('آیا از حذف این مورد اطمینان دارید؟')) {
+        this.$http.post(`grammers/remove` , {id})
         .then(res => {
-          this.form_data = {};
-          this.loading = false;
           this.$fire({
             title: "موفق",
             text: res.data.message,
             type: "success",
             timer: 5000
           })
-          this.add_grammer_rule_modal = false;
+          this.reset()
         })
         .catch( err => {
-          this.loading = false;
           const e = err.response.data
-          if(e.errors){ this.errors = e.errors }
+          if(e.errors){ this.edit_errors = e.errors }
           else if(e.message){
             this.$fire({
               title: "خطا",
@@ -233,7 +193,8 @@ export default {
             })
           }
         });
-    }
+      }
+    },
   },
   mounted(){
     this.filter.sort_by = 'asc';
