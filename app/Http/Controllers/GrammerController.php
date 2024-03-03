@@ -10,6 +10,36 @@ use Illuminate\Support\Facades\Validator;
 
 class GrammerController extends Controller
 {
+    function grammerList(Request $request)
+    {
+        $list = Grammer::paginate(25);
+
+        return response()->json([
+            'data' => $list,
+            'errors' => [],
+            'message' => "اطلاعات با موفقیت گرفته شد"
+        ]);
+    }
+
+    function getGrammer(Request $request)
+    {
+        $grammer = Grammer::with('grammer_explanations')->where('id' , $request->grammer_id)->first();
+
+        if (!$grammer) {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => "اطلاعات گرامر یافت نشد."
+            ] , 404);
+        }
+
+        return response()->json([
+            'data' => $grammer,
+            'errors' => [],
+            'message' => "اطلاعات با موفقیت گرفته شد"
+        ]);
+    }
+
     function findGrammer(Request $request)
     {
         $validator = Validator::make($request->all(), [

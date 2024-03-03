@@ -174,6 +174,8 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/get_slider_show', [SliderController::class, 'getSlidersForShow']);
 
     // grammer
-    Route::post('/find_grammar', [GrammerController::class, 'findGrammer']);
+    Route::get('/grammer_list', [GrammerController::class, 'grammerList']);
+    Route::post('/get_grammer', [GrammerController::class, 'getGrammer']);
+    Route::post('/find_grammer', [GrammerController::class, 'findGrammer']);
 
 });

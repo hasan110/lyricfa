@@ -62,6 +62,9 @@
 .v-btn {
     letter-spacing: 0 !important;
 }
+.v-tab {
+    letter-spacing: 0 !important;
+}
 
 /* styles */
 .font-en-input input{

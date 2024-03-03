@@ -20,4 +20,9 @@ class Grammer extends Model
     {
         return $this->belongsToMany(Grammer::class, 'grammer_prerequisite', 'grammer_id', 'grammer_prerequisite_id');
     }
+
+    public function grammer_explanations()
+    {
+        return $this->hasMany(GrammerExplanation::class, 'grammer_id');
+    }
 }

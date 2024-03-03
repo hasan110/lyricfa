@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\admin;
 
+use App\Models\GrammerExample;
+use App\Models\GrammerExplanation;
 use App\Models\GrammerRule;
 use App\Models\Word;
 use App\Models\Grammer;
@@ -82,6 +84,10 @@ class GrammerController extends Controller
             'rules.required' => 'انتخاب قوانین اجباری است.',
             'rules.array' => 'قوانین باید آرایه باشد.',
             'prerequisite.array' => 'گرامر های پیش نیاز باید آرایه باشد.',
+            'grammer_explanations.*.type.filled' => 'نوع توضیح گرامر نمی تواند خالی باشد.',
+            'grammer_explanations.*.content.filled' => 'متن توضیح گرامر نمی تواند خالی باشد.',
+            'grammer_explanations.*.grammer_examples.*.english_content.filled' => 'متن انگلیسی مثال گرامر نمی تواند خالی باشد.',
+            'grammer_explanations.*.grammer_examples.*.persian_content.filled' => 'متن فارسی مثال گرامر نمی تواند خالی باشد.',
         );
 
         $validator = Validator::make($request->all(), [
@@ -91,6 +97,10 @@ class GrammerController extends Controller
             'level' => 'required',
             'rules' => 'required|array',
             'prerequisite' => 'array',
+            'grammer_explanations.*.type' => 'filled',
+            'grammer_explanations.*.content' => 'filled',
+            'grammer_explanations.*.grammer_examples.*.english_content' => 'filled',
+            'grammer_explanations.*.grammer_examples.*.persian_content' => 'filled',
         ], $messages);
 
         if ($validator->fails()) {
@@ -118,6 +128,25 @@ class GrammerController extends Controller
         }
         if($request->has('prerequisite')) {
             $grammer->grammer_prerequisites()->sync($request->prerequisite);
+        }
+
+        foreach ($request->grammer_explanations as $explanation)
+        {
+            $grammer_explanation = new GrammerExplanation();
+            $grammer_explanation->grammer_id = $grammer->id;
+            $grammer_explanation->type = $explanation['type'];
+            $grammer_explanation->title = $explanation['title'];
+            $grammer_explanation->content = $explanation['content'];
+            $grammer_explanation->save();
+
+            foreach ($explanation['grammer_examples'] as $example)
+            {
+                $grammer_example = new GrammerExample();
+                $grammer_example->grammer_explanation_id = $grammer_explanation->id;
+                $grammer_example->english_content = $example['english_content'];
+                $grammer_example->persian_content = $example['persian_content'];
+                $grammer_example->save();
+            }
         }
 
         $arr = [
@@ -276,6 +305,10 @@ class GrammerController extends Controller
             'rules.required' => 'انتخاب قوانین اجباری است.',
             'rules.array' => 'قوانین باید آرایه باشد.',
             'prerequisite.array' => 'گرامر های پیش نیاز باید آرایه باشد.',
+            'grammer_explanations.*.type.filled' => 'نوع توضیح گرامر نمی تواند خالی باشد.',
+            'grammer_explanations.*.content.filled' => 'متن توضیح گرامر نمی تواند خالی باشد.',
+            'grammer_explanations.*.grammer_examples.*.english_content.filled' => 'متن انگلیسی مثال گرامر نمی تواند خالی باشد.',
+            'grammer_explanations.*.grammer_examples.*.persian_content.filled' => 'متن فارسی مثال گرامر نمی تواند خالی باشد.',
         );
 
         $validator = Validator::make($request->all(), [
@@ -286,6 +319,10 @@ class GrammerController extends Controller
             'level' => 'required',
             'rules' => 'required|array',
             'prerequisite' => 'array',
+            'grammer_explanations.*.type' => 'filled',
+            'grammer_explanations.*.content' => 'filled',
+            'grammer_explanations.*.grammer_examples.*.english_content' => 'filled',
+            'grammer_explanations.*.grammer_examples.*.persian_content' => 'filled',
         ], $messages);
 
         if ($validator->fails()) {
@@ -297,7 +334,7 @@ class GrammerController extends Controller
             return response()->json($arr, 400);
         }
 
-        $grammer = Grammer::find($request->id);
+        $grammer = Grammer::with('grammer_explanations')->find($request->id);
         $grammer->english_name = $request->english_name;
         $grammer->persian_name = $request->persian_name;
         $grammer->description = $request->description;
@@ -313,6 +350,33 @@ class GrammerController extends Controller
         }
         if($request->has('prerequisite')) {
             $grammer->grammer_prerequisites()->sync($request->prerequisite);
+        }
+
+        // delete all explanation relations and ...
+        foreach ($grammer->grammer_explanations as $item){
+            foreach ($item->grammer_examples as $example_item){
+                $example_item->delete();
+            }
+            $item->delete();
+        }
+
+        foreach ($request->grammer_explanations as $explanation)
+        {
+            $grammer_explanation = new GrammerExplanation();
+            $grammer_explanation->grammer_id = $grammer->id;
+            $grammer_explanation->type = $explanation['type'];
+            $grammer_explanation->title = $explanation['title'];
+            $grammer_explanation->content = $explanation['content'];
+            $grammer_explanation->save();
+
+            foreach ($explanation['grammer_examples'] as $example)
+            {
+                $grammer_example = new GrammerExample();
+                $grammer_example->grammer_explanation_id = $grammer_explanation->id;
+                $grammer_example->english_content = $example['english_content'];
+                $grammer_example->persian_content = $example['persian_content'];
+                $grammer_example->save();
+            }
         }
 
         $arr = [
@@ -343,7 +407,7 @@ class GrammerController extends Controller
             return response()->json($arr, 400);
         }
 
-        $get = Grammer::find($request->id);
+        $get = Grammer::with('grammer_explanations')->find($request->id);
         if(!$get){
             return response()->json([
                 'data' => null,
