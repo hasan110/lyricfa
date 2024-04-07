@@ -20,6 +20,7 @@ class CreateSettingsTable extends Migration
             $table->string("price_year")->require();
             $table->string("app_version_code")->require();
             $table->string("app_version_name")->require();
+            $table->tinyInteger("maintenance_mode")->default(0);
             $table->timestamps();
         });
     }

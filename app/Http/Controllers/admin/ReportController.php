@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\LikeSingerController;
 use App\Models\Report;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -103,5 +104,40 @@ class ReportController extends Controller
             'message' => "اطلاعات با موفقیت گرفته شد",
         ];
         return response()->json($response, 200);
+    }
+
+    public function addGroupSubscription(Request $request)
+    {
+        $messsages = array(
+            'hours.required' => 'تعداد ساعت تمدید اشتراک نمیتواند خالی باشد',
+            'hours.numeric' => 'تعداد ساعت تمدید اشتراک باید عدد صحیح باشد',
+        );
+
+        $validator = Validator::make($request->all(), [
+            'hours' => 'required|numeric'
+        ], $messsages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => null,
+                'errors' => $validator->errors(),
+                'message' => " شکست در وارد کردن اطلاعات",
+            ], 422);
+        }
+
+        $new_date = Carbon::now()->addHours($request->hours);
+        $before_date = Carbon::now()->subHours($request->hours);
+
+        User::where('expired_at' , '<' , $before_date)->update([
+            'expired_at' => $new_date->format('Y-m-d H:i:s')
+        ]);
+
+        $arr = [
+            'data' => null,
+            'errors' => null,
+            'message' => " تمدید اشتراک کاربران با موفقیت انجام شد",
+        ];
+        return response()->json($arr);
+
     }
 }

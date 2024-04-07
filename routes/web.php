@@ -74,7 +74,7 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
         Route::post('/list', [TextController::class, 'textsList'])->name('texts/list');
         Route::post("/create", [TextController::class, "textsCreate"])->name('texts/create');
         Route::post("/update", [TextController::class, "textsUpdate"])->name('texts/update');
-          Route::post("/upload", [TextController::class, "uploadFileGetInfoAndSave"])->name('texts/upload');
+        Route::post("/upload", [TextController::class, "uploadFileGetInfoAndSave"])->name('texts/upload');
         Route::post("/download", [TextController::class, "downloadMusicTextFile"])->name('texts/download');
     });
 
@@ -89,6 +89,7 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
         Route::post('/list', [UserController::class, 'usersList'])->name('users/list');
         Route::post('/single', [UserController::class, 'singleUser'])->name('users/single');
         Route::post("/add_subs", [ReportController::class, "addPanelReports"])->name('users/add_subs');
+        Route::post("/add_subs/group", [ReportController::class, "addGroupSubscription"])->name('users/add_subs/group');
     });
 
     Route::prefix('user_comments')->group(function () {
@@ -133,7 +134,9 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
     Route::prefix('film_texts')->group(function () {
         Route::post('/list', [FilmTextController::class, 'getTextList'])->name('film_texts/list');
         Route::post("/create", [FilmTextController::class, "insertListTexts"])->name('film_texts/create');
-        Route::post("/update", [FilmTextController::class, "updateListTexts"])->name('film_texts/update');
+        Route::post("/update", [FilmTextController::class, "updateListTexts"])->name('film_texts/update');;
+        Route::post("/upload", [FilmTextController::class, "uploadFileGetInfoAndSave"])->name('film_texts/upload');
+        Route::post("/download", [FilmTextController::class, "downloadFilmTextFile"])->name('film_texts/download');
     });
 
     Route::prefix('words')->group(function () {

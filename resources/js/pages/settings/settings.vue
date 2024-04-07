@@ -34,6 +34,15 @@
                     label="نام ورژن اپ"
                 ></v-text-field>
             </v-col>
+            <v-col cols="6" class="pb-0">
+                <v-checkbox
+                    v-model="setting.maintenance_mode"
+                    outlined
+                    clearable
+                    dense
+                    label="حالت تعمیر و نگهداری"
+                ></v-checkbox>
+            </v-col>
 
             <v-col cols="12" class="pb-0 text-center">
                 <v-btn

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Grammer;
 use App\Models\User;
 use App\Models\UserWord;
 use Exception;
@@ -100,29 +101,31 @@ class UserWordController extends Controller
                 $type = $itemMain->type;
 
                 $comment_user = UserWordController::getCommentUser($item, $user_id );
-
-                $get_word = Word::where('english_word', $item)->first();
-                if (!$get_word) {
-                    $map = Map::where('word', $item)->first();
-
-                    if (!$map) {
-                        $mainResponse = ['id' => $id, 'word' => $item, 'type' => $type, 'mean' => null, "english_mean" => null, "idioms" => null, "user_comment" => $comment_user];
-                        $response[] = $mainResponse;
-                    } else {
-                        $ciBase = $map->ci_base;
-                        $get_base_word = Word::where('english_word', $ciBase)->first();
-                        $get_english_word = WordEnEn::where('ci_word', $ciBase)->first();
-                        $get_idioms = Idiom::where('base', $ciBase)->get();
-                        $mainResponse = ['id' => $id, 'word' => $item, 'type' => $type, 'mean' => $get_base_word, "english_mean" => $get_english_word, "idioms" => $get_idioms, "user_comment" => $comment_user];
-                        $response[] = $mainResponse;
-                    }
+                if (intval($type) === 3) {
+                    $grammar = Grammer::where('id' , $item)->first();
+                    $mainResponse = ['id' => $id, 'word' => $item, 'type' => $type, 'mean' => null, "english_mean" => null, "idioms" => null, "user_comment" => null, "grammer"=>$grammar];
                 } else {
-                    $get_english_word = WordEnEn::where('ci_word', $item)->first();
-                    $get_idioms = Idiom::where('base', $item)->get();
-                    $mainResponse = ['id' => $id, 'word' => $item, 'type' => $type, 'mean' => $get_word, "english_mean" => $get_english_word, "idioms" => $get_idioms, "user_comment" => $comment_user];
-                    $response[] = $mainResponse;
+                    $get_word = Word::where('english_word', $item)->first();
+                    if (!$get_word) {
+                        $map = Map::where('word', $item)->first();
+
+                        if (!$map) {
+                            $mainResponse = ['id' => $id, 'word' => $item, 'type' => $type, 'mean' => null, "english_mean" => null, "idioms" => null, "user_comment" => $comment_user, "grammer"=>null];
+                        } else {
+                            $ciBase = $map->ci_base;
+                            $get_base_word = Word::where('english_word', $ciBase)->first();
+                            $get_english_word = WordEnEn::where('ci_word', $ciBase)->first();
+                            $get_idioms = Idiom::where('base', $ciBase)->get();
+                            $mainResponse = ['id' => $id, 'word' => $item, 'type' => $type, 'mean' => $get_base_word, "english_mean" => $get_english_word, "idioms" => $get_idioms, "user_comment" => $comment_user, "grammer"=>null];
+                        }
+                    } else {
+                        $get_english_word = WordEnEn::where('ci_word', $item)->first();
+                        $get_idioms = Idiom::where('base', $item)->get();
+                        $mainResponse = ['id' => $id, 'word' => $item, 'type' => $type, 'mean' => $get_word, "english_mean" => $get_english_word, "idioms" => $get_idioms, "user_comment" => $comment_user, "grammer"=>null];
+                    }
                 }
 
+                $response[] = $mainResponse;
             }
             $responseCheck = ['data' => $response, 'errors' => [], 'message' => "اطلاعات با موفقیت گرفته شد"];
             return response()->json($responseCheck, 200);
@@ -146,6 +149,7 @@ class UserWordController extends Controller
                 $words_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('type', 0)->count();
                 $idioms_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('type', 1)->count();
                 $comment_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('type', 2)->count();
+                $grammars_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('type', 3)->count();
                 $reviews_count = 0;
                 $date = Carbon::now();
                 switch ($i) {
@@ -175,6 +179,7 @@ class UserWordController extends Controller
                     'words_count' => $words_count,
                     'idioms_count' => $idioms_count,
                     'comments_count' => $comment_count,
+                    'grammars_count' => $grammars_count,
                     'reviews_count' => $reviews_count,
                 ];
                 $box_data[$i] = $data;

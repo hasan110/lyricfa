@@ -11,31 +11,25 @@ use App\Http\Controllers\Controller;
 
 class TextController extends Controller
 {
-
     public function textsList(Request $request)
     {
-
-            $id_music = $request->id_music;
-            $users = Text::where('id_music', '=', $id_music)->orderBy("id")->get();
-            $arr = [
-                'data' => $users,
-                'errors' => null,
-                'message' => "اطلاعات با موفقیت گرفته شد",
-            ];
-            return response()->json($arr, 200);
-
+        $id_music = $request->id_music;
+        $users = Text::where('id_music', '=', $id_music)->orderBy("id")->get();
+        $arr = [
+            'data' => $users,
+            'errors' => null,
+            'message' => "اطلاعات با موفقیت گرفته شد",
+        ];
+        return response()->json($arr, 200);
     }
 
     public function getTextIncludeWord(Request $request)
     {
-
-
         if (UserController::isUserSubscriptionValid()) {
 
             $word = $request->word;
             $queryText = '%' . $word . '%'; //implode('%',str_split($word));
             return Text::query()->where('text_english', 'LIKE', "%{$queryText}%")->paginate(25);
-
         } else {
             $arr = [
                 'data' => null,
@@ -44,14 +38,11 @@ class TextController extends Controller
                 'message' => "اشتراک شما به پایان رسیده است لطفا اشتراک خود را تمدید کنید",
             ];
             return response()->json($arr, 400);
-
         }
     }
 
     public function textsCreate(Request $request)
     {
-        // validation music_id is exist
-
         $messsages = array(
             'music_id.required' => 'music_id نمی تواند خالی باشد',
             'music_id.numeric' => 'music_id باید فقط شامل عدد باشد',
@@ -120,11 +111,8 @@ class TextController extends Controller
         }
     }
 
-
     public function textsUpdate(Request $request)
     {
-        // validation music_id is exist
-
         $messsages = array(
             'music_id.required' => 'music_id نمی تواند خالی باشد',
             'music_id.numeric' => 'music_id باید فقط شامل عدد باشد',
@@ -173,7 +161,6 @@ class TextController extends Controller
 
                 $comments = isset($item["comments"]) ? $item["comments"] : null;
 
-
                 $text = new Text();
                 $text->text_english = $textEnglish;
                 $text->text_persian = $textPersian;
@@ -204,12 +191,8 @@ class TextController extends Controller
         }
     }
 
-
     public function deleteListTexts(Request $request): bool
     {
-        // validation music_id is exist
-
-
         $listTexts = $this->getAllTextMusic($request->music_id);
 
         foreach ($listTexts as $item) {
@@ -223,8 +206,7 @@ class TextController extends Controller
         $texts = Text::where('id_Music', "=", $music_id)->get();
         return $texts;
     }
-    
-    
+
     public function uploadFileGetInfoAndSave(Request $request)
     {
         $messsages = array(
@@ -253,13 +235,7 @@ class TextController extends Controller
             $this->uploadFileById($request->lyrics, "lyrics", $request->id);
         }
 
-
-        // $contents = file_get_contents(url('uploads/lyrics/' . $request->id . '.srt'));
-        
-        
-         $contents = file_get_contents('https://dl.lyricfa.app/uploads/lyrics/' . $request->id . '.srt');
-        
-        
+        $contents = file_get_contents('https://dl.lyricfa.app/uploads/lyrics/' . $request->id . '.srt');
 
         $name = explode(PHP_EOL, $contents);
 
@@ -271,7 +247,6 @@ class TextController extends Controller
             "end_time" => "",
         );
         foreach ($name as $key => $value) {
-
 
             switch ($key) {
                 case $key % 5 == 1 :
@@ -295,11 +270,8 @@ class TextController extends Controller
 
                     break;
                 case $key % 5 == 4 :
-//                    $object = $value;
-
                     break;
                 case $key % 5 == 0 :
-//                    $object = $value;
 
                     if ($object["text_english"] != "" && $object["text_persian"]  != "")
                         $mainList[] = $object;
@@ -347,12 +319,7 @@ class TextController extends Controller
             $file_texts .= $text->text_english . PHP_EOL;
             $file_texts .= $text->text_persian . PHP_EOL . PHP_EOL;
         }
-
-//         $contents = file_get_contents('https://dl.lyricfa.app/uploads/lyrics/' . $request->id . '.srt');
-
-
         return $file_texts;
-
     }
 
     public function formatMilliseconds($milliseconds) {
@@ -370,8 +337,6 @@ class TextController extends Controller
 
     public function textsCreateForUpload($texts, $musicId)
     {
-
-
         $isMusicExist = MusicController::getMusicById($musicId);
 
         if ($isMusicExist) {
@@ -402,7 +367,6 @@ class TextController extends Controller
         }
     }
 
-
     private function getStartTime(string $request)
     {
         $hour = (int) substr($request, 0, 2);
@@ -427,5 +391,3 @@ class TextController extends Controller
     }
 
 }
-
-// http://localhost/lyricfa/public/add_list_texts?music_id=4&texts[0][text_english]=yes&texts[0][start_time]=100&texts[0][text_persian]=100&texts[0][end_time]=100&texts[1][text_english]=%D8%AF%D8%AE&texts[1][start_time]=200&texts[1][text_persian]=200&texts[1][end_time]=100

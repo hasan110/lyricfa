@@ -12,7 +12,14 @@ class GrammerController extends Controller
 {
     function grammerList(Request $request)
     {
+        $api_token = $request->header("ApiToken");
+        $user = UserController::getUserByToken($api_token);
+
         $list = Grammer::paginate(25);
+//
+//        foreach ($list as $item) {
+//
+//        }
 
         return response()->json([
             'data' => $list,
@@ -138,6 +145,7 @@ class GrammerController extends Controller
         $result = [];
         foreach ($found_grammers as $gr) {
             $result[] = [
+                'id' => $gr->id,
                 'english_name' => $gr->english_name,
                 'persian_name' => $gr->persian_name,
                 'description' => $gr->description,

@@ -8,4 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Setting extends Model
 {
     use HasFactory;
+    protected $casts = [
+        'maintenance_mode' => 'integer'
+    ];
 }

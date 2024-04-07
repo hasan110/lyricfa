@@ -16,12 +16,6 @@ class FilmTextController extends Controller
         $id_film = $request->id_film;
         $films = FilmText::where('id_film', '=', $id_film)->orderBy("id")->get();
 
-        foreach ($films as $film){
-            $film->start_time = $this->getStartTime($film->start_end_time);
-            $film->end_time = $this->getEndTime($film->start_end_time);
-        }
-
-
         $arr = [
             'data' => $films,
             'errors' => null,
@@ -97,7 +91,7 @@ class FilmTextController extends Controller
                 $textPersian = $item["text_persian"];
                 $startEndTime = $item["start_end_time"];
        $comments = $item["comments"];
-       
+
                 $text = new FilmText();
                 $text->text_english = $textEnglish;
                 $text->text_persian = $textPersian;
@@ -211,10 +205,7 @@ class FilmTextController extends Controller
 
     public function deleteListTexts(Request $request): bool
     {
-        // validation music_id is exist
-
-
-        $listTexts = $this->getAllTextMusic($request->film_id);
+        $listTexts = $this->getAllTextFilms($request->film_id);
 
         foreach ($listTexts as $item) {
             $item->delete();
@@ -222,9 +213,187 @@ class FilmTextController extends Controller
         return true;
     }
 
-    private function getAllTextMusic($film_id)
+    private function getAllTextFilms($film_id)
     {
         $texts = FilmText::where('id_film', "=", $film_id)->get();
         return $texts;
+    }
+    public function uploadFileGetInfoAndSave(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|numeric',
+            'lyrics' => 'required|file|max:512'
+        ], array(
+            'id.required' => 'شناسه ی آهنگ الزامی است',
+            'id.numeric' => 'شناسه ی آهنگ باید عدد باشد',
+            'lyrics.required' => 'فایل متنی الزامی می باشد',
+            'lyrics.file' => 'نوع فایل باید فایل باشد',
+            'lyrics.max' => 'ماکزیمم سایز یک مگا بایت',
+        ));
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => null,
+                'errors' => $validator->errors(),
+                'message' => " افزودن متن شکست خورد",
+            ], 400);
+        }
+
+        if ($request->hasFile('lyrics')) {
+            $this->uploadFileById($request->lyrics, "film_texts", $request->id);
+        }
+        $just_english = $request->has('just_english') && intval($request->just_english);
+
+        $contents = file_get_contents('https://dl.lyricfa.app/uploads/film_texts/' . $request->id . '.srt');
+
+        $content = explode(PHP_EOL, $contents);
+
+        $mainList = array();
+        $object = array(
+            "text_english" => "",
+            "text_persian" => "",
+            "start_time" => "",
+            "end_time" => "",
+        );
+        if ($just_english) {
+            foreach ($content as $key => $value) {
+                switch ($key) {
+                    case $key % 4 == 1 :
+
+                        $object = array(
+                            "text_english" => "",
+                            "text_persian" => "",
+                            "start_time" => "",
+                            "end_time" => "",
+                        );
+
+                        $object["start_time"] = $this->getStartTime($value);
+                        $object["end_time"] = $this->getEndTime($value);
+                        break;
+                    case $key % 4 == 2 :
+                        $object["text_english"] = $value;
+                        break;
+                    case $key % 4 == 3 :
+                        break;
+                    case $key % 4 == 0 :
+                        if ($object["text_english"] != "")
+                            $mainList[] = $object;
+                    break;
+                }
+            }
+        } else {
+            foreach ($content as $key => $value) {
+                switch ($key) {
+                    case $key % 5 == 1 :
+
+                        $object = array(
+                            "text_english" => "",
+                            "text_persian" => "",
+                            "start_time" => "",
+                            "end_time" => "",
+                        );
+
+                        $object["start_time"] = $this->getStartTime($value);
+                        $object["end_time"] = $this->getEndTime($value);
+                        break;
+                    case $key % 5 == 2 :
+                        $object["text_english"] = $value;
+                        break;
+                    case $key % 5 == 3 :
+                        $object["text_persian"] = $value;
+                        break;
+                    case $key % 5 == 4 :
+                        // $object = $value;
+                        break;
+                    case $key % 5 == 0 :
+                        // $object = $value;
+                        if ($object["text_english"] != "")
+                            $mainList[] = $object;
+                        break;
+                }
+            }
+        }
+
+        $request->film_id = $request->id;
+        $this->deleteListTexts($request);
+        $this->textsCreateForUpload($mainList, $request->id);
+        return $mainList;
+    }
+    public function textsCreateForUpload($texts, $filmId)
+    {
+
+        $isFilmExist = FilmController::getFilmById($filmId);
+
+        if ($isFilmExist) {
+
+            foreach ($texts as $index => $item) {
+                $textEnglish = $item["text_english"];
+                $textPersian = $item["text_persian"];
+                $startTime = $item["start_time"];
+                $endTime = $item["end_time"];
+
+                $text = new FilmText();
+                $text->text_english = $textEnglish;
+                $text->text_persian = $textPersian;
+                $text->start_time = $startTime;
+                $text->end_time = $endTime;
+                $text->priority = $index + 1;
+                $text->id_film = $filmId;
+                $text->save();
+            }
+
+            $arr = [
+                'data' => null,
+                'errors' => null,
+                'message' => "متن ها با موفقیت اضافه شدند",
+            ];
+            return response()->json($arr);
+        }
+    }
+
+    public function downloadFilmTextFile(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|numeric'
+        ], array(
+            'id.required' => 'شناسه ی فیلم الزامی است',
+            'id.numeric' => 'شناسه ی فیلم باید عدد باشد'
+        ));
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => null,
+                'errors' => $validator->errors(),
+                'message' => " افزودن متن شکست خورد",
+            ], 400);
+        }
+
+        $film_texts = FilmText::where('id_film',$request->id)->orderBy("id")->get();
+
+        $file_texts = '';
+        foreach ($film_texts as $key => $text)
+        {
+            $file_texts .= $key+1 . PHP_EOL;
+            $start = $this->formatMilliseconds($text->start_time);
+            $end = $this->formatMilliseconds($text->end_time);
+            $file_texts .= $start.' --> '.$end . PHP_EOL;
+            $file_texts .= $text->text_english . PHP_EOL;
+            $file_texts .= $text->text_persian . PHP_EOL . PHP_EOL;
+        }
+
+        return $file_texts;
+    }
+
+    public function formatMilliseconds($milliseconds) {
+        $seconds = floor($milliseconds / 1000);
+        $minutes = floor($seconds / 60);
+        $hours = floor($minutes / 60);
+        $milliseconds = $milliseconds % 1000;
+        $seconds = $seconds % 60;
+        $minutes = $minutes % 60;
+
+        $format = '%02u:%02u:%02u,%03u';
+        $time = sprintf($format, $hours, $minutes, $seconds, $milliseconds);
+        return trim($time);
     }
 }

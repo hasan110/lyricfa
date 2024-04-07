@@ -12,12 +12,8 @@ use Illuminate\Support\Facades\Validator;
 
 class FilmTextController extends Controller
 {
-
-
     public function getTextList(Request $request)
     {
-
-
         $messsages = array(
             'id_film.required' => 'id_film نمی تواند خالی باشد',
             'id_film.numeric' => 'id_film باید فقط شامل عدد باشد',
@@ -44,23 +40,9 @@ class FilmTextController extends Controller
             $id_film = $request->id_film;
             $films = FilmText::where('id_film', '=', $id_film)->orderBy("id")->skip($request->page * 25)->take(25)->get();//1
 
-            foreach ($films as $index => $film){
-                $film->start_time = $this->getStartTime($film->start_end_time);
-                $film->end_time = $this->getEndTime($film->start_end_time);
-//                if($index == 0){
-//                    $film->status = "start";
-//                }
-//                if($index >  0 && $index <  24 ){
-//                    $film->status = "";
-//                }if($index == 24){
-//                    $film->status = "end";
-//                }
-            }
 
             $arr = [
                 'data' => $films,
-//                'start_all' => $this->getStartTime( $films[0]->start_end_time),
-//                'end_all' => $this->getEndTime($films[24]->start_end_time),
                 'errors' => null,
                 'message' => "اطلاعات با موفقیت گرفته شد",
             ];
@@ -101,14 +83,8 @@ class FilmTextController extends Controller
         return $compute;
     }
 
-    //str::limit
-
-
-
     public function insertListTexts(Request $request)
     {
-        // validation music_id is exist
-
         $messsages = array(
             'film_id.required' => 'film_id نمی تواند خالی باشد',
             'film_id.numeric' => 'film_id باید فقط شامل عدد باشد',
@@ -151,8 +127,6 @@ class FilmTextController extends Controller
                 $text->start_end_time = $startEndTime;
                 $text->id_film = $filmId;
                 $text->save();
-
-
             }
 
             $this->add10LastRowNull();
@@ -173,47 +147,44 @@ class FilmTextController extends Controller
         }
     }
 
-
     public function getTimesForPagin(Request $request)
     {
-
-            $id_film = $request->id_film;
-            $films = FilmText::where('id_film', '=', $id_film)->orderBy("id")->get();//1
+        $id_film = $request->id_film;
+        $films = FilmText::where('id_film', '=', $id_film)->orderBy("id")->get();//1
 
         $ok = [];
         $x = [];
-            foreach ($films as $index => $film){
-                $film->start_time = $this->getStartTime($film->start_end_time);
-                $film->end_time = $this->getEndTime($film->start_end_time);
-                if($index % 25 == 0){
-                    $start_time = $this->getStartTime($film->start_end_time);
-                }
-                if($index % 25 == 24){
-                    $end_time= $this->getEndTime($film->start_end_time);
-                }
-                if(isset($start_time) && isset($end_time) ){
-                    $x["start_time"] = $start_time;
-                    $x["end_time"] = $end_time;
-                    $ok[$index / 25 ] = $x;
-                    $x = null;
-                    $start_time = null;
-                    $end_time = null;
-                }
+        foreach ($films as $index => $film){
+            $film->start_time = $this->getStartTime($film->start_end_time);
+            $film->end_time = $this->getEndTime($film->start_end_time);
+            if($index % 25 == 0){
+                $start_time = $this->getStartTime($film->start_end_time);
             }
-            
-                    $size = $films->count();
+            if($index % 25 == 24){
+                $end_time= $this->getEndTime($film->start_end_time);
+            }
+            if(isset($start_time) && isset($end_time) ){
+                $x["start_time"] = $start_time;
+                $x["end_time"] = $end_time;
+                $ok[$index / 25 ] = $x;
+                $x = null;
+                $start_time = null;
+                $end_time = null;
+            }
+        }
+
+        $size = $films->count();
         $remain = $size % 25;
         $x["start_time"] = $this->getStartTime($films[$size - $remain + 1]->start_end_time);
         $x["end_time"] =  $this->getEndTime($films[$size - 1]->start_end_time);
         $ok[$size / 25] = $x;
 
-
-            $arr = [
-                'data' => $ok,
-                'errors' => null,
-                'message' => "اطلاعات با موفقیت گرفته شد",
-            ];
-            return response()->json($arr, 200);
+        $arr = [
+            'data' => $ok,
+            'errors' => null,
+            'message' => "اطلاعات با موفقیت گرفته شد",
+        ];
+        return response()->json($arr, 200);
     }
 
     public function add10LastRowNull()
@@ -227,6 +198,4 @@ class FilmTextController extends Controller
             $text->save();
         }
     }
-
-
 }

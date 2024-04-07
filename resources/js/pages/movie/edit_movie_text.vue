@@ -4,7 +4,7 @@
     <div class="page-head">
       <div class="titr">ویرایش متن فیلم</div>
       <div class="back">
-        <router-link :to="{ name : 'musics' }">بازگشت
+        <router-link :to="{ name : 'movies' }">بازگشت
           <v-icon>
             mdi-chevron-left
           </v-icon>
@@ -37,6 +37,22 @@
           ذخیره</v-btn>
 
         </v-col>
+          <v-col cols="4" class="text-right">
+              <v-btn
+                  color="success"
+                  dense
+                  @click="upload_modal = true"
+              >
+                  آپلود متن از طریق فایل</v-btn>
+              <v-tooltip top>
+                  <template v-slot:activator="{ on, attrs }">
+                      <v-btn color="primary" x-small fab v-bind="attrs" v-on="on" @click="download()">
+                          <v-icon>mdi-download</v-icon>
+                      </v-btn>
+                  </template>
+                  <span>دانلود متن</span>
+              </v-tooltip>
+          </v-col>
       </v-row>
 
       <div class="panel-body" id="app">
@@ -47,7 +63,8 @@
                 <th style="width: 220px;">متن انگلیسی</th>
                 <th style="width: 220px;">متن فارسی</th>
                 <th style="width: 220px;">توضیحات</th>
-                <th style="width: 300px;">شروع/پایان</th>
+                <th style="width: 100px;">شروع</th>
+                <th style="width: 100px;">پایان</th>
                 <th style="width: 10px;">افزودن</th>
                 <th style="width: 10px;">حذف</th>
               </tr>
@@ -68,7 +85,6 @@
                 <td>
                   <v-textarea
                     v-model="row.text_persian"
-                    :background-color="(text_errors[index] && text_errors[index].text_persian ? 'red lighten-5' : null) || (!row.text_persian ? 'red lighten-5' : null)"
                     outlined
                     dense
                   ></v-textarea>
@@ -82,10 +98,26 @@
                 </td>
                 <td class="font-en-input">
                   <v-text-field
-                    v-model="row.start_end_time"
-                    :background-color="(!row.start_end_time ? 'red lighten-5' : null)"
-                    outlined
-                    dense
+                      v-model="row.start_time"
+                      :background-color="(!row.start_time ? 'red lighten-5' : null)"
+                      outlined
+                      dense
+                      type="number"
+                      step="100"
+                  ></v-text-field>
+
+                  <small class="red--text">
+                      {{ text_errors[index] && text_errors[index].start_time ? text_errors[index].start_time : null }}
+                  </small>
+                </td>
+                <td class="font-en-input">
+                  <v-text-field
+                      v-model="row.end_time"
+                      :background-color="(!row.end_time ? 'red lighten-5' : null)"
+                      outlined
+                      dense
+                      type="number"
+                      step="100"
                   ></v-text-field>
                 </td>
                 <td>
@@ -131,6 +163,49 @@
           <v-icon>mdi-content-save-check</v-icon>
       </v-btn>
 
+      <v-dialog
+          max-width="400"
+          v-model="upload_modal"
+      >
+          <v-card>
+              <v-toolbar
+                  color="accent"
+                  dark
+              >آپلود متن از طریق فایل</v-toolbar>
+              <v-card-text>
+
+                  <v-container>
+                      <v-row class="pt-3">
+                          <v-col cols="12" class="pb-0">
+                              <v-file-input
+                                  label="فایل خود را انتخاب کنید"
+                                  outlined
+                                  dense
+                                  v-model="form_data.lyrics"
+                                  show-size
+                              ></v-file-input>
+                          </v-col>
+                          <v-col cols="12" class="pb-0">
+                              <v-checkbox v-model="form_data.just_english" label="فقط متن انگلیسی ؟"></v-checkbox>
+                          </v-col>
+                      </v-row>
+
+                  </v-container>
+
+              </v-card-text>
+
+              <v-card-actions class="justify-end">
+                  <v-btn color="danger" dark @click="upload_modal = false">بستن</v-btn>
+                  <v-btn
+                      :loading="upload_loading"
+                      :disabled="upload_loading"
+                      color="success"
+                      @click="upload()"
+                  >آپلود</v-btn>
+              </v-card-actions>
+          </v-card>
+      </v-dialog>
+
   </div>
 </template>
 <script>
@@ -138,12 +213,18 @@ export default {
   name:'edit_music_text',
   data: () => ({
     rows: [
-      {text_english: '', text_persian: "", comments: "", start_end_time: ''},
+      {text_english: '', text_persian: "", comments: "", start_time: '', end_time: ''},
     ],
     movie_id:null,
     text_errors:[],
     movie:{},
     errors:{},
+    form_data:{
+      lyrics:null,
+      just_english:false,
+    },
+    upload_modal: false,
+    upload_loading: false,
     loading: false,
   }),
   methods:{
@@ -216,6 +297,67 @@ export default {
           // }
       });
     },
+    download(){
+      this.$store.commit('SHOW_APP_LOADING' , 1);
+      this.$http.post(`film_texts/download` , {id:this.movie_id})
+        .then(res => {
+          this.$store.commit('SHOW_APP_LOADING' , 0);
+          const fileName = Date.now() + '-' + this.movie_id + '.srt'
+          this.generateFile(fileName , res.data);
+        })
+        .catch( () => {
+          this.$store.commit('SHOW_APP_LOADING' , 0);
+          this.$fire({
+              title: "خطا",
+              text: 'دانلود متن با مشکل مواجه شد.',
+              type: "error",
+              timer: 5000
+          })
+        });
+    },
+      generateFile(filename, text) {
+          var element = document.createElement('a');
+          element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+          element.setAttribute('download', filename);
+
+          element.style.display = 'none';
+          document.body.appendChild(element);
+
+          element.click();
+
+          document.body.removeChild(element);
+      },
+    upload(){
+      const d = new FormData();
+      d.append('id', this.movie_id);
+      this.form_data.lyrics ? d.append('lyrics', this.form_data.lyrics) : '';
+      d.append('just_english', this.form_data.just_english ? 1 : 0);
+      this.upload_loading = true
+      this.$http.post(`film_texts/upload` , d).then(res => {
+        this.upload_loading = false
+        this.upload_modal = false
+        this.$fire({
+            title: "موفق",
+            text: 'متن با موفقیت اضافه شد.',
+            type: "success",
+            timer: 5000
+        })
+
+        const texts = res.data
+        if(texts.length > 0){
+            this.rows = texts
+        }
+      })
+      .catch( () => {
+        this.upload_loading = false
+        this.$fire({
+            title: "خطا",
+            text: 'افزودن متن از طریق فایل با مشکل مواجه شد.',
+            type: "error",
+            timer: 5000
+        })
+      });
+    },
     validateInputs(){
           this.text_errors = []
           let ok = true;
@@ -223,8 +365,9 @@ export default {
               let obj = {}
               const d = this.rows
               if(!d[i].text_english) { ok = false; }
-              if(!d[i].text_persian) { ok = false; }
-              if(!d[i].start_end_time) { ok = false; }
+              // if(!d[i].text_persian) { ok = false; }
+              if(!d[i].start_time) { ok = false; }
+              if(!d[i].end_time) { ok = false; }
 
               this.text_errors.push(obj);
           }

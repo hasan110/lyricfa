@@ -15,8 +15,6 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-
-
     public function uploadFileById($file , $path , $id) : bool
     {
         if(env('DEPLOYED')){

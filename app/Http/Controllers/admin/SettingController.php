@@ -60,6 +60,7 @@ class SettingController extends Controller
         if (isset($setting)) {
             $setting->app_version_code = $request->app_version_code;
             $setting->app_version_name = $request->app_version_name;
+            $setting->maintenance_mode = $request->maintenance_mode;
             $setting->save();
 
 
