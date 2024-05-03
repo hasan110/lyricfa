@@ -54,22 +54,19 @@ class FilmTextController extends Controller
 
     public function insertListTexts(Request $request)
     {
-        // validation music_id is exist
-
         $messsages = array(
             'film_id.required' => 'film_id نمی تواند خالی باشد',
             'film_id.numeric' => 'film_id باید فقط شامل عدد باشد',
             'texts.required' => 'texts نمی تواند خالی باشد',
             'texts.array' => 'texts باید آرایه باشد',
-
         );
 
         $validator = Validator::make($request->all(), [
             'film_id' => 'required|numeric',
             'texts' => 'required|array',
             'texts.*.text_english' => 'required',
-            'texts.*.text_persian' => 'required',
-            'texts.*.start_end_time' => 'required',
+            'texts.*.start_time' => 'required',
+            'texts.*.end_time' => 'required',
         ], $messsages);
 
         if ($validator->fails()) {
@@ -89,20 +86,18 @@ class FilmTextController extends Controller
             foreach ($request->texts as $item) {
                 $textEnglish = $item["text_english"];
                 $textPersian = $item["text_persian"];
-                $startEndTime = $item["start_end_time"];
-       $comments = $item["comments"];
+                $startTime = $item["start_time"];
+                $endTime = $item["end_time"];
+                $comments = $item["comments"];
 
                 $text = new FilmText();
                 $text->text_english = $textEnglish;
                 $text->text_persian = $textPersian;
-                $text->start_end_time = $startEndTime;
-                      $text->comments = $comments;
+                $text->start_time = $startTime;
+                $text->end_time = $endTime;
+                $text->comments = $comments;
                 $text->id_film = $filmId;
                 $text->save();
-
-
-
-
             }
 
             $arr = [
@@ -136,8 +131,8 @@ class FilmTextController extends Controller
             'film_id' => 'required|numeric',
             'texts' => 'required|array',
             'texts.*.text_english' => 'required',
-            'texts.*.text_persian' => 'required',
-            'texts.*.start_end_time' => 'required',
+            'texts.*.end_time' => 'required',
+            'texts.*.start_time' => 'required',
         ], $messsages);
 
         if ($validator->fails()) {
@@ -167,7 +162,8 @@ class FilmTextController extends Controller
             foreach ($request->texts as $item) {
                 $textEnglish = $item["text_english"];
                 $textPersian = $item["text_persian"];
-                $startEndTime = $item["start_end_time"];
+                $startTime = $item["start_time"];
+                $endTime = $item["end_time"];
                 if(isset($item["comments"]))
                 $comments = $item["comments"];
                 else
@@ -176,12 +172,11 @@ class FilmTextController extends Controller
                 $text = new FilmText();
                 $text->text_english = $textEnglish;
                 $text->text_persian = $textPersian;
-                $text->start_end_time = $startEndTime;
+                $text->start_time = $startTime;
+                $text->end_time = $endTime;
                 $text->comments = $comments;
                 $text->id_film = $filmId;
                 $text->save();
-
-
             }
 
             $arr = [

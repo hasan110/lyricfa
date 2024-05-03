@@ -79,12 +79,13 @@ class FilmController extends Controller
             'persian_name.required' => 'عنوان فارسی آهنگ اجباری است',
             'type.required' => 'type لازم است.',
             'parent.required' => 'parent لازم است',
+            'extension.required' => 'پسوند فایل لازم است',
             'type.numeric' => 'type عدد می باشد',
             'parent.numeric' => 'parent باید عدد باشد',
             'film.file' => 'نوع فیلم باید فایل باشد',
             'film.mimetypes' => 'نوع فایل باید ویدئو باشد',
-            'image.file' => 'نوع عکس باید فایل باشد',
-            'image.mimes' => 'نوع فایل باید jpg باشد',
+            'poster.file' => 'نوع عکس باید فایل باشد',
+            'poster.mimes' => 'نوع فایل باید jpg باشد',
         );
 
         $validator = Validator::make($request->all(), [
@@ -92,8 +93,9 @@ class FilmController extends Controller
             'persian_name' => 'required',
             'type' => 'required|numeric',
             'parent' => 'required|numeric',
+            'extension' => 'required',
             'film' => 'file|mimetypes:video/*',
-            'image' => 'file|mimes:jpg'
+            'poster' => 'file'
         ], $messsages);
 
         if ($validator->fails()) {
@@ -110,13 +112,14 @@ class FilmController extends Controller
         $film->persian_name = $request->persian_name;
         $film->type = $request->type;
         $film->parent = $request->parent;
+        $film->extension = $request->extension;
         $film->save();
 
         if ($request->hasFile('film')) {
             $this->uploadFileById($request->film,"films", $film->id);
         }
-        if ($request->hasFile('image')) {
-            $this->uploadFileById($request->image,"films_banner", $film->id);
+        if ($request->hasFile('poster')) {
+            $this->uploadFileById($request->poster,"films_banner", $film->id);
         }
 
         $arr = [
@@ -144,8 +147,9 @@ class FilmController extends Controller
             'parent.numeric' => 'parent باید عدد باشد',
             'film.file' => 'نوع موزیک باید فایل باشد',
             'film.mimeTypes' => 'نوع فایل باید ویدئو باشد',
-            'image.file' => 'نوع عکس باید فایل باشد',
-            'image.mimes' => 'نوع فایل باید jpg باشد',
+            'poster.file' => 'نوع عکس باید فایل باشد',
+            'poster.mimes' => 'نوع فایل باید jpg باشد',
+            'extension.required' => 'پسوند فایل لازم است',
         );
 
         $validator = Validator::make($request->all(), [
@@ -155,7 +159,8 @@ class FilmController extends Controller
             'type' => 'required|numeric',
             'parent' => 'required|numeric',
             'film' => 'file|mimeTypes:video',
-            'image' => 'file|mimes:jpg'
+            'extension' => 'required',
+            'poster' => 'file'
         ], $messsages);
 
         if ($validator->fails()) {
@@ -182,25 +187,22 @@ class FilmController extends Controller
         $film->persian_name = $request->persian_name;
         $film->type = $request->type;
         $film->parent = $request->parent;
+        $film->extension = $request->extension;
         $film->save();
 
         if ($request->hasFile('film')) {
             $this->uploadFileById($request->film,"films", $film->id);
         }
 
-        if ($request->hasFile('image')) {
-            $this->uploadFileById($request->image,"films_banner", $film->id);
+        if ($request->hasFile('poster')) {
+            $this->uploadFileById($request->poster,"films_banner", $film->id);
         }
 
-        $arr = [
+        return response()->json([
             'data' => $film,
             'errors' => null,
             'message' => "موزیک با موفقیت اضافه شد"
-        ];
-
-        return response()->json($arr, 200);
-
-
+        ]);
     }
 
 

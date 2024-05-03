@@ -62,13 +62,13 @@ class FilmTextController extends Controller
 
     private function getStartTime(string $request)
     {
-       $hour = (int) substr($request, 0, 2);
-       $min = (int)  substr($request , 3, 2 );
-       $second = (int)  substr($request, 6, 2);
-       $milli =(int)  substr($request, 9, 3);
+        $hour = (int) substr($request, 0, 2);
+        $min = (int)  substr($request , 3, 2 );
+        $second = (int)  substr($request, 6, 2);
+        $milli =(int)  substr($request, 9, 3);
 
-       $compute = $milli + ($second * 1000) + ($min * 60 * 1000) + ($hour * 60 * 60 * 1000);
-       return $compute;
+        $compute = $milli + ($second * 1000) + ($min * 60 * 1000) + ($hour * 60 * 60 * 1000);
+        return $compute;
     }
 
     private function getEndTime(string $request)
@@ -152,16 +152,24 @@ class FilmTextController extends Controller
         $id_film = $request->id_film;
         $films = FilmText::where('id_film', '=', $id_film)->orderBy("id")->get();//1
 
+        if (!count($films)) {
+            return response()->json([
+                'data' => null,
+                'errors' => null,
+                'message' => "لیست متن فیلم خالی است.",
+            ], 400);
+        }
+
         $ok = [];
         $x = [];
         foreach ($films as $index => $film){
-            $film->start_time = $this->getStartTime($film->start_end_time);
-            $film->end_time = $this->getEndTime($film->start_end_time);
+            // $film->start_time = $this->getStartTime($film->start_end_time);
+            // $film->end_time = $this->getEndTime($film->start_end_time);
             if($index % 25 == 0){
-                $start_time = $this->getStartTime($film->start_end_time);
+                $start_time = $film->start_time;
             }
             if($index % 25 == 24){
-                $end_time= $this->getEndTime($film->start_end_time);
+                $end_time= $film->end_time;
             }
             if(isset($start_time) && isset($end_time) ){
                 $x["start_time"] = $start_time;
@@ -175,8 +183,8 @@ class FilmTextController extends Controller
 
         $size = $films->count();
         $remain = $size % 25;
-        $x["start_time"] = $this->getStartTime($films[$size - $remain + 1]->start_end_time);
-        $x["end_time"] =  $this->getEndTime($films[$size - 1]->start_end_time);
+        $x["start_time"] = $films[$size - $remain + 1]['start_time'];
+        $x["end_time"] =  $films[$size - 1]['end_time'];
         $ok[$size / 25] = $x;
 
         $arr = [
@@ -193,7 +201,8 @@ class FilmTextController extends Controller
             $text = new FilmText();
             $text->text_english = "";
             $text->text_persian = "";
-            $text->start_end_time = 0;
+            $text->start_time = 0;
+            $text->end_time = 0;
             $text->id_film = 0;
             $text->save();
         }

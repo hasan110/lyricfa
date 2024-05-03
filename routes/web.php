@@ -134,7 +134,7 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
     Route::prefix('film_texts')->group(function () {
         Route::post('/list', [FilmTextController::class, 'getTextList'])->name('film_texts/list');
         Route::post("/create", [FilmTextController::class, "insertListTexts"])->name('film_texts/create');
-        Route::post("/update", [FilmTextController::class, "updateListTexts"])->name('film_texts/update');;
+        Route::post("/update", [FilmTextController::class, "updateListTexts"])->name('film_texts/update');
         Route::post("/upload", [FilmTextController::class, "uploadFileGetInfoAndSave"])->name('film_texts/upload');
         Route::post("/download", [FilmTextController::class, "downloadFilmTextFile"])->name('film_texts/download');
     });

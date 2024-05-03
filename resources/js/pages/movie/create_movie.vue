@@ -62,19 +62,31 @@
                     </v-col>
 
                 </v-row>
+                <v-row>
+
+                    <v-col cols="6" class="pb-0">
+                        <v-file-input
+                            show-size
+                            dense
+                            outlined
+                            label="پوستر فیلم"
+                            v-model="form_data.poster" persistent-hint
+                            accept="image/*"
+                        ></v-file-input>
+                    </v-col>
+                    <v-col cols="6" class="pb-0">
+                        <v-text-field
+                            v-model="form_data.extension"
+                            outlined
+                            clearable
+                            dense
+                            label="پسوند فایل فیلم"
+                        ></v-text-field>
+                    </v-col>
+
+                </v-row>
             </v-col>
         </v-row>
-
-      <v-row>
-        <v-col v-if="form_data.has_album" cols="8" class="pb-2">
-          <v-textarea
-            v-model="form_data.album_id"
-            outlined
-            dense
-            label="توضیحات"
-          ></v-textarea>
-        </v-col>
-      </v-row>
 
       <v-row>
 
@@ -113,7 +125,17 @@ export default {
   methods:{
     saveMovie(){
       this.loading = true
-      this.$http.post(`movies/create` , this.form_data)
+      const form = new FormData();
+      const data = this.form_data;
+
+      data.english_name ? form.append('english_name', data.english_name) : '';
+      data.persian_name ? form.append('persian_name', data.persian_name) : '';
+      data.type ? form.append('type', data.type) : '';
+      form.append('parent', data.parent ? data.parent : 0);
+      data.poster ? form.append('poster', data.poster) : '';
+      data.extension ? form.append('extension', data.extension) : '';
+
+      this.$http.post(`movies/create` , form)
       .then(res => {
         this.form_data = {};
 
@@ -129,18 +151,13 @@ export default {
       })
       .catch( err => {
           this.loading = false
-        const e = err.response.data
-        // if(e.errors){ this.errors = e.errors }
-        // else if(e.message){
-
+          const e = err.response.data
           this.$fire({
             title: "خطا",
             text: e.message,
             type: "error",
             timer: 5000
           })
-
-        // }
       });
     }
   },

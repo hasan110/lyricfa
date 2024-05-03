@@ -62,17 +62,29 @@
                         </v-col>
 
                     </v-row>
-                </v-col>
-            </v-row>
+                    <v-row>
 
-            <v-row>
-                <v-col v-if="form_data.has_album" cols="8" class="pb-2">
-                    <v-textarea
-                        v-model="form_data.album_id"
-                        outlined
-                        dense
-                        label="توضیحات"
-                    ></v-textarea>
+                        <v-col cols="6" class="pb-0">
+                            <v-file-input
+                                show-size
+                                dense
+                                outlined
+                                label="پوستر فیلم"
+                                v-model="form_data.new_poster" persistent-hint
+                                accept="image/*"
+                            ></v-file-input>
+                        </v-col>
+                        <v-col cols="6" class="pb-0">
+                            <v-text-field
+                                v-model="form_data.extension"
+                                outlined
+                                clearable
+                                dense
+                                label="پسوند فایل فیلم"
+                            ></v-text-field>
+                        </v-col>
+
+                    </v-row>
                 </v-col>
             </v-row>
 
@@ -133,35 +145,42 @@ export default {
         },
         saveMovie(){
             this.loading = true
-            this.$http.post(`movies/update` , this.form_data)
-                .then(res => {
-                    this.form_data = {};
+            const form = new FormData();
+            const data = this.form_data;
 
-                    this.$fire({
-                        title: "موفق",
-                        text: res.data.message,
-                        type: "success",
-                        timer: 5000
-                    })
+            form.append('id', data.id);
+            data.english_name ? form.append('english_name', data.english_name) : '';
+            data.persian_name ? form.append('persian_name', data.persian_name) : '';
+            data.type ? form.append('type', data.type) : '';
+            form.append('parent', data.parent ? data.parent : 0);
+            data.new_poster ? form.append('poster', data.new_poster) : '';
+            data.extension ? form.append('extension', data.extension) : '';
 
-                    this.$router.push({name:'movies'})
+            this.$http.post(`movies/update` , form)
+            .then(res => {
+                this.form_data = {};
 
+                this.$fire({
+                    title: "موفق",
+                    text: res.data.message,
+                    type: "success",
+                    timer: 5000
                 })
-                .catch( err => {
-                    this.loading = false
-                    const e = err.response.data
-                    // if(e.errors){ this.errors = e.errors }
-                    // else if(e.message){
 
-                    this.$fire({
-                        title: "خطا",
-                        text: e.message,
-                        type: "error",
-                        timer: 5000
-                    })
+                this.$router.push({name:'movies'})
 
-                    // }
-                });
+            })
+            .catch( err => {
+                this.loading = false
+                const e = err.response.data
+
+                this.$fire({
+                    title: "خطا",
+                    text: e.message,
+                    type: "error",
+                    timer: 5000
+                })
+            });
         }
     },
     mounted(){
