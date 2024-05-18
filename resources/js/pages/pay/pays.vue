@@ -121,8 +121,7 @@ export default {
     errors:{},
     sort_by_list: [
       {text: 'جدید ترین ها',value: 'newest'},
-      {text: 'قدیمی ترین ها',value: 'oldest'},
-      {text: 'بیشترین مقدار',value: 'max_value'},
+      {text: 'قدیمی ترین ها',value: 'oldest'}
     ],
     current_page:1,
     per_page:0,
@@ -161,6 +160,7 @@ export default {
     },
   },
   mounted(){
+    this.filter.sort_by = 'newest'
     this.getList();
   },
   beforeMount(){

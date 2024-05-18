@@ -30,7 +30,7 @@ class GrammerController extends Controller
 
     function getGrammer(Request $request)
     {
-        $grammer = Grammer::with('grammer_explanations')->where('id' , $request->grammer_id)->first();
+        $grammer = Grammer::with('grammer_sections')->where('id' , $request->grammer_id)->first();
 
         if (!$grammer) {
             return response()->json([

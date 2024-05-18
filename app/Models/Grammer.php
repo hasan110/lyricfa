@@ -25,4 +25,9 @@ class Grammer extends Model
     {
         return $this->hasMany(GrammerExplanation::class, 'grammer_id');
     }
+
+    public function grammer_sections()
+    {
+        return $this->hasMany(GrammerSection::class, 'grammer_id');
+    }
 }

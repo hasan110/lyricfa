@@ -17,6 +17,11 @@ class GrammerExplanation extends Model
         return $this->belongsTo(Grammer::class, 'grammer_id');
     }
 
+    public function grammer_section()
+    {
+        return $this->belongsTo(GrammerSection::class, 'grammer_section_id');
+    }
+
     public function grammer_examples()
     {
         return $this->hasMany(GrammerExample::class, 'grammer_explanation_id');

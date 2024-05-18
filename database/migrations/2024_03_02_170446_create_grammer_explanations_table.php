@@ -18,6 +18,8 @@ class CreateGrammerExplanationsTable extends Migration
 
             $table->bigInteger('grammer_id')->unsigned();
             $table->foreign('grammer_id')->references('id')->on('grammers')->onDelete('cascade');
+            $table->bigInteger('grammer_section_id')->unsigned()->nullable();
+            $table->foreign('grammer_section_id')->references('id')->on('grammer_sections')->onDelete('cascade');
 
             $table->enum('type' , ['explain' , 'tip' , 'attention'])->default('explain');
             $table->string('title')->nullable();

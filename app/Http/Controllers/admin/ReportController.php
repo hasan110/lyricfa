@@ -90,7 +90,21 @@ class ReportController extends Controller
 
     public function reportsUserList(Request $request)
     {
-        $list = Report::whereNotNull('id')->where('type', 0)->paginate(50);
+        $list = Report::whereNotNull('id')->where('type', 0);
+
+        if($request->sort_by){
+            switch ($request->sort_by){
+                case 'newest':
+                default:
+                    $list = $list->orderBy('id' , 'desc');
+                    break;
+                case 'oldest':
+                    $list = $list->orderBy('id' , 'asc');
+                    break;
+            }
+        }
+
+        $list = $list->paginate(50);
 
         foreach ($list as $item) {
             unset($item['title'],$item['description']);
