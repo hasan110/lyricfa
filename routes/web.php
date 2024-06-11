@@ -53,6 +53,7 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
         Route::post('/send', [NotificationController::class, 'sendFCM'])->name('notifications/send');
         Route::post('/create', [NotificationController::class, 'addNotification'])->name('notifications/create');
         Route::post('/list', [NotificationController::class, 'getNotifications'])->name('notifications/list');
+        Route::post('/get-music-data', [NotificationController::class, 'getMusicData'])->name('notifications/get_music_data');
     });
 
     Route::get('/get_admin_data', [AdminController::class, 'get_admin_data']);

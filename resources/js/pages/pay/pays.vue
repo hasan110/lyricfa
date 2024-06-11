@@ -93,7 +93,7 @@
                   </td>
                   <td>{{item.ref_id}}</td>
                   <td>{{item.val_money}} تومان</td>
-                  <td>{{item.created_at}}</td>
+                  <td>{{item.persian_created_at}}</td>
               </tr>
             </tbody>
           </template>

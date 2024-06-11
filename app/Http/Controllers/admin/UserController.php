@@ -10,13 +10,13 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Morilog\Jalali\Jalalian;
 
 class UserController extends Controller
 {
     public static function isUserSubscriptionValid(Request $request)
     {
         $api_token = $request->header("ApiToken");
-//        $data = User::header('ApiToken', $api_token)->first();
 
         $data = self::getUserByToken($api_token);
 
@@ -58,7 +58,6 @@ class UserController extends Controller
         } else {
             return null;
         }
-
     }
 
     public static function changeTokenAndReturnUser($phone_number)
@@ -118,12 +117,8 @@ class UserController extends Controller
 
     public function getUser(Request $request)
     {
-
         $api_token = $request->header("ApiToken");
-//        $data = User::header('ApiToken', $api_token)->first();
-
         $data = self::getUserByToken($api_token);
-
         $id = $data->id;
         if ($id != null) {
 
@@ -158,7 +153,6 @@ class UserController extends Controller
     {
         return User::where('id', $id)->first();
     }
-
 
     public function usersList(Request $request)
     {
@@ -198,6 +192,7 @@ class UserController extends Controller
             }
 
             $user['expire'] = $expire;
+            $user->persian_created_at = Jalalian::forge($user->created_at)->format('%Y-%m-%d H:i');
         }
 
         $response = [
@@ -229,12 +224,13 @@ class UserController extends Controller
             return response()->json($arr, 400);
         }
 
-
-
         $user = User::where('id',  $request->id)->first();
 
-       $subscription =  Report::where('user_id', $request->id)->orderBy('id', 'DESC')->get();
-        $user->subscription = $subscription;
+        $subscriptions =  Report::where('user_id', $request->id)->orderBy('id', 'DESC')->take(100)->get();
+        foreach ($subscriptions as &$subscription) {
+            $subscription['persian_created_at'] = Jalalian::forge($subscription->created_at)->format('%Y-%m-%d H:i');
+        }
+        $user->subscription = $subscriptions;
 
         $now = Carbon::now();
         $expiredAt = $user->expired_at;
@@ -256,14 +252,13 @@ class UserController extends Controller
 
     public function saveFcmRefreshTokenInServer(Request $request)
     {
-
-        $messsages = array(
+        $messages = array(
             'token.required' => 'توکن الزامی است'
         );
 
         $validator = Validator::make($request->all(), [
             'token' => 'required'
-        ], $messsages);
+        ], $messages);
 
 
         if ($validator->fails()) {
@@ -315,6 +310,4 @@ class UserController extends Controller
         }
         return $tokens;
     }
-
-
 }

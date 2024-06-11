@@ -145,3 +145,13 @@
 .rtl-dir{
     direction: rtl !important;
 }
+
+.two-line-box {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.8;
+    white-space: break-spaces;
+}

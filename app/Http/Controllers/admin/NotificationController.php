@@ -4,6 +4,8 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\admin\UserController;
+use App\Http\Controllers\SingerController;
+use App\Models\Music;
 use App\Models\Notification;
 use Carbon\Carbon;
 use Exception;
@@ -15,8 +17,6 @@ class NotificationController extends Controller
 {
     public function addNotification(Request $request)
     {
-
-
         $messsages = array(
             'title.required' => 'عنوان نوتیفیکیشن الزامی است',
             'body.required' => 'بدنه نوتیفیکیشن الزامی است',
@@ -24,7 +24,6 @@ class NotificationController extends Controller
             'image.file' => 'نوع عکس باید فایل باشد',
             'image.mimes' => 'نوع فایل باید jpg باشد',
             'image.dimensions' => 'عکس باید (200 تا 500) در (200 تا 500) باشد',
-
         );
 
         $validator = Validator::make($request->all(), [
@@ -61,8 +60,6 @@ class NotificationController extends Controller
 
     public function editNotification(Request $request)
     {
-
-
         $messsages = array(
             'id.required' => 'شناسه ی نوتیفیکیشن الزامی است',
             'id.numeric' => 'شناسه نوتیفیکیشن باید عدد باشد',
@@ -72,7 +69,6 @@ class NotificationController extends Controller
             'image.file' => 'نوع عکس باید فایل باشد',
             'image.mimes' => 'نوع فایل باید jpg باشد',
             'image.dimensions' => 'عکس باید (200 تا 500) در (200 تا 500) باشد',
-
         );
 
         $validator = Validator::make($request->all(), [
@@ -92,7 +88,6 @@ class NotificationController extends Controller
             ];
             return response()->json($arr, 400);
         }
-
 
         $notification = $this->getNotificationById($request->id);
         $notification->title = $request->title;
@@ -122,19 +117,19 @@ class NotificationController extends Controller
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
         ];
-        return response()->json($response, 200);
+        return response()->json($response);
     }
 
     public function sendFCM(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'id.required' => 'شناسه نوتیفیکیشن الزامی است',
             'id.numeric' => 'شناسه نوتیفیکیشن باید عدد باشد'
         );
 
         $validator = Validator::make($request->all(), [
             'id' => 'required|numeric'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
             $arr = [
@@ -235,6 +230,70 @@ class NotificationController extends Controller
         $notif->save();
 
         return true;
+    }
+
+    public function getMusicData(Request $request)
+    {
+        try {
+            $ids = $request->music_ids;
+            $text = '';
+            if (str_contains($ids, '-')) {
+                $ids = explode('-', $ids);
+                $from = $ids[0];
+                $to = $ids[1];
+
+                if (!is_numeric($from) || !is_numeric($to)) {
+                    throw new Exception('لطفا بازه شناسه موزیک را به درستی وارد نمایید');
+                }
+
+                $musics_count = Music::whereBetween('id', [$from, $to])->count();
+                if ($musics_count > 50) {
+                    throw new Exception('تعداد موزیک های یافت شده بیش از 50 عدد است');
+                }
+
+                $musics = Music::whereBetween('id', [$from, $to])->get();
+                foreach ($musics as $music) {
+                    $singers = SingerController::getSingerById($music->singers);
+                    $singer_names = [];
+                    foreach ($singers as $singer) {
+                        $singer_names[] = $singer->english_name;
+                    }
+                    $singer_text = implode(", ", $singer_names);
+
+                    $text .= $music->name . "->" . $singer_text . "\n";
+                }
+            } else {
+                if (!is_numeric($ids)) {
+                    throw new Exception($ids);
+                }
+
+                $music = Music::where('id', $ids)->first();
+                if (!$music) {
+                    throw new Exception('موزیک یافت نشد');
+                }
+
+                $singers = SingerController::getSingerById($music->singers);
+                $singer_names = [];
+                foreach ($singers as $singer) {
+                    $singer_names[] = $singer->english_name;
+                }
+                $singer_text = implode(", ", $singer_names);
+
+                $text = $music->name . "->" . $singer_text;
+            }
+
+        } catch (Exception $exception) {
+            return response()->json([
+                'data' => null,
+                'errors' => null,
+                'message' => $exception->getMessage(),
+            ], 400);
+        }
+        return response()->json([
+            'data' => $text,
+            'errors' => null,
+            'message' => "اطلاعات با موفقیت گرفته شد",
+        ]);
     }
 
 }

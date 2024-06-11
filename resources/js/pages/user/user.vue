@@ -153,7 +153,7 @@
                   </td>
                   <td>{{item.title}}</td>
                   <td>{{item.description}}</td>
-                  <td>{{item.created_at}}</td>
+                  <td>{{item.persian_created_at}}</td>
                 </tr>
               </tbody>
             </template>
@@ -199,6 +199,7 @@
                                   dense
                                   label="آپلود تصویر"
                                   accept="image/*"
+                                  persistent-hint hint="فرمت تصویر باید jpg و سایز آن باید (200 تا 500) در (200 تا 500) باشد"
                               ></v-file-input>
                           </v-col>
 

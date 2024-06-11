@@ -66,6 +66,7 @@
                 <th>نام خواننده</th>
                 <th>کاربر</th>
                 <th>امتیاز</th>
+                <th>تاریخ ثبت</th>
                 <th>عملیات</th>
               </tr>
             </thead>
@@ -90,7 +91,8 @@
                   </router-link>
                   <span v-else>--</span>
                 </td>
-                  <td>{{item.rate}}</td>
+                <td>{{item.rate}}</td>
+                <td>{{item.persian_created_at}}</td>
                 <td>
                   <v-btn color="primary" dens @click="getItem(item.id)">
                     ویرایش
@@ -123,12 +125,9 @@
           dark
         >ویرایش درخواست موزیک</v-toolbar>
         <v-card-text>
-
           <v-container>
-
             <v-row class="pt-3">
-
-              <v-col cols="6" class="pb-0">
+              <v-col cols="12" class="pb-0">
                   <v-select
                       label="تغییر وضعیت"
                       :items="order_statuses"
@@ -136,15 +135,44 @@
                       item-text="text"
                       item-value="value"
                       outlined
-                      clearable
                       dense
                   ></v-select>
               </v-col>
-
             </v-row>
-
+            <v-row v-show="form_data.condition_order !== 0">
+                <v-col cols="12" class="pb-2">
+                    <h3>تنظیمات ارسال اعلان</h3>
+                </v-col>
+                <v-col cols="12" class="pb-0">
+                    <v-text-field
+                        label="عنوان اعلان"
+                        v-model="form_data.notification_title"
+                        outlined
+                        dense
+                    ></v-text-field>
+                </v-col>
+                <v-col v-if="form_data.condition_order === 2" cols="12" class="pb-0">
+                    <v-select
+                        label="انتخاب متن اعلان"
+                        :items="reject_reasons"
+                        @change="setRejectReason()"
+                        v-model="reject_reason"
+                        item-text="text"
+                        item-value="value"
+                        outlined
+                        dense
+                    ></v-select>
+                </v-col>
+                <v-col cols="12" class="pb-0">
+                    <v-textarea
+                        label="متن اعلان"
+                        v-model="form_data.notification_text"
+                        outlined
+                        dense
+                    ></v-textarea>
+                </v-col>
+            </v-row>
           </v-container>
-
         </v-card-text>
 
         <v-card-actions class="justify-end">
@@ -165,6 +193,10 @@
 export default {
   name:'music_orders',
   data: () => ({
+    reject_reasons: [
+      {text: 'قانون 80 درصد',value: 1},
+      {text: 'قانون کلمات رکیک',value: 2},
+    ],
     order_statuses: [
       {text: 'بررسی نشده',value: 0},
       {text: 'قبول شده',value: 1},
@@ -173,6 +205,7 @@ export default {
     ],
     list:[],
     form_data:{},
+    reject_reason:'',
     filter:{},
     errors:{},
     sort_by_list: [
@@ -189,9 +222,36 @@ export default {
   watch:{
     current_page(){
       this.getList();
+    },
+    'form_data.condition_order': {
+      handler: function (after) {
+        if (after === 1) {
+            this.form_data.notification_title = "سفارش انجام شد";
+            this.form_data.notification_text = `کاربر محترم لیریکفا؛ سفارش موزیک شما با عنوان ${this.form_data.music_name} - ${this.form_data.singer_name} انجام شد و اکنون در اپلیکیشن لیریکفا در دسترس می‌باشد. \nبرای دسترسی به جدیدترین آهنگ های سفارشی, به صفحه اصلی نرم افزار «گزینه مشاهده بیشتر» مقابل «آهنگ های درخواستی» مراجعه کنید. `;
+        } else if (after === 2) {
+            this.form_data.notification_title = "سفارش شما رد شد";
+            this.form_data.notification_text = "";
+        } else if (after === 3) {
+            this.form_data.notification_title = "سفارش در اپ موجود می باشد";
+            this.form_data.notification_text = `کاربر محترم لیریکفا؛ سفارش موزیک شما با عنوان ${this.form_data.music_name} - ${this.form_data.singer_name} در اپلیکیشن لیریکفا موجود می‌باشد. \nشما می‌توانید از گزینه search هم از طریق نام خواننده و هم از طریق نام موزیک به آهنگ مورد نظر خود دسترسی پیدا کنید. `;
+        } else {
+            this.form_data.notification_title = "";
+            this.form_data.notification_text = "";
+        }
+      },
+      deep: true
     }
   },
   methods:{
+    setRejectReason(){
+      let text = "";
+      if (this.reject_reason === 1) {
+          text = `کاربر محترم لیریکفا؛ سفارش موزیک شما با عنوان ${this.form_data.music_name} - ${this.form_data.singer_name} رد شد. \nتوجه داشته باشید کمتر از 80% از متن موزیک, انگلیسی است و این موضوع خارج از قوانین اپلیکیشن می باشد.`;
+      } else if (this.reject_reason === 2) {
+          text = `کاربر محترم لیریکفا؛ سفارش موزیک شما با عنوان ${this.form_data.music_name} - ${this.form_data.singer_name} رد شد. \nمتن موزیک حاوی الفاظ و کلمات رکیک و غیر اخلاقی است و این موضوع خارج از قوانین اپلیکیشن می باشد.`;
+      }
+      this.form_data.notification_text = text;
+    },
     getList(){
       this.fetch_loading = true
       this.$http.post(`orders/list?page=${this.current_page}` , this.filter)

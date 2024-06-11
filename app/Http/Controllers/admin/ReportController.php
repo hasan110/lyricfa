@@ -3,72 +3,68 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\LikeSingerController;
 use App\Models\Report;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Morilog\Jalali\Jalalian;
 
 class ReportController extends Controller
 {
     public function addPanelReports(Request $request)
     {
-            $messsages = array(
-                'user_id.required' => 'user_id نمی تواند خالی باشد',
-                'title.required' => 'تعداد روزهای اشتراک نمی تواند خالی باشد',
-                'title.numeric' => 'تعداد روزهای اشتراک باید عدد صحیح باشد',
-                'description.required' => 'دلیل اشتراک نمی تواند خالی باشد',
-            );
+        $messages = array(
+            'user_id.required' => 'user_id نمی تواند خالی باشد',
+            'title.required' => 'تعداد روزهای اشتراک نمی تواند خالی باشد',
+            'title.numeric' => 'تعداد روزهای اشتراک باید عدد صحیح باشد',
+            'description.required' => 'دلیل اشتراک نمی تواند خالی باشد',
+        );
 
-            $validator = Validator::make($request->all(), [
-                'user_id' => 'required',
-                'title' => 'required|numeric',
-                'description' => 'required',
-            ], $messsages);
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+            'title' => 'required|numeric',
+            'description' => 'required',
+        ], $messages);
 
-            if ($validator->fails()) {
-                $arr = [
-                    'data' => null,
-                    'errors' => $validator->errors(),
-                    'message' => " شکست در وارد کردن اطلاعات",
-                ];
-                return response()->json($arr, 400);
-            }
-
-           $user = UserController::getUserById($request->user_id);
-            $daysSubscription = $request->title;
-            $expired = Carbon::parse($user->expired_at);
-            if ($expired > Carbon::now()) {
-                $user->expired_at = $expired->addDays($daysSubscription);
-            } else {
-                $user->expired_at = Carbon::now()->addDays($daysSubscription);
-            }
-
-            unset($user['days_remain']);
-            $user->save();
-
-            $report = new Report();
-            $report->user_id = $request->user_id;
-            $report->ref_id = 0;
-            $report->val_money = 0 ;
-            $report->id_zarin = 0;
-            $report->description = $request->description;
-            $report->title = $request->title;
-            $report->type = 1;
-            $report->save();
-
-
+        if ($validator->fails()) {
             $arr = [
                 'data' => null,
-                'errors' => null,
-                'message' => " اکانت کاربر با موفقیت شارژ شد",
+                'errors' => $validator->errors(),
+                'message' => " شکست در وارد کردن اطلاعات",
             ];
-            return response()->json($arr, 200);
+            return response()->json($arr, 400);
+        }
 
+        $user = UserController::getUserById($request->user_id);
+        $daysSubscription = $request->title;
+        $expired = Carbon::parse($user->expired_at);
+        if ($expired > Carbon::now()) {
+            $user->expired_at = $expired->addDays($daysSubscription);
+        } else {
+            $user->expired_at = Carbon::now()->addDays($daysSubscription);
+        }
+
+        unset($user['days_remain']);
+        $user->save();
+
+        $report = new Report();
+        $report->user_id = $request->user_id;
+        $report->ref_id = 0;
+        $report->val_money = 0 ;
+        $report->id_zarin = 0;
+        $report->description = $request->description;
+        $report->title = $request->title;
+        $report->type = 1;
+        $report->save();
+
+        $arr = [
+            'data' => null,
+            'errors' => null,
+            'message' => " اکانت کاربر با موفقیت شارژ شد",
+        ];
+        return response()->json($arr);
     }
-
-
 
     public function reportsAdminList(Request $request)
     {
@@ -77,15 +73,15 @@ class ReportController extends Controller
         foreach ($list as $item) {
             unset($item['ref_id'],$item['val_money'],$item['id_zarin']);
             $item->user = UserController::getUserById($item->user_id);
+            $item->persian_created_at = Jalalian::forge($item->created_at)->format('%Y-%m-%d H:i');
         }
 
         $response = [
             'data' => $list,
-            'errors' => [
-            ],
+            'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
         ];
-        return response()->json($response, 200);
+        return response()->json($response);
     }
 
     public function reportsUserList(Request $request)
@@ -109,6 +105,7 @@ class ReportController extends Controller
         foreach ($list as $item) {
             unset($item['title'],$item['description']);
             $item->user = UserController::getUserById($item->user_id);
+            $item->persian_created_at = Jalalian::forge($item->created_at)->format('%Y-%m-%d H:i');
         }
 
         $response = [
@@ -117,19 +114,19 @@ class ReportController extends Controller
             ],
             'message' => "اطلاعات با موفقیت گرفته شد",
         ];
-        return response()->json($response, 200);
+        return response()->json($response);
     }
 
     public function addGroupSubscription(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'hours.required' => 'تعداد ساعت تمدید اشتراک نمیتواند خالی باشد',
             'hours.numeric' => 'تعداد ساعت تمدید اشتراک باید عدد صحیح باشد',
         );
 
         $validator = Validator::make($request->all(), [
             'hours' => 'required|numeric'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
             return response()->json([
@@ -152,6 +149,5 @@ class ReportController extends Controller
             'message' => " تمدید اشتراک کاربران با موفقیت انجام شد",
         ];
         return response()->json($arr);
-
     }
 }

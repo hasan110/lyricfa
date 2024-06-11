@@ -2,7 +2,7 @@ import VueCookies from 'vue-cookies';
 import axios from 'axios';
 
 const Axios = axios.create({
-    baseURL: 'http://localhost:8000/',
+    baseURL: 'http://lyricfa.local/',
     // baseURL: 'https://panel.lyricfa.app/',
     headers: {'ApiToken': VueCookies.get('admin_token')}
 });

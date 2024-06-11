@@ -78,6 +78,7 @@
             label="تصویر بنر"
             v-model="form_data.banner"
             accept="image/*"
+            persistent-hint hint="فرمت تصویر باید jpg و سایز آن 575*1024 باشد"
           ></v-file-input>
         </v-col>
 

@@ -68,6 +68,7 @@
                 <th>نام</th>
                 <th>شماره تلفن</th>
                 <th>اشتراک</th>
+                <th>تاریخ ثبت نام</th>
                 <th>جزییات</th>
               </tr>
             </thead>
@@ -87,6 +88,7 @@
                 <td>{{ item.full_name }}</td>
                 <td>{{ item.phone_number }}</td>
                 <td><div v-html="item.expire"></div></td>
+                  <td>{{ item.persian_created_at }}</td>
                 <td>
                   <v-btn color="primary" dens>
                     <router-link :to="{ name:'user' , params:{ id:item.id } }">
