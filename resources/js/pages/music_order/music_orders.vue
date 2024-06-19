@@ -139,7 +139,7 @@
                   ></v-select>
               </v-col>
             </v-row>
-            <v-row v-show="form_data.condition_order !== 0">
+            <v-row v-show="parseInt(form_data.condition_order) !== 0">
                 <v-col cols="12" class="pb-2">
                     <h3>تنظیمات ارسال اعلان</h3>
                 </v-col>

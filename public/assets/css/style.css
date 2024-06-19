@@ -155,3 +155,18 @@
     line-height: 1.8;
     white-space: break-spaces;
 }
+
+.red-mark {
+    background: red;
+    color: #fff !important;
+}
+.yellow-mark {
+    background: #ffb700;
+    color: #ff0000;
+}
+.new-word {
+    cursor: pointer;
+}
+.inline-text-area {
+    width: 100%;background: #fff;padding: .5rem;border: #aaaaaa;outline: none;
+}

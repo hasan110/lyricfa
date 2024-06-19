@@ -40,6 +40,8 @@ import notifications from '../pages/notifications/notifications.vue';
 import words from '../pages/dictionary/words.vue';
 import create_word from '../pages/dictionary/create_word.vue';
 import edit_word from '../pages/dictionary/edit_word.vue';
+import replace_texts from '../pages/dictionary/replace_texts.vue';
+import replace_rules from '../pages/dictionary/replace_rules.vue';
 
 import idioms from '../pages/idioms/idioms.vue';
 import create_idiom from '../pages/idioms/create_idiom.vue';
@@ -100,6 +102,8 @@ const allUrl = [
     { path: '/words', name: 'words', component: words },
     { path: '/words/create', name: 'create_word', component: create_word },
     { path: '/words/edit/:id', name: 'edit_word', component: edit_word },
+    { path: '/words/replace-texts/:type/:id', name: 'replace_texts', component: replace_texts },
+    { path: '/words/replace-rules', name: 'replace_rules', component: replace_rules },
 
     { path: '/idioms', name: 'idioms', component: idioms },
     { path: '/idioms/create', name: 'create_idiom', component: create_idiom },

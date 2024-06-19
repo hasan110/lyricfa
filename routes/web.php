@@ -21,6 +21,7 @@ use App\Http\Controllers\admin\IdiomController;
 use App\Http\Controllers\admin\WordController;
 use App\Http\Controllers\admin\GrammerController;
 use App\Http\Controllers\admin\MapController;
+use App\Http\Controllers\admin\ReplaceController;
 
 Route::get('/get_id', [MusicController::class, 'getGuessId']);
 
@@ -149,14 +150,25 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
         Route::get( "/types",  [WordController::class, "getTypes"])->name('words/types');
     });
 
+    Route::prefix('replace')->group(function () {
+        Route::post('/process-text', [ReplaceController::class, 'processText'])->name('replace/process_text');
+        Route::post('/apply',        [ReplaceController::class, 'apply'])->name('replace/apply');
+    });
+
+    Route::prefix('replace_rule')->group(function () {
+        Route::post('/list',   [ReplaceController::class, 'ruleList'])->name('replace_rule/list');
+        Route::post("/create", [ReplaceController::class, "createRule"])->name('replace_rule/create');
+        Route::post("/remove", [ReplaceController::class, "removeRule"])->name('replace_rule/remove');
+    });
+
     Route::prefix('grammers')->group(function () {
-        Route::post('/list', [GrammerController::class, 'GrammersList'])->name('grammers/list');
+        Route::post('/list',   [GrammerController::class, 'GrammersList'])->name('grammers/list');
         Route::post("/single", [GrammerController::class, "getGrammer"])->name('grammers/single');
         Route::post("/update", [GrammerController::class, "updateGrammer"])->name('grammers/update');
         Route::post("/create", [GrammerController::class, "createGrammer"])->name('grammers/create');
         Route::post("/remove", [GrammerController::class, "removeGrammer"])->name('grammers/remove');
         Route::prefix('rules')->group(function () {
-            Route::post('/list', [GrammerController::class, 'GrammerRulesList'])->name('grammer_rules/list');
+            Route::post('/list',   [GrammerController::class, 'GrammerRulesList'])->name('grammer_rules/list');
             Route::post('/create', [GrammerController::class, 'createGrammerRule'])->name('grammer_rules/create');
             Route::post('/update', [GrammerController::class, 'updateGrammerRule'])->name('grammer_rules/update');
             Route::post('/remove', [GrammerController::class, 'removeGrammerRule'])->name('grammer_rules/remove');

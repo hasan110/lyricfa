@@ -168,6 +168,7 @@ export default {
   name:'create_word',
   data: () => ({
     form_data:{
+      english_word:'',
       definitions: [
           {
               definition:'',
@@ -270,7 +271,13 @@ export default {
       });
     }
   },
-  beforeMount(){
+    mounted() {
+      const word = this.$route.query.word;
+      if (word) {
+          this.form_data.english_word = word;
+      }
+    },
+    beforeMount(){
     this.checkAuth()
   }
 }
