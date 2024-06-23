@@ -26,6 +26,7 @@
                         label="جست و جو"
                         type="text"
                         @click:append-outer="reset()"
+                        @keyup.enter="reset()"
                     ></v-text-field>
 
                 </v-col>
@@ -239,47 +240,47 @@ export default {
         },
         getReplaceRulesList(){
             this.$http.post(`replace_rule/list?page=1` , this.rules_filter)
-            .then(res => {
-                this.replace_rules = res.data.data.data;
-            })
-            .catch( () => {
-            });
+                .then(res => {
+                    this.replace_rules = res.data.data.data;
+                })
+                .catch( () => {
+                });
         },
         getList(add_to_list = false){
             this.fetch_loading = true
             this.$http.post(`replace_rule/list?page=${this.current_page}` , this.filter)
-            .then(res => {
-                const response = res.data.data;
-                this.list = response.data;
-                this.last_page = response.last_page;
-                this.fetch_loading = false
+                .then(res => {
+                    const response = res.data.data;
+                    this.list = response.data;
+                    this.last_page = response.last_page;
+                    this.fetch_loading = false
 
-                if (add_to_list) {
-                    this.replace_rules = response.data;
-                }
-            })
-            .catch( () => {
-                this.fetch_loading = false
-            });
+                    if (add_to_list) {
+                        this.replace_rules = response.data;
+                    }
+                })
+                .catch( () => {
+                    this.fetch_loading = false
+                });
         },
         deleteRule(rule_id){
             if (confirm('آیا از حذف این مورد اطمینان دارید؟')) {
                 this.$http.post(`replace_rule/remove` , {id:rule_id})
-                .then( () => {
-                    this.reset(true)
-                })
-                .catch( err => {
-                    const e = err.response.data
-                    if(e.errors){ this.errors = e.errors }
-                    else if(e.message){
-                        this.$fire({
-                            title: "خطا",
-                            text: e.message,
-                            type: "error",
-                            timer: 5000
-                        })
-                    }
-                });
+                    .then( () => {
+                        this.reset(true)
+                    })
+                    .catch( err => {
+                        const e = err.response.data
+                        if(e.errors){ this.errors = e.errors }
+                        else if(e.message){
+                            this.$fire({
+                                title: "خطا",
+                                text: e.message,
+                                type: "error",
+                                timer: 5000
+                            })
+                        }
+                    });
             }
         },
         saveReplaceRule(){
@@ -330,6 +331,7 @@ export default {
     },
     beforeMount(){
         this.checkAuth()
+        this.setPageTitle('قوانین جایگذاری عبارات')
     }
 }
 </script>

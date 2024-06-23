@@ -400,6 +400,7 @@ export default {
     },
     beforeMount(){
         this.checkAuth()
+        this.setPageTitle('ویرایش متن موزیک')
     }
 }
 </script>

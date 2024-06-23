@@ -161,50 +161,24 @@ export default {
         getIdiom(id){
             this.$store.commit('SHOW_APP_LOADING' , 1)
             this.$http.post(`idioms/single` , {id:id})
-            .then(res => {
-                this.form_data = res.data.data
-                this.$store.commit('SHOW_APP_LOADING' , 0)
-            })
-            .catch( () => {
-                this.$store.commit('SHOW_APP_LOADING' , 0)
-                this.$router.replace({name:'idioms'});
-            });
+                .then(res => {
+                    this.form_data = res.data.data
+                    this.$store.commit('SHOW_APP_LOADING' , 0)
+                })
+                .catch( () => {
+                    this.$store.commit('SHOW_APP_LOADING' , 0)
+                    this.$router.replace({name:'idioms'});
+                });
         },
         editIdiom(){
             this.loading = true;
             this.$http.post(`idioms/update` , this.form_data)
-            .then(res => {
-                this.form_data = {
-                    idiom_definitions: [],
-                    idiom_definition_examples: []
-                };
-                this.loading = false;
-                this.$fire({
-                    title: "موفق",
-                    text: res.data.message,
-                    type: "success",
-                    timer: 5000
-                })
-                this.$router.push({name:'idioms'})
-            })
-            .catch( err => {
-                this.loading = false;
-                const e = err.response.data
-                if(e.errors){ this.errors = e.errors }
-                else if(e.message){
-                    this.$fire({
-                        title: "خطا",
-                        text: e.message,
-                        type: "error",
-                        timer: 5000
-                    })
-                }
-            });
-        },
-        deleteIdiom(){
-            if (confirm('باحذف این اصطلاح تمامی معانی و مثال های مرتبط باآن حذف خواهد شد. \n \n از حذف اصطلاح اطمینان دارید؟')){
-                this.$http.post(`idioms/remove` , {id:this.form_data.id})
                 .then(res => {
+                    this.form_data = {
+                        idiom_definitions: [],
+                        idiom_definition_examples: []
+                    };
+                    this.loading = false;
                     this.$fire({
                         title: "موفق",
                         text: res.data.message,
@@ -218,21 +192,48 @@ export default {
                     const e = err.response.data
                     if(e.errors){ this.errors = e.errors }
                     else if(e.message){
-
                         this.$fire({
                             title: "خطا",
                             text: e.message,
                             type: "error",
                             timer: 5000
                         })
-
                     }
                 });
+        },
+        deleteIdiom(){
+            if (confirm('باحذف این اصطلاح تمامی معانی و مثال های مرتبط باآن حذف خواهد شد. \n \n از حذف اصطلاح اطمینان دارید؟')){
+                this.$http.post(`idioms/remove` , {id:this.form_data.id})
+                    .then(res => {
+                        this.$fire({
+                            title: "موفق",
+                            text: res.data.message,
+                            type: "success",
+                            timer: 5000
+                        })
+                        this.$router.push({name:'idioms'})
+                    })
+                    .catch( err => {
+                        this.loading = false;
+                        const e = err.response.data
+                        if(e.errors){ this.errors = e.errors }
+                        else if(e.message){
+
+                            this.$fire({
+                                title: "خطا",
+                                text: e.message,
+                                type: "error",
+                                timer: 5000
+                            })
+
+                        }
+                    });
             }
         }
     },
     beforeMount(){
         this.checkAuth()
+        this.setPageTitle('ویرایش اصطلاح')
     },
     mounted() {
         const idiom_id = this.$route.params.id;

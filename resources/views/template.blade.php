@@ -6,9 +6,9 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>LyricFa | Admin</title>
+    <title>لیریکفا | پنل مدیریت</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{asset('assets/css/style.css')}}?v=14">
+    <link rel="stylesheet" href="{{asset('assets/css/style.css')}}?v=15">
     {{-- <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet"> --}}
 
 </head>
@@ -18,7 +18,7 @@
 </div>
 
 
-<script src="{{asset('assets/js/vue.js')}}?v=14"></script>
+<script src="{{asset('assets/js/vue.js')}}?v=15"></script>
 
 </body>
 </html>

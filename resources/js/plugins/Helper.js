@@ -52,6 +52,9 @@ Plugin.install = function(Vue) {
         if (evt.target.value.length >= 11) {
           evt.preventDefault();
         }
+      },
+      setPageTitle(title){
+        document.title = `لیریکفا | ${title}`;
       }
     }
 

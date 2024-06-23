@@ -167,12 +167,12 @@ export default {
             this.$http.post(`sliders/single` , {id : this.slider_id})
                 .then(res => {
                     this.form_data = res.data.data
-                this.$store.commit('SHOW_APP_LOADING' , 0)
+                    this.$store.commit('SHOW_APP_LOADING' , 0)
                 })
                 .catch( err => {
                     this.loading = false
                     const e = err.response.data
-                this.$store.commit('SHOW_APP_LOADING' , 0)
+                    this.$store.commit('SHOW_APP_LOADING' , 0)
                     // if(e.errors){ this.errors = e.errors }
                     // else if(e.message){
 
@@ -193,6 +193,7 @@ export default {
     },
     beforeMount(){
         this.checkAuth()
+        this.setPageTitle('ویرایش اسلایدر')
     }
 }
 </script>

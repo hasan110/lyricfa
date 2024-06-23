@@ -18,8 +18,13 @@ class WordController extends Controller
         $list = Word::with('word_definitions');
 
         if ($request->search_key) {
-            $list = $list->where('english_word', 'LIKE', "%{$request->search_key}%")->
-            orWhere('pronunciation', 'LIKE', "%{$request->search_key}%");
+            if (isset($request->equals) && $request->equals) {
+                $list = $list->where('english_word', '=', $request->search_key)->
+                orWhere('pronunciation', '=', $request->search_key);
+            } else {
+                $list = $list->where('english_word', 'LIKE', "%{$request->search_key}%")->
+                orWhere('pronunciation', 'LIKE', "%{$request->search_key}%");
+            }
         }
         if ($request->sort_by) {
             switch ($request->sort_by) {
@@ -181,13 +186,15 @@ class WordController extends Controller
             $word_definition->definition = $definition['definition'];
             $word_definition->save();
 
-            foreach ($definition['word_definition_examples'] as $definition_example)
-            {
-                $word_definition_example = new WordDefinitionExample();
-                $word_definition_example->word_definition_id = $word_definition->id;
-                $word_definition_example->phrase = $definition_example['phrase'];
-                $word_definition_example->definition = $definition_example['definition'];
-                $word_definition_example->save();
+            if (isset($definition['word_definition_examples'])) {
+                foreach ($definition['word_definition_examples'] as $definition_example)
+                {
+                    $word_definition_example = new WordDefinitionExample();
+                    $word_definition_example->word_definition_id = $word_definition->id;
+                    $word_definition_example->phrase = $definition_example['phrase'];
+                    $word_definition_example->definition = $definition_example['definition'];
+                    $word_definition_example->save();
+                }
             }
         }
 

@@ -4,11 +4,6 @@
         <div class="page-head">
             <div class="titr">پردازش متن</div>
             <div class="back">
-                <!--<router-link :to="{ name : 'words' }">بازگشت-->
-                <!--    <v-icon>-->
-                <!--        mdi-chevron-left-->
-                <!--    </v-icon>-->
-                <!--</router-link>-->
             </div>
         </div>
 
@@ -46,7 +41,7 @@
                     <v-simple-table
                         fixed-header
                         height="100%"
-                        style="height:100%"
+                        style="height:100%;direction: ltr;"
                     >
                         <template v-slot:default>
                             <thead>
@@ -174,7 +169,7 @@
                     <v-simple-table
                         fixed-header
                         height="100%"
-                        style="height:100%"
+                        style="height:100%;direction: ltr;"
                     >
                         <template v-slot:default>
                             <thead>
@@ -256,25 +251,25 @@ export default {
                 type:this.type,
                 page:this.current_page,
             })
-            .then(res => {
-                const response = res.data.data;
-                this.list = response.data;
-                this.last_page = response.last_page;
-                this.fetch_loading = false
-            })
-            .catch( err => {
-                this.fetch_loading = false;
-                const e = err.response.data
-                if(e.errors){ this.errors = e.errors }
-                else if(e.message){
-                    this.$fire({
-                        title: "خطا",
-                        text: e.message,
-                        type: "error",
-                        timer: 5000
-                    })
-                }
-            });
+                .then(res => {
+                    const response = res.data.data;
+                    this.list = response.data;
+                    this.last_page = response.last_page;
+                    this.fetch_loading = false
+                })
+                .catch( err => {
+                    this.fetch_loading = false;
+                    const e = err.response.data
+                    if(e.errors){ this.errors = e.errors }
+                    else if(e.message){
+                        this.$fire({
+                            title: "خطا",
+                            text: e.message,
+                            type: "error",
+                            timer: 5000
+                        })
+                    }
+                });
         },
         applyChanges(text_type , untranslated = false){
             let list = [];
@@ -316,33 +311,33 @@ export default {
                 apply_on:text_type,
                 texts:list,
             })
-            .then( () => {
-                let route_name;
-                if (this.type === 'music') {
-                    route_name = 'edit_music_text';
-                } else {
-                    route_name = 'edit_movie_text';
-                }
-                this.$router.push({
-                    name:route_name,
-                    params:{
-                        id:this.id
+                .then( () => {
+                    let route_name;
+                    if (this.type === 'music') {
+                        route_name = 'edit_music_text';
+                    } else {
+                        route_name = 'edit_movie_text';
+                    }
+                    this.$router.push({
+                        name:route_name,
+                        params:{
+                            id:this.id
+                        }
+                    });
+                })
+                .catch( err => {
+                    this.edit_loading = false;
+                    const e = err.response.data
+                    if(e.errors){ this.errors = e.errors }
+                    if(e.message){
+                        this.$fire({
+                            title: "خطا",
+                            text: e.message,
+                            type: "error",
+                            timer: 5000
+                        })
                     }
                 });
-            })
-            .catch( err => {
-                this.edit_loading = false;
-                const e = err.response.data
-                if(e.errors){ this.errors = e.errors }
-                if(e.message){
-                    this.$fire({
-                        title: "خطا",
-                        text: e.message,
-                        type: "error",
-                        timer: 5000
-                    })
-                }
-            });
         },
         reset(){
             this.current_page = 1
@@ -360,6 +355,7 @@ export default {
     },
     beforeMount(){
         this.checkAuth()
+        this.setPageTitle('پردازش متن')
     }
 }
 </script>

@@ -18,7 +18,8 @@ class FilmController extends Controller
         $films = Film::orderBy('id', "DESC")->whereIn('type', [ 1, 2]);
         $films = $films->where(function ($query) use ($search_key) {
             $query->where('english_name', 'like', '%' . $search_key . '%')
-                ->orWhere('persian_name', 'like', '%' . $search_key . '%');
+                ->orWhere('persian_name', 'like', '%' . $search_key . '%')
+                ->orWhere('id', '=', $search_key);
         })->paginate(25);
         $response = [
             'data' => $films,

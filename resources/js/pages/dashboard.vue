@@ -175,6 +175,7 @@ export default {
     },
     beforeMount(){
         this.checkAuth()
+        this.setPageTitle('داشبورد')
     },
     mounted(){
         this.getStatistics()

@@ -22,7 +22,8 @@ class SingerController extends Controller
 
         if ($request->search_key) {
             $list = $list->where('english_name', 'LIKE', "%{$request->search_key}%")->
-            orWhere('persian_name', 'LIKE', "%{$request->search_key}%");
+            orWhere('persian_name', 'LIKE', "%{$request->search_key}%")->
+            orWhere('id', '=', $request->search_key);
         }
         if ($request->sort_by) {
             switch ($request->sort_by) {
@@ -42,6 +43,11 @@ class SingerController extends Controller
             }
         }
         $list = $list->paginate(50);
+
+        if ($request->no_page) {
+            $new_list = Singer::whereIn('id', $request->singer_ids ?? [1])->get();
+            $list = $list->merge($new_list);
+        }
 
         foreach ($list as $item) {
 

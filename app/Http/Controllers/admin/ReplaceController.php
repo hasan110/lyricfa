@@ -148,7 +148,7 @@ class ReplaceController extends Controller
     }
     private function findUntranslatedWords(Text &$text): void
     {
-        $separateds = preg_split("/[- ,?;_!.}{)(\r]+/" , $text->text_english);
+        $separateds = preg_split("/[, ?;_!.}{)(\r]+/" , $text->text_english);
         $found_words = [];
         foreach ($separateds as $key => $separated) {
             if (!$separated) continue;
@@ -181,7 +181,11 @@ class ReplaceController extends Controller
         if (count($found_words) !== 0) {
             $text->untranslated_words_changed = true;
             foreach ($found_words as $found_word) {
-                $text->untranslated_words_text = str_replace($found_word , '<a href="/words/create?word='.$found_word.'" target="_blank" class="red-mark new-word">'.$found_word.'</a>' , $text->text_english);
+                $text->untranslated_words_text = str_replace(
+                    $found_word,
+                    '<a href="/words/create?word='.$found_word.'" target="_blank" class="red-mark new-word">'.$found_word.'</a>',
+                    $text->text_english
+                );
             }
         } else {
             $text->untranslated_words_text = $text->text_english;

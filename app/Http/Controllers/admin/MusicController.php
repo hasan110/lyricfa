@@ -24,7 +24,7 @@ class MusicController extends Controller
         if ($request->search_key) {
             $musics = $musics->where('name', 'LIKE', "%{$request->search_key}%")->
             orWhere('persian_name', 'LIKE', "%{$request->search_key}%")->
-            orWhere('id', 'LIKE', "%{$request->search_key}%");
+            orWhere('id', '=', $request->search_key);
         }
         if ($request->sort_by) {
             switch ($request->sort_by) {
@@ -137,7 +137,7 @@ class MusicController extends Controller
         }
         if ($request->id_third_singer) {
             $music->singers = $music->singers . "," . $this->set4digit($request->id_third_singer);
-        } 
+        }
         if ($request->id_fourth_singer) {
             $music->singers = $music->singers . "," . $this->set4digit($request->id_fourth_singer);
         }
@@ -243,10 +243,10 @@ class MusicController extends Controller
         $music->singers = $this->set4digit($request->id_first_singer);
         if ($request->id_second_singer) {
             $music->singers = $music->singers . "," . $this->set4digit($request->id_second_singer);
-        } 
+        }
         if ($request->id_third_singer) {
             $music->singers = $music->singers . "," . $this->set4digit($request->id_third_singer);
-        } 
+        }
         if ($request->id_fourth_singer) {
             $music->singers = $music->singers . "," . $this->set4digit($request->id_fourth_singer);
         }

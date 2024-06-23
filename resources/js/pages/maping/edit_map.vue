@@ -119,12 +119,12 @@ export default {
         getMap(map_id){
             this.$store.commit('SHOW_APP_LOADING' , 1)
             this.$http.post(`maps/single` , {id:map_id})
-            .then(res => {
-                this.form_data = res.data.data
-            })
-            .catch( err => {
-                this.$router.push({name:'maps'})
-            }).finally(()=>{
+                .then(res => {
+                    this.form_data = res.data.data
+                })
+                .catch( err => {
+                    this.$router.push({name:'maps'})
+                }).finally(()=>{
                 this.$store.commit('SHOW_APP_LOADING' , 0)
             });
         },
@@ -140,6 +140,7 @@ export default {
     },
     beforeMount(){
         this.checkAuth()
+        this.setPageTitle('ویرایش مپ لغت')
     },
     mounted() {
         const map_id = this.$route.params.id;

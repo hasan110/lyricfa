@@ -157,30 +157,30 @@ export default {
             data.extension ? form.append('extension', data.extension) : '';
 
             this.$http.post(`movies/update` , form)
-            .then(res => {
-                this.form_data = {};
+                .then(res => {
+                    this.form_data = {};
 
-                this.$fire({
-                    title: "موفق",
-                    text: res.data.message,
-                    type: "success",
-                    timer: 5000
+                    this.$fire({
+                        title: "موفق",
+                        text: res.data.message,
+                        type: "success",
+                        timer: 5000
+                    })
+
+                    this.$router.push({name:'movies'})
+
                 })
+                .catch( err => {
+                    this.loading = false
+                    const e = err.response.data
 
-                this.$router.push({name:'movies'})
-
-            })
-            .catch( err => {
-                this.loading = false
-                const e = err.response.data
-
-                this.$fire({
-                    title: "خطا",
-                    text: e.message,
-                    type: "error",
-                    timer: 5000
-                })
-            });
+                    this.$fire({
+                        title: "خطا",
+                        text: e.message,
+                        type: "error",
+                        timer: 5000
+                    })
+                });
         }
     },
     mounted(){
@@ -189,6 +189,7 @@ export default {
     },
     beforeMount(){
         this.checkAuth()
+        this.setPageTitle('ویرایش فیلم')
     }
 }
 </script>

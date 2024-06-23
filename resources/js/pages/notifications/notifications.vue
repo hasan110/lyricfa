@@ -26,6 +26,7 @@
                         label="جست و جو"
                         type="text"
                         @click:append-outer="reset()"
+                        @keyup.enter="reset()"
                     ></v-text-field>
 
                 </v-col>
@@ -401,6 +402,7 @@ export default {
     },
     beforeMount(){
         this.checkAuth()
+        this.setPageTitle('نوتیفیکیشن ها')
     }
 }
 </script>

@@ -161,13 +161,10 @@ class FilmTextController extends Controller
 
             foreach ($request->texts as $item) {
                 $textEnglish = $item["text_english"];
-                $textPersian = $item["text_persian"];
+                $textPersian = $item["text_persian"] ?? '';
                 $startTime = $item["start_time"];
                 $endTime = $item["end_time"];
-                if(isset($item["comments"]))
-                $comments = $item["comments"];
-                else
-                $comments = "";
+                $comments = $item["comments"] ?? '';
 
                 $text = new FilmText();
                 $text->text_english = $textEnglish;

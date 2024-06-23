@@ -2,7 +2,12 @@
     <div>
 
         <div class="page-head">
-            <div class="titr">لغات</div>
+            <div class="titr">
+                لغات
+                <v-chip :to="{ name : 'maps' }" small class="mr-2">مپ لغات</v-chip>
+                <v-chip :to="{ name : 'idioms' }" small class="mr-1">اصطلاحات</v-chip>
+                <v-chip :to="{ name : 'grammers' }" small class="mr-1">گرامرها</v-chip>
+            </div>
             <div class="back">
                 <router-link :to="{ name : 'dashboard' }">بازگشت
                     <v-icon>
@@ -26,10 +31,12 @@
                         label="جست و جو"
                         type="text"
                         @click:append-outer="reset()"
+                        @keyup.enter="reset()"
                     ></v-text-field>
 
                 </v-col>
                 <v-col cols="4" class="pb-0">
+                    <v-checkbox v-model="filter.equals" class="mt-1" label="برابر باشد"></v-checkbox>
                 </v-col>
                 <v-col cols="4" class="pb-0">
                     <v-select
@@ -128,7 +135,9 @@ export default {
         list:[],
         form_data:{},
         edit_form_data:{},
-        filter:{},
+        filter:{
+            equals:true
+        },
         errors:{},
         sort_by_list: [
             {text: 'اول به آخر',value: 'word_asc'},
@@ -179,6 +188,7 @@ export default {
     },
     beforeMount(){
         this.checkAuth()
+        this.setPageTitle('لغات')
     }
 }
 </script>

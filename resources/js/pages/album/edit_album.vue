@@ -218,6 +218,7 @@ export default {
     },
     beforeMount(){
         this.checkAuth()
+        this.setPageTitle('ویرایش آلبوم')
     }
 }
 </script>

@@ -78,8 +78,13 @@ class IdiomController extends Controller
         $list = Idiom::with('idiom_definitions');
 
         if ($request->search_key) {
-            $list = $list->where('base', 'LIKE', "%{$request->search_key}%")->
-            orWhere('phrase', 'LIKE', "%{$request->search_key}%");
+            if (isset($request->equals) && $request->equals) {
+                $list = $list->where('base', '=', $request->search_key)->
+                orWhere('phrase', '=', $request->search_key);
+            } else {
+                $list = $list->where('base', 'LIKE', "%{$request->search_key}%")->
+                orWhere('phrase', 'LIKE', "%{$request->search_key}%");
+            }
         }
         if ($request->sort_by) {
             switch ($request->sort_by) {

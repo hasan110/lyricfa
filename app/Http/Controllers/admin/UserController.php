@@ -159,7 +159,8 @@ class UserController extends Controller
         $users = User::query();
 
         if($request->search_key){
-            $users = $users->where('phone_number', 'LIKE', "%{$request->search_key}%");
+            $users = $users->where('phone_number', 'LIKE', "%{$request->search_key}%")
+                ->orWhere('id', '=', $request->search_key);
         }
         if($request->sort_by){
             switch ($request->sort_by){
