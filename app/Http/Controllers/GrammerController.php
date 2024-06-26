@@ -64,7 +64,7 @@ class GrammerController extends Controller
         }
 
         $phrase = $request->phrase;
-        $separateds = preg_split("/[- ,?;_!.}{)(]+/" , $phrase);
+        $separateds = preg_split("/[- ,?;_\"!.}{)(]+/" , $phrase);
         $separated_words = [];
         foreach ($separateds as $separated){
             if(strlen($separated) > 0){
@@ -164,7 +164,7 @@ class GrammerController extends Controller
     {
         $type = $rule->type;
         $words = $rule->words;
-        $separates = preg_split("/[- ,?;_!.}{)(]+/" , $words);
+        $separates = preg_split("/[- ,?;_\"!.}{)(]+/" , $words);
         if ($type == 'search_exact') {
             if ($this->checkIfContains($words , $phrase)) {
                 return true;

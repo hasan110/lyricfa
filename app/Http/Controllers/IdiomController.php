@@ -107,7 +107,7 @@ class IdiomController extends Controller
             $word_base = $word_base->ci_base;
         }
 
-        $seprateds = preg_split("/[- ,?;_!.}{)(]+/" , $phrase);
+        $seprateds = preg_split("/[- ,?;_\"!.}{)(]+/" , $phrase);
         $seprated_words = [];
         foreach ($seprateds as $seprated){
             if(strlen($seprated) > 0){
@@ -146,7 +146,7 @@ class IdiomController extends Controller
         foreach ($word_idioms as $key => $word_idiom)
         {
             $word_idiom->rate = 0;
-            $seprated_phrase = preg_split("/[- ,?;_!.}{)(]+/" , $word_idiom->phrase);
+            $seprated_phrase = preg_split("/[- ,?;_\"!.}{)(]+/" , $word_idiom->phrase);
             $phrase_seprated_words = [];
             foreach ($seprated_phrase as $seprated){
                 if(strlen($seprated) > 0 && !in_array($seprated , $phrase_seprated_words)){
@@ -178,7 +178,7 @@ class IdiomController extends Controller
         foreach ($word_base_idioms as $key => $word_base_idiom)
         {
             $word_base_idiom->rate = 0;
-            $base_seprated_phrase = preg_split("/[- ,?;_!.}{)(]+/" , $word_base_idiom->phrase);
+            $base_seprated_phrase = preg_split("/[- ,?;_\"!.}{)(]+/" , $word_base_idiom->phrase);
             $base_phrase_seprated_words = [];
             foreach ($base_seprated_phrase as $base_seprated){
                 if(strlen($base_seprated) > 0 && !in_array($base_seprated , $base_phrase_seprated_words)){

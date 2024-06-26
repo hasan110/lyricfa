@@ -150,7 +150,7 @@ class FilmTextController extends Controller
     public function getTimesForPagin(Request $request)
     {
         $id_film = $request->id_film;
-        $films = FilmText::where('id_film', '=', $id_film)->orderBy("id")->get();//1
+        $films = FilmText::where('id_film', '=', $id_film)->orderBy("id")->get()->toArray();//1
 
         if (!count($films)) {
             return response()->json([
@@ -160,35 +160,20 @@ class FilmTextController extends Controller
             ], 400);
         }
 
-        $ok = [];
-        $x = [];
-        foreach ($films as $index => $film){
-            // $film->start_time = $this->getStartTime($film->start_end_time);
-            // $film->end_time = $this->getEndTime($film->start_end_time);
-            if($index % 25 == 0){
-                $start_time = $film->start_time;
-            }
-            if($index % 25 == 24){
-                $end_time= $film->end_time;
-            }
-            if(isset($start_time) && isset($end_time) ){
-                $x["start_time"] = $start_time;
-                $x["end_time"] = $end_time;
-                $ok[$index / 25 ] = $x;
-                $x = null;
-                $start_time = null;
-                $end_time = null;
+        $chunked = array_chunk($films, 25);
+        $result = [];
+
+        foreach ($chunked as $item) {
+            if (count($item)) {
+                $result[] = [
+                    "start_time" => $item[0]["start_time"],
+                    "end_time" => end($item)["end_time"]
+                ];
             }
         }
 
-        $size = $films->count();
-        $remain = $size % 25;
-        $x["start_time"] = $films[$size - $remain + 1]['start_time'];
-        $x["end_time"] =  $films[$size - 1]['end_time'];
-        $ok[$size / 25] = $x;
-
         $arr = [
-            'data' => $ok,
+            'data' => $result,
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
         ];

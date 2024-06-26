@@ -79,7 +79,9 @@ export default {
     name:'create_idiom',
     data: () => ({
         map_reasons_filter:{},
-        form_data:{},
+        form_data:{
+            word: '',
+        },
         errors:{},
         map_reasons:[],
         loading: false,
@@ -131,6 +133,10 @@ export default {
         this.setPageTitle('ایجاد مپ لغت')
     },
     mounted() {
+        const word = this.$route.query.word;
+        if (word) {
+            this.form_data.word = word;
+        }
         this.getMapReasonsList();
     }
 }

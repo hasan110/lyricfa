@@ -181,14 +181,34 @@ class UserController extends Controller
         foreach ($users as $user)
         {
             $expire = '<span class="red--text">منقضی شده</span>';
+            $user->has_subscription = false;
 
             if ($user->expired_at)
             {
                 $expired_at = Carbon::parse($user->expired_at);
-                $diff = Carbon::now()->diffInDays($expired_at , false);
-                if($diff > 0)
+                $diffInMinute = Carbon::now()->diffInMinutes($expired_at, false);
+                if($diffInMinute > 0)
                 {
-                    $expire = '<b>'. $diff .' روز </b>';
+                    $diff = Carbon::now()->diff($expired_at);
+                    $years_days = $diff->y > 0 ? $diff->y * 365 : 0;
+                    $months_days = $diff->m > 0 ? $diff->m * 30 : 0;
+                    $days = $years_days + $months_days + $diff->d;
+                    if ($days > 3) {
+                        $user->has_subscription = true;
+                    }
+                    if ($days > 0) {
+                        if ($diff->h > 0) {
+                            $expire = $days .' روز و ' . $diff->h . ' ساعت';
+                        } else {
+                            $expire = $days .' روز و '.$diff->i .' دقیقه';
+                        }
+                    } else {
+                        if ($diff->h > 0) {
+                            $expire = $diff->h .' ساعت و '.$diff->i .' دقیقه';
+                        } else {
+                            $expire = $diff->i .' دقیقه';
+                        }
+                    }
                 }
             }
 

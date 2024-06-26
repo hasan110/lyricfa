@@ -145,14 +145,13 @@ class MapController extends Controller
         $messages = array(
             'word.required' => 'لغت نمی تواند خالی باشد',
             'base_word.required' => 'لغت پایه نمی تواند خالی باشد',
-            'map_reasons.required' => 'انتخاب علت مپ شدن اجباری است.',
             'map_reasons.array' => 'علت مپ شدن باید آرایه باشد.',
         );
 
         $validator = Validator::make($request->all(), [
             'word' => 'required',
             'base_word' => 'required',
-            'map_reasons' => 'required|array',
+            'map_reasons' => 'array',
         ], $messages);
 
         if ($validator->fails()) {
@@ -190,7 +189,6 @@ class MapController extends Controller
             'id.required' => 'شناسه نمی تواند خالی باشد',
             'word.required' => 'لغت نمی تواند خالی باشد',
             'ci_base.required' => 'لغت پایه نمی تواند خالی باشد',
-            'map_reasons.required' => 'انتخاب علت مپ شدن اجباری است.',
             'map_reasons.array' => 'علت مپ شدن باید آرایه باشد.',
         );
 
@@ -198,7 +196,7 @@ class MapController extends Controller
             'id' => 'required',
             'word' => 'required',
             'ci_base' => 'required',
-            'map_reasons' => 'required|array',
+            'map_reasons' => 'array',
         ], $messages);
 
         if ($validator->fails()) {

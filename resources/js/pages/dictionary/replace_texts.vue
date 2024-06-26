@@ -349,9 +349,6 @@ export default {
         this.id = this.$route.params.id;
         this.type = this.$route.params.type;
         this.getList();
-        function activeClickUntranslatedWords(){
-            console.log(1)
-        }
     },
     beforeMount(){
         this.checkAuth()

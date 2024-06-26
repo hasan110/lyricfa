@@ -38,6 +38,9 @@
 
                     </v-col>
                     <v-col cols="4" class="text-right">
+                        <v-btn color="deep-purple" dark dense :to="{name:'replace_texts', params:{id:movie_id, type:'film'}}">
+                            پردازش متن
+                        </v-btn>
                         <v-btn
                             color="success"
                             dense

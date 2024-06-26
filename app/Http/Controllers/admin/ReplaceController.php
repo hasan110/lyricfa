@@ -93,7 +93,7 @@ class ReplaceController extends Controller
         ]);
     }
 
-    private function replaceText(Text &$text, ReplaceRule $rule): void
+    private function replaceText(&$text, ReplaceRule $rule): void
     {
         if ($rule->apply_on === 'persian_text' || $rule->apply_on === 'all') {
             if (isset($text->changed_text_persian)) {
@@ -146,12 +146,17 @@ class ReplaceController extends Controller
 
         $text->enable_edit = false;
     }
-    private function findUntranslatedWords(Text &$text): void
+    private function findUntranslatedWords(&$text): void
     {
-        $separateds = preg_split("/[, ?;_!.}{)(\r]+/" , $text->text_english);
+        $temp = preg_split("/[, ?;_!.}{)(\r]+/" , $text->text_english);
         $found_words = [];
+        $separateds = [];
+        foreach ($temp as $separated) {
+            if ($separated) {
+                $separateds[] = $separated;
+            }
+        }
         foreach ($separateds as $key => $separated) {
-            if (!$separated) continue;
             $separated = trim(trim($separated , "'") , '"');
             $raw_word = $separated;
             if (str_ends_with($separated , "'s")) {
@@ -164,7 +169,9 @@ class ReplaceController extends Controller
                     $map_capital_check = Map::where('word', ucwords($separated))->first();
                     $map_letter_check = Map::where('word', strtolower($separated))->first();
                     if (!$map_capital_check && !$map_letter_check) {
-                        $found_words[] = $raw_word;
+                        if (!in_array($raw_word, $found_words)) {
+                            $found_words[$raw_word] = '<a href="/words/create?word='.$raw_word.'" target="_blank" class="red-mark new-word">'.$raw_word.'</a>';
+                        }
                     }
                 }
             } else {
@@ -172,7 +179,9 @@ class ReplaceController extends Controller
                 if (!$word_check) {
                     $map_check = Map::where('word', $separated)->first();
                     if (!$map_check) {
-                        $found_words[] = $raw_word;
+                        if (!in_array($raw_word, $found_words)) {
+                            $found_words[$raw_word] = '<a href="/words/create?word='.$raw_word.'" target="_blank" class="red-mark new-word">'.$raw_word.'</a>';
+                        }
                     }
                 }
             }
@@ -180,13 +189,11 @@ class ReplaceController extends Controller
         $text->untranslated_words_changed = false;
         if (count($found_words) !== 0) {
             $text->untranslated_words_changed = true;
-            foreach ($found_words as $found_word) {
-                $text->untranslated_words_text = str_replace(
-                    $found_word,
-                    '<a href="/words/create?word='.$found_word.'" target="_blank" class="red-mark new-word">'.$found_word.'</a>',
-                    $text->text_english
-                );
-            }
+            $text->untranslated_words_text = str_replace(
+                array_keys($found_words),
+                array_values($found_words),
+                $text->text_english
+            );
         } else {
             $text->untranslated_words_text = $text->text_english;
         }

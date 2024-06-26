@@ -112,6 +112,7 @@ export default {
     name:'create_idiom',
     data: () => ({
         form_data:{
+            base: '',
             idiom_definitions: [
                 {
                     definition:'',
@@ -179,6 +180,12 @@ export default {
                         })
                     }
                 });
+        }
+    },
+    mounted() {
+        const word = this.$route.query.word;
+        if (word) {
+            this.form_data.base = word;
         }
     },
     beforeMount(){

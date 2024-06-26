@@ -2,7 +2,11 @@
     <div>
 
         <div class="page-head">
-            <div class="titr">ایجاد لغت</div>
+            <div class="titr">
+                ایجاد لغت
+                <v-chip :to="{ name : 'create_idiom', query:{'word': form_data.english_word} }" small class="mr-2">ایجاد اصطلاح</v-chip>
+                <v-chip :to="{ name : 'create_map', query:{'word': form_data.english_word} }" small class="mr-1">ایجاد مپ</v-chip>
+            </div>
             <div class="back">
                 <router-link :to="{ name : 'words' }">بازگشت
                     <v-icon>

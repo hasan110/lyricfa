@@ -84,6 +84,7 @@
                         <tr
                             v-for="(item , key) in list"
                             :key="key"
+                            :class="[item.has_subscription ? 'bg-star' : '']"
                         >
                             <td>{{ item.id }}</td>
                             <td>{{ item.full_name }}</td>
@@ -230,4 +231,7 @@ export default {
 }
 </script>
 <style>
+.bg-star{
+    background: #cdfff9 !important;
+}
 </style>
