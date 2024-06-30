@@ -241,37 +241,37 @@ class FilmTextController extends Controller
         $content = explode(PHP_EOL, $contents);
 
         $mainList = array();
-        $object = array(
-            "text_english" => "",
-            "text_persian" => "",
-            "start_time" => "",
-            "end_time" => "",
-        );
         if ($just_english) {
-            foreach ($content as $key => $value) {
-                switch ($key) {
-                    case $key % 4 == 1 :
-
-                        $object = array(
-                            "text_english" => "",
-                            "text_persian" => "",
-                            "start_time" => "",
-                            "end_time" => "",
-                        );
-
-                        $object["start_time"] = $this->getStartTime($value);
-                        $object["end_time"] = $this->getEndTime($value);
-                        break;
-                    case $key % 4 == 2 :
-                        $object["text_english"] = $value;
-                        break;
-                    case $key % 4 == 3 :
-                        break;
-                    case $key % 4 == 0 :
-                        if ($object["text_english"] != "")
-                            $mainList[] = $object;
-                    break;
+            $list = [];
+            $chunked = [];
+            foreach ($content as $index => $item) {
+                if (strlen($item) > 0) {
+                    $chunked[] = $item;
+                } else {
+                    $list[] = $chunked;
+                    $chunked = [];
                 }
+            }
+            foreach ($list as $value) {
+                $object = array(
+                    "text_english" => "",
+                    "text_persian" => "",
+                    "start_time" => "",
+                    "end_time" => "",
+                );
+                foreach ($value as $key => $data) {
+                    if ($key === 0) continue;
+                    if ($key === 1) {
+                        $object["start_time"] = $this->getStartTime($data);
+                        $object["end_time"] = $this->getEndTime($data);
+                    } else  {
+                        $object["text_english"] .= strip_tags($data).PHP_EOL;
+                    }
+                }
+                if ($object["text_english"] == "") {
+                    continue;
+                }
+                $mainList[] = $object;
             }
         } else {
             foreach ($content as $key => $value) {
@@ -308,16 +308,14 @@ class FilmTextController extends Controller
 
         $request->film_id = $request->id;
         $this->deleteListTexts($request);
+        $mainList = mb_convert_encoding($mainList , 'UTF-8', 'UTF-8');
         $this->textsCreateForUpload($mainList, $request->id);
         return $mainList;
     }
     public function textsCreateForUpload($texts, $filmId)
     {
-
         $isFilmExist = FilmController::getFilmById($filmId);
-
         if ($isFilmExist) {
-
             foreach ($texts as $index => $item) {
                 $textEnglish = $item["text_english"];
                 $textPersian = $item["text_persian"];
@@ -333,13 +331,6 @@ class FilmTextController extends Controller
                 $text->id_film = $filmId;
                 $text->save();
             }
-
-            $arr = [
-                'data' => null,
-                'errors' => null,
-                'message' => "متن ها با موفقیت اضافه شدند",
-            ];
-            return response()->json($arr);
         }
     }
 

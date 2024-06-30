@@ -170,3 +170,7 @@
 .inline-text-area {
     width: 100%;background: #fff;padding: .5rem;border: #aaaaaa;outline: none;
 }
+.plain-text,
+.plain-text textarea{
+    unicode-bidi: plaintext;
+}

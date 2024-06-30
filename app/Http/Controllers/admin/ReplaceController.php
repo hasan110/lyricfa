@@ -121,10 +121,12 @@ class ReplaceController extends Controller
 
             if (strpos($striped_tags_text , $rule->find_phrase) !== false) {
                 if ($rule->last_character) {
-                    $text_length = strlen($striped_tags_text);
-                    $phrase_position = strpos($striped_tags_text, $rule->find_phrase);
-                    if (strlen($rule->find_phrase) + $phrase_position === $text_length) {
-                        $final_text = str_replace($rule->find_phrase, '<span class="yellow-mark">' . $rule->replace_phrase . '</span>', $striped_tags_text);
+                    if (str_ends_with($striped_tags_text, $rule->find_phrase)) {
+                        $separated = explode(' ' , $striped_tags_text);
+                        $last_word = end($separated);
+                        array_pop($separated);
+                        $separated[] = str_replace($rule->find_phrase, '<span class="yellow-mark">' . $rule->replace_phrase . '</span>', $last_word);
+                        $final_text = implode(' ', $separated);
                     }
                 } else {
                     $final_text = str_replace($rule->find_phrase, '<span class="yellow-mark">' . $rule->replace_phrase . '</span>', $striped_tags_text);
@@ -157,7 +159,7 @@ class ReplaceController extends Controller
             }
         }
         foreach ($separateds as $key => $separated) {
-            $separated = trim(trim($separated , "'") , '"');
+            $separated = trim($separated , '"');
             $raw_word = $separated;
             if (str_ends_with($separated , "'s")) {
                 $separated = str_replace("'s" , "" , $separated);

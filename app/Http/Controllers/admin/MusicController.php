@@ -251,6 +251,7 @@ class MusicController extends Controller
             $music->singers = $music->singers . "," . $this->set4digit($request->id_fourth_singer);
         }
 
+        $music->is_user_request = $request->has('is_user_request') ? intval($request->is_user_request) : 0;
         $music->start_demo = $request->start_demo;
         $music->end_demo = $request->end_demo;
         $music->degree = $request->hardest_degree;

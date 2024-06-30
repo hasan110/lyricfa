@@ -17,7 +17,7 @@ class Controller extends BaseController
 
     public function uploadFileById($file , $path , $id) : bool
     {
-        if(env('DEPLOYED')){
+        if(config('app.deployed')){
             $path_upload = 'uploads/'. $path;
             $file_name = $id . '.' .$file->getClientOriginalExtension();
             $image_path = $path_upload .'/'. $file_name;
@@ -33,7 +33,7 @@ class Controller extends BaseController
     }
     public function deleteFile($path)
     {
-        if(env('DEPLOYED')){
+        if(config('app.deployed')){
             Storage::disk('ftp')->delete('uploads/'.$path);
         }else{
             File::delete(public_path().'/uploads/'.$path);

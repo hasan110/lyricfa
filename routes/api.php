@@ -69,8 +69,13 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/get_n_requested_music', [MusicController::class, 'getNRequestedMusic']);
 
     //films
-    Route::post('/get_films', [FilmController::class, 'getListForShow']);
+    Route::post('/get_films', [FilmController::class, 'getList']);
+    Route::post('/get_film_data', [FilmController::class, 'getData']);
     Route::post('/get_childs_by_id', [FilmController::class, 'getChildById']);
+
+    //text film
+    Route::post('/get_text_film', [FilmTextController::class, 'getTextList']);
+    Route::post('/get_times', [FilmTextController::class, 'getTimesForPagin']);
 
     //comment music
     Route::post('/get_comment_music', [CommentMusicController::class, 'getMusicComment']);
@@ -127,10 +132,6 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/get_text_list', [TextController::class, 'getTextList']);
     Route::post('/get_text_include_word', [TextController::class, 'getTextIncludeWord']);
     Route::post('/get_text_music', [MusicController::class, 'getMusicWithTextPaginate']);
-
-    //text film
-    Route::post('/get_text_film', [FilmTextController::class, 'getTextList']);
-    Route::post('/get_times', [FilmTextController::class, 'getTimesForPagin']);
 
     //english persian words
     Route::post('/get_all_words', [WordController::class, 'getAllWords']);

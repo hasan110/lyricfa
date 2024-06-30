@@ -71,6 +71,7 @@
                                 outlined
                                 label="پوستر فیلم"
                                 v-model="form_data.poster" persistent-hint
+                                hint="فرمت تصویر باید jpg و سایز آن 750*1000 باشد"
                                 accept="image/*"
                             ></v-file-input>
                         </v-col>
@@ -82,6 +83,15 @@
                                 dense
                                 label="پسوند فایل فیلم"
                             ></v-text-field>
+                        </v-col>
+                        <v-col cols="12" class="pb-0 plain-text">
+                            <v-textarea
+                                v-model="form_data.description"
+                                outlined
+                                clearable
+                                dense rows="12"
+                                label="توضیحات فیلم"
+                            ></v-textarea>
                         </v-col>
 
                     </v-row>
@@ -134,6 +144,7 @@ export default {
             form.append('parent', data.parent ? data.parent : 0);
             data.poster ? form.append('poster', data.poster) : '';
             data.extension ? form.append('extension', data.extension) : '';
+            data.description ? form.append('description', data.description) : '';
 
             this.$http.post(`movies/create` , form)
                 .then(res => {

@@ -11,7 +11,6 @@ class Music extends Model
     protected $table = 'musics';
 
     protected $casts = [
-        'degree' => 'integer',
         'is_user_request' => 'integer',
     ];
 

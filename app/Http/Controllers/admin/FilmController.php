@@ -87,6 +87,7 @@ class FilmController extends Controller
             'film.mimetypes' => 'نوع فایل باید ویدئو باشد',
             'poster.file' => 'نوع عکس باید فایل باشد',
             'poster.mimes' => 'نوع فایل باید jpg باشد',
+            'poster.dimensions' => 'عکس باید 750 در 1000 باشد',
         );
 
         $validator = Validator::make($request->all(), [
@@ -96,7 +97,7 @@ class FilmController extends Controller
             'parent' => 'required|numeric',
             'extension' => 'required',
             'film' => 'file|mimetypes:video/*',
-            'poster' => 'file'
+            'poster' => 'file|mimes:jpg|dimensions:min_width=750,min_height=1000,max_width=750,max_height=1000'
         ], $messsages);
 
         if ($validator->fails()) {
@@ -114,6 +115,7 @@ class FilmController extends Controller
         $film->type = $request->type;
         $film->parent = $request->parent;
         $film->extension = $request->extension;
+        $film->description = $request->description;
         $film->save();
 
         if ($request->hasFile('film')) {
@@ -150,6 +152,7 @@ class FilmController extends Controller
             'film.mimeTypes' => 'نوع فایل باید ویدئو باشد',
             'poster.file' => 'نوع عکس باید فایل باشد',
             'poster.mimes' => 'نوع فایل باید jpg باشد',
+            'poster.dimensions' => 'عکس باید 750 در 1000 باشد',
             'extension.required' => 'پسوند فایل لازم است',
         );
 
@@ -161,7 +164,7 @@ class FilmController extends Controller
             'parent' => 'required|numeric',
             'film' => 'file|mimeTypes:video',
             'extension' => 'required',
-            'poster' => 'file'
+            'poster' => 'file|mimes:jpg|dimensions:min_width=750,min_height=1000,max_width=750,max_height=1000'
         ], $messsages);
 
         if ($validator->fails()) {
@@ -189,6 +192,7 @@ class FilmController extends Controller
         $film->type = $request->type;
         $film->parent = $request->parent;
         $film->extension = $request->extension;
+        $film->description = $request->description;
         $film->save();
 
         if ($request->hasFile('film')) {
