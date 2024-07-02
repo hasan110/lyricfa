@@ -66,10 +66,11 @@
                             <th style="width: 220px;">متن انگلیسی</th>
                             <th style="width: 220px;">متن فارسی</th>
                             <th style="width: 220px;">توضیحات</th>
-                            <th style="width: 100px;">شروع</th>
-                            <th style="width: 100px;">پایان</th>
+                            <th style="width: 120px;">شروع</th>
+                            <th style="width: 120px;">پایان</th>
                             <th style="width: 10px;">افزودن</th>
                             <th style="width: 10px;">حذف</th>
+                            <th style="width: 10px;">تماشا</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -149,6 +150,19 @@
                                     </v-icon>
                                 </v-btn>
                             </td>
+                            <td >
+                                <v-btn
+                                    class="mx-2"
+                                    fab small
+                                    dark
+                                    @click="play(row)"
+                                    color="green"
+                                >
+                                    <v-icon dark>
+                                        mdi-play
+                                    </v-icon>
+                                </v-btn>
+                            </td>
                         </tr>
                         </tbody>
                     </table>
@@ -209,6 +223,16 @@
             </v-card>
         </v-dialog>
 
+        <div class="video-wrapper" v-show="video_wrapper">
+            <div class="close-video-wrapper" @click="video_wrapper = !video_wrapper">
+                <v-icon dark>
+                    mdi-close
+                </v-icon>
+            </div>
+            <video v-if="movie.id" height="100%" width="100%" ref="vid" controls>
+                <source :src="'https://dl.lyricfa.app/uploads/films/'+movie.id+'.'+movie.extension" type="video/mp4" />
+            </video>
+        </div>
     </div>
 </template>
 <script>
@@ -229,8 +253,25 @@ export default {
         upload_modal: false,
         upload_loading: false,
         loading: false,
+        video_wrapper: false,
     }),
     methods:{
+        play(data) {
+            if (!data.end_time || !data.start_time) {
+                alert('تاریخ شروع و پایان مشخص نیست!!!');
+                return;
+            }
+            this.video_wrapper = true;
+            let myVid = this.$refs.vid;
+            myVid.currentTime = data.start_time / 1000;
+            myVid.play();
+            const a = setInterval(function () {
+                if(myVid.currentTime >= data.end_time / 1000) {
+                    myVid.pause();
+                    clearInterval(a)
+                }
+            }, 30);
+        },
         addRow(index) {
             this.rows.splice(index + 1, 0, {});
         },
@@ -238,19 +279,26 @@ export default {
             if(this.rows.length === 1){ return; }
             this.rows.splice(index, 1);
         },
-        getMovieData(){
+        getMovieTexts(){
             this.$store.commit('SHOW_APP_LOADING' , 1)
             this.$http.post(`film_texts/list` , { id_film:this.movie_id })
-                .then(res => {
-                    const txt = res.data.data
-                    if(txt.length > 0){
-                        this.rows = res.data.data
-                    }
-                    this.$store.commit('SHOW_APP_LOADING' , 0)
-                })
-                .catch( () => {
-                    this.$store.commit('SHOW_APP_LOADING' , 0)
-                });
+            .then(res => {
+                const txt = res.data.data
+                if(txt.length > 0){
+                    this.rows = res.data.data
+                }
+                this.$store.commit('SHOW_APP_LOADING' , 0)
+            })
+            .catch( () => {
+                this.$store.commit('SHOW_APP_LOADING' , 0)
+            });
+        },
+        getMovieData(){
+            this.$http.get(`movies/movie/${this.movie_id}`)
+            .then(res => {
+                this.movie = res.data.data
+            })
+            .catch( () => {});
         },
         saveData(status){
             if(!this.validateInputs()){
@@ -284,16 +332,16 @@ export default {
                 }
 
             })
-                .catch( err => {
-                    this.loading = false
-                    const e = err.response.data
-                    this.$fire({
-                        title: "خطا",
-                        text: e.message,
-                        type: "error",
-                        timer: 5000
-                    })
-                });
+            .catch( err => {
+                this.loading = false
+                const e = err.response.data
+                this.$fire({
+                    title: "خطا",
+                    text: e.message,
+                    type: "error",
+                    timer: 5000
+                })
+            });
         },
         download(){
             this.$store.commit('SHOW_APP_LOADING' , 1);
@@ -382,6 +430,7 @@ export default {
     },
     mounted(){
         this.movie_id = this.$route.params.id;
+        this.getMovieTexts();
         this.getMovieData();
     },
     beforeMount(){

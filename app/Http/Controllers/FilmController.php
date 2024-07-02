@@ -12,7 +12,7 @@ class FilmController extends Controller
     {
         $search_key = $request->search_text;
 
-        $films = Film::orderBy('id', "DESC")->whereIn('type', [ 1, 2]);
+        $films = Film::orderBy('id', "DESC")->whereIn('type', [1, 2]);
         $films = $films->where(function ($query) use ($search_key) {
             $query->where('english_name', 'like', '%' . $search_key . '%')
                 ->orWhere('persian_name', 'like', '%' . $search_key . '%');
@@ -37,12 +37,11 @@ class FilmController extends Controller
         ], $message);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "گرفتن اطلاعات شکست خورد"
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $film = Film::where('id', $request->id)->first();
@@ -54,7 +53,7 @@ class FilmController extends Controller
             ], 400);
         }
 
-        $films = Film::orderBy('id', "ASC")->where('parent', $request->id)->whereIn('type', [3, 4])->get();
+        $films = Film::orderBy('priority', "ASC")->where('parent', $request->id)->whereIn('type', [3, 4, 5])->get();
 
         $film['items'] = $films;
         $film['items_count'] = $films->count();
@@ -87,24 +86,18 @@ class FilmController extends Controller
         }
 
         $films = Film::orderBy('id', "ASC")->where('parent', $request->id)->whereIn('type', [3, 4])->get();
-        $response = [
+
+        return response()->json([
             'data' => $films,
-            'errors' => [
-            ],
+            'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response, 200);
+        ]);
     }
-
-
 
     public static function getFilmById($id)
     {
-
         $get_music = Film::where('id', $id)->first();
 
         return $get_music;
     }
-
-
 }

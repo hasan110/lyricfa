@@ -9,85 +9,86 @@ use Illuminate\Support\Facades\Validator;
 
 class FilmController extends Controller
 {
-
     public function getListForShow(Request $request)
     {
-
         $search_key = $request->search_text;
 
-        $films = Film::orderBy('id', "DESC")->whereIn('type', [ 1, 2]);
+        $films = Film::orderBy('id', "DESC");
+
+        if ($request->type) {
+            $films = $films->where('type', $request->type);
+        } else {
+            $films = $films->whereIn('type', [1, 2]);
+        }
+
+        if ($request->series_id) {
+            $films = $films->where('parent', $request->series_id);
+        }
+
         $films = $films->where(function ($query) use ($search_key) {
             $query->where('english_name', 'like', '%' . $search_key . '%')
                 ->orWhere('persian_name', 'like', '%' . $search_key . '%')
                 ->orWhere('id', '=', $search_key);
         })->paginate(25);
-        $response = [
+
+        return response()->json([
             'data' => $films,
-            'errors' => [
-            ],
+            'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response, 200);
+        ]);
     }
 
     public function getChildById(Request $request)
     {
-
-        $messsages = array(
+        $messages = array(
             'id.required' => 'id الزامی است',
             'id.numeric' => 'id باید عدد باشد'
-
         );
 
         $validator = Validator::make($request->all(), [
             'id' => 'required|numeric'
-        ], $messsages);
-
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "گرفتن اطلاعات شکست خورد"
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $id = $request->id;
 
-        $films = Film::orderBy('id', "DESC")->where('parent', $id)->whereIn('type', [3, 4])->get();
-        $response = [
+        $films = Film::orderBy('id', "DESC")->where('parent', $id)->whereIn('type', [3, 4, 5])->get();
+
+        return response()->json([
             'data' => $films,
-            'errors' => [
-            ],
+            'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response, 200);
+        ]);
     }
 
     public static function getFilmById($id)
     {
-
-        $get_music = Film::where('id', $id)->first();
-
-        return $get_music;
+        return Film::where('id', $id)->first();
     }
 
     public function filmCreate(Request $request)
     {
-        $messsages = array(
-            'english_name.required' => 'عنوان انگلیسی آهنگ اجباری است',
-            'persian_name.required' => 'عنوان فارسی آهنگ اجباری است',
-            'type.required' => 'type لازم است.',
-            'parent.required' => 'parent لازم است',
+        $messages = array(
+            'english_name.required' => 'عنوان انگلیسی فیلم اجباری است',
+            'persian_name.required' => 'عنوان فارسی فیلم اجباری است',
+            'type.required' => 'نوع فیلم لازم است.',
+            'parent.required' => 'فیلم مرتبط را انتخاب کنید',
             'extension.required' => 'پسوند فایل لازم است',
-            'type.numeric' => 'type عدد می باشد',
-            'parent.numeric' => 'parent باید عدد باشد',
-            'film.file' => 'نوع فیلم باید فایل باشد',
-            'film.mimetypes' => 'نوع فایل باید ویدئو باشد',
-            'poster.file' => 'نوع عکس باید فایل باشد',
-            'poster.mimes' => 'نوع فایل باید jpg باشد',
-            'poster.dimensions' => 'عکس باید 750 در 1000 باشد',
+            'type.numeric' => 'نوع فیلم عدد می باشد',
+            'parent.numeric' => 'فیلم مرتبط باید عدد باشد',
+            'film.file' => 'نوع فایل آپلودی باید فایل باشد',
+            'film.mimetypes' => 'نوع فایل فیلم باید ویدئو باشد',
+            'poster.file' => 'نوع پوستر باید فایل باشد',
+            'poster.mimes' => 'نوع پوستر باید jpg باشد',
+            'poster.dimensions' => 'پوستر باید 750 در 1000 باشد',
+            'priority.required_if' => 'شماره قسمت الزامی است',
         );
 
         $validator = Validator::make($request->all(), [
@@ -96,17 +97,17 @@ class FilmController extends Controller
             'type' => 'required|numeric',
             'parent' => 'required|numeric',
             'extension' => 'required',
+            'priority' => 'required_if:type,3,4,5',
             'film' => 'file|mimetypes:video/*',
             'poster' => 'file|mimes:jpg|dimensions:min_width=750,min_height=1000,max_width=750,max_height=1000'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " افزودن فیلم شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $film = new Film();
@@ -116,6 +117,11 @@ class FilmController extends Controller
         $film->parent = $request->parent;
         $film->extension = $request->extension;
         $film->description = $request->description;
+        if (in_array($request->type, [3,4,5])) {
+            $film->priority = $request->priority;
+        } else {
+            $film->priority = null;
+        }
         $film->save();
 
         if ($request->hasFile('film')) {
@@ -125,35 +131,31 @@ class FilmController extends Controller
             $this->uploadFileById($request->poster,"films_banner", $film->id);
         }
 
-        $arr = [
+        return response()->json([
             'data' => $film,
             'errors' => null,
             'message' => "فیلم با موفقیت اضافه شد"
-        ];
-
-        return response()->json($arr, 200);
-
-
+        ]);
     }
 
     public function filmUpdate(Request $request)
     {
-        $messsages = array(
-
-            'id.required' => 'id نمی تواند خالی باشد',
-            'id.numeric' => 'id باید فقط شامل عدد باشد',
-            'english_name.required' => 'عنوان انگلیسی آهنگ اجباری است',
-            'persian_name.required' => 'عنوان فارسی آهنگ اجباری است',
-            'type.required' => 'type لازم است.',
-            'parent.required' => 'parent لازم است',
-            'type.numeric' => 'type عدد می باشد',
-            'parent.numeric' => 'parent باید عدد باشد',
-            'film.file' => 'نوع موزیک باید فایل باشد',
-            'film.mimeTypes' => 'نوع فایل باید ویدئو باشد',
-            'poster.file' => 'نوع عکس باید فایل باشد',
-            'poster.mimes' => 'نوع فایل باید jpg باشد',
-            'poster.dimensions' => 'عکس باید 750 در 1000 باشد',
+        $messages = array(
+            'id.required' => 'شناسه فیلم نمی تواند خالی باشد',
+            'id.numeric' => 'شناسه فیلم باید فقط شامل عدد باشد',
+            'english_name.required' => 'عنوان انگلیسی فیلم اجباری است',
+            'persian_name.required' => 'عنوان فارسی فیلم اجباری است',
+            'type.required' => 'نوع فیلم لازم است.',
+            'parent.required' => 'فیلم مرتبط لازم است',
+            'type.numeric' => 'نوع فیلم عدد می باشد',
+            'parent.numeric' => 'فیلم مرتبط باید عدد باشد',
+            'film.file' => 'نوع فایل آپلودی باید فایل باشد',
+            'film.mimeTypes' => 'نوع فایل فیلم باید ویدئو باشد',
+            'poster.file' => 'نوع پوستر باید فایل باشد',
+            'poster.mimes' => 'نوع پوستر باید jpg باشد',
+            'poster.dimensions' => 'پوستر باید 750 در 1000 باشد',
             'extension.required' => 'پسوند فایل لازم است',
+            'priority.required_if' => 'شماره قسمت الزامی است',
         );
 
         $validator = Validator::make($request->all(), [
@@ -164,35 +166,38 @@ class FilmController extends Controller
             'parent' => 'required|numeric',
             'film' => 'file|mimeTypes:video',
             'extension' => 'required',
+            'priority' => 'required_if:type,3,4,5',
             'poster' => 'file|mimes:jpg|dimensions:min_width=750,min_height=1000,max_width=750,max_height=1000'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " ویرایش فیلم شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $film = $this->getFilmById($request->id);
         if(!$film){
-
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "این فیلم وجود ندارد برای به روز رسانی"
-            ];
-
-            return response()->json($arr, 200);
+            ]);
         }
+
         $film->english_name = $request->english_name;
         $film->persian_name = $request->persian_name;
         $film->type = $request->type;
         $film->parent = $request->parent;
         $film->extension = $request->extension;
         $film->description = $request->description;
+        if (in_array($request->type, [3,4,5])) {
+            $film->priority = $request->priority;
+        } else {
+            $film->priority = null;
+        }
         $film->save();
 
         if ($request->hasFile('film')) {
@@ -206,34 +211,27 @@ class FilmController extends Controller
         return response()->json([
             'data' => $film,
             'errors' => null,
-            'message' => "موزیک با موفقیت اضافه شد"
+            'message' => "فیلم با موفقیت ویرایش شد"
         ]);
     }
-
 
     public function getFilmByIdRequest(Request $request)
     {
         $id = $request->id;
         $film = $this->getFilmById($id);
 
-        $arr = [
+        $film->parent_id = null;
+
+        if($film->type == 5){
+            $parent = Film::where('id', $film->parent)->first();
+            $series = Film::where('id', $parent->parent)->first();
+            $film->parent_id = $series->id;
+        }
+
+        return response()->json([
             'data' => $film,
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-
-        return response()->json($arr, 200);
-
+        ]);
     }
-
-
-
 }
-
-
-/*
- * type = 1 -> is Movie (One part film)
- * type = 2 -> is Serial (Some of Chapter)
- * type = 3 -> is Chapter (Some of film)
- * type = 4 -> is Film (Chapter or serials Films)
- */
