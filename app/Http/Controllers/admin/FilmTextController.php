@@ -245,6 +245,7 @@ class FilmTextController extends Controller
             $list = [];
             $chunked = [];
             foreach ($content as $index => $item) {
+                $item = str_replace("\r", '', $item);
                 if (strlen($item) > 0) {
                     $chunked[] = $item;
                 } else {
