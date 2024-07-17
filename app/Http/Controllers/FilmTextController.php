@@ -14,9 +14,9 @@ class FilmTextController extends Controller
 {
     public function getTextList(Request $request)
     {
-        $messsages = array(
-            'id_film.required' => 'id_film نمی تواند خالی باشد',
-            'id_film.numeric' => 'id_film باید فقط شامل عدد باشد',
+        $messages = array(
+            'id_film.required' => 'film_id نمی تواند خالی باشد',
+            'id_film.numeric' => 'film_id باید فقط شامل عدد باشد',
             'page.required' => 'page نمی تواند خالی باشد',
             'page.numeric' => 'page باید فقط شامل عدد باشد',
         );
@@ -24,7 +24,7 @@ class FilmTextController extends Controller
         $validator = Validator::make($request->all(), [
             'id_film' => 'required|numeric',
             'page' => 'required|numeric',
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
             $arr = [
@@ -38,7 +38,7 @@ class FilmTextController extends Controller
         if (UserController::isUserSubscriptionValid($request)) {
 
             $id_film = $request->id_film;
-            $films = FilmText::where('id_film', '=', $id_film)->orderBy("id")->skip($request->page * 25)->take(25)->get();//1
+            $films = FilmText::where('film_id', '=', $id_film)->orderBy("id")->skip($request->page * 25)->take(25)->get();//1
 
 
             $arr = [
@@ -52,7 +52,7 @@ class FilmTextController extends Controller
             $arr = [
                 'data' => null,
                 'errors' => null,
-                'status' => 1000, // subscription end
+                'status' => 1000,
                 'message' => "اشتراک شما به پایان رسیده است لطفا اشتراک خود را تمدید کنید",
             ];
             return response()->json($arr, 400);
@@ -83,74 +83,10 @@ class FilmTextController extends Controller
         return $compute;
     }
 
-    public function insertListTexts(Request $request)
-    {
-        $messsages = array(
-            'film_id.required' => 'film_id نمی تواند خالی باشد',
-            'film_id.numeric' => 'film_id باید فقط شامل عدد باشد',
-            'texts.required' => 'texts نمی تواند خالی باشد',
-            'texts.array' => 'texts باید آرایه باشد',
-            'start_end_time.required' => 'start_end_time ضروری است',
-
-        );
-
-        $validator = Validator::make($request->all(), [
-            'film_id' => 'required|numeric',
-            'texts' => 'required|array',
-            'texts.*.text_english' => 'required',
-            'texts.*.text_persian' => 'required',
-            'texts.*.start_end_time' => 'required',
-        ], $messsages);
-
-        if ($validator->fails()) {
-            $arr = [
-                'data' => null,
-                'errors' => $validator->errors(),
-                'message' => "افزودن متن ها شکست خورد",
-            ];
-            return response()->json($arr, 400);
-        }
-
-        $filmId = $request->film_id;
-        $isFilmExist = FilmController::getFilmById($filmId);
-
-        if ($isFilmExist) {
-
-            foreach ($request->texts as $item) {
-                $textEnglish = $item["text_english"];
-                $textPersian = $item["text_persian"];
-                $startEndTime = $item["start_end_time"];
-
-                $text = new FilmText();
-                $text->text_english = $textEnglish;
-                $text->text_persian = $textPersian;
-                $text->start_end_time = $startEndTime;
-                $text->id_film = $filmId;
-                $text->save();
-            }
-
-            $this->add10LastRowNull();
-            $arr = [
-                'data' => null,
-                'errors' => null,
-                'message' => "متن ها با موفقیت اضافه شدند",
-            ];
-            return response()->json($arr, 200);
-
-        } else {
-            $arr = [
-                'data' => null,
-                'errors' => $validator->errors(),
-                'message' => "در ابتدا فیلم را اضافه کنید",
-            ];
-            return response()->json($arr, 400);
-        }
-    }
-
     public function getTimesForPagin(Request $request)
     {
         $id_film = $request->id_film;
-        $films = FilmText::where('id_film', '=', $id_film)->orderBy("id")->get()->toArray();//1
+        $films = FilmText::where('film_id', '=', $id_film)->orderBy("id")->get()->toArray();//1
 
         if (!count($films)) {
             return response()->json([
@@ -188,7 +124,7 @@ class FilmTextController extends Controller
             $text->text_persian = "";
             $text->start_time = 0;
             $text->end_time = 0;
-            $text->id_film = 0;
+            $text->film_id = 0;
             $text->save();
         }
     }

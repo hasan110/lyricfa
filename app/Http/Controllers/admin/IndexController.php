@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\Models\CommentMusic;
+use App\Models\Comment;
 use App\Models\Music;
 use App\Models\Report;
 use App\Models\Singer;
@@ -26,8 +26,8 @@ class IndexController extends Controller
         $new_musics = Music::where('created_at' , '>' , $week_ago)->count();
         $total_singers = Singer::count();
         $new_singers = Singer::where('created_at' , '>' , $week_ago)->count();
-        $total_comments = CommentMusic::count();
-        $pending_comments = CommentMusic::where('id_admin_confirmed' , 0)->count();
+        $total_comments = Comment::count();
+        $pending_comments = Comment::where('status' , 0)->count();
         $week_total_pays = Report::where('type', 0)->where('created_at' , '>' , $week_ago)->sum('val_money');
         $yesterday_total_pays = Report::where('type', 0)->where('created_at' , '<' , Carbon::today()->subMinutes(210)->format('Y-m-d H:i:s'))->where('created_at' , '>' , Carbon::yesterday()->subMinutes(210)->format('Y-m-d H:i:s'))->sum('val_money');
         $today_total_pays = Report::where('type', 0)->where('created_at' , '>' , Carbon::today()->subMinutes(210)->format('Y-m-d H:i:s'))->sum('val_money');
@@ -51,6 +51,6 @@ class IndexController extends Controller
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
         ];
-        return response()->json($arr, 200);
+        return response()->json($arr);
     }
 }

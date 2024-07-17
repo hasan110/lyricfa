@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MerchentZarinPal;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 
 class MerchentZarinPalController extends Controller
 {
     public function getMerchentId(Request $request){
-        $merchent = MerchentZarinPal::first();
-        $merchentId = $merchent->merchent_id;
+        $merchant = [];
+        foreach (Setting::where('key', 'like', '%zarinpal%')->get() as $setting) {
+            $merchant[$setting->title] = $setting->value;
+        }
 
-        if($merchentId){
+        if(!empty($merchant)){
             $response = [
-                'data' => $merchent,
-                'errors' => [
-                ],
-                'message' => "مرچنت با موفقیت گرفته شدl"
+                'data' => $merchant,
+                'errors' => [],
+                'message' => "مرچنت با موفقیت گرفته شد"
             ];
-            return response()->json($response, 200);
+            return response()->json($response);
         }else{
             $response = [
                 'data' => null,

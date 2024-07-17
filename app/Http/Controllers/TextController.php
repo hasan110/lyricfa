@@ -10,20 +10,15 @@ use Exception;
 
 class TextController extends Controller
 {
-
     public function getTextList(Request $request)
     {
-
         if (UserController::isUserSubscriptionValid($request)) {
 
             $id_music = $request->id_music;
             $texts = Text::where('id_music', '=', $id_music)->orderBy("id")->get();
-            
-                $textsWithIdiom = array();
+
+            $textsWithIdiom = array();
             foreach ($texts as $item){
-                // try{
-                $item->idioms = TextIdiomsController::getTextIdiomsById($item->id);
-                // }catch(Exception $e){}
                 $textsWithIdiom[] = $item;
             }
 
@@ -38,34 +33,27 @@ class TextController extends Controller
             $arr = [
                 'data' => null,
                 'errors' => null,
-                'status' => 1000, // subscription end
+                'status' => 1000,
                 'message' => "اشتراک شما به پایان رسیده است لطفا اشتراک خود را تمدید کنید",
             ];
             return response()->json($arr, 400);
-
         }
     }
-    
 
     public function getTextIncludeWord(Request $request)
     {
-
-
         if (UserController::isUserSubscriptionValid()) {
-
             $word = $request->word;
-            $queryText = '%' . $word . '%'; //implode('%',str_split($word));
+            $queryText = '%' . $word . '%';
             return Text::query()->where('text_english', 'LIKE', "%{$queryText}%")->paginate(25);
-
         } else {
             $arr = [
                 'data' => null,
                 'errors' => null,
-                'status' => 1000, // subscription end
+                'status' => 1000,
                 'message' => "اشتراک شما به پایان رسیده است لطفا اشتراک خود را تمدید کنید",
             ];
             return response()->json($arr, 400);
-
         }
     }
 
@@ -76,15 +64,11 @@ class TextController extends Controller
 
     public function getTextById($id)
     {
-
-        $get_text = Text::where('id', $id)->first();
-
-        return $get_text;
+        return Text::where('id', $id)->first();
     }
 
     public function check10LastRowIsNull()
     {
-
         $biggerId = $this->getBiggerId();
 
         if ($biggerId > 10) {
@@ -122,7 +106,4 @@ class TextController extends Controller
             $text->save();
         }
     }
-
 }
-
-// http://localhost/lyricfa/public/add_list_texts?music_id=4&texts[0][text_english]=yes&texts[0][start_time]=100&texts[0][text_persian]=100&texts[0][end_time]=100&texts[1][text_english]=%D8%AF%D8%AE&texts[1][start_time]=200&texts[1][text_persian]=200&texts[1][end_time]=100

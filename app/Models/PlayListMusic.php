@@ -9,4 +9,5 @@ class PlayListMusic extends Model
 {
     use HasFactory;
     protected $guarded = [];
+    protected $table = 'playlist_music';
 }

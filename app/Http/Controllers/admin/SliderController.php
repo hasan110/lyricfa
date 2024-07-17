@@ -13,21 +13,18 @@ class SliderController extends Controller
 {
     public function slidersList(Request $request)
     {
-
         $sliders = Slider::orderBy("id")->paginate(25);
         $arr = [
             'data' => $sliders,
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
         ];
-        return response()->json($arr, 200);
+        return response()->json($arr);
     }
-
 
     public function sliderUpdate(Request $request)
     {
-        $messsages = array(
-
+        $messages = array(
             'id.required' => 'id نمی تواند خالی باشد',
             'id_singer_music_album.required' => 'id_singer_music_album نمی تواند خالی باشد',
             'id.numeric' => 'id باید فقط شامل عدد باشد',
@@ -47,7 +44,7 @@ class SliderController extends Controller
             'show_it' => 'required',
             'banner' => 'file|mimes:jpg|dimensions:min_width=1024,min_height=575,max_width=1024,max_height=575'
 
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
             $arr = [

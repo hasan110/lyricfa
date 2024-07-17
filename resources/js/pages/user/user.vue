@@ -316,7 +316,7 @@ export default {
 
         sendNotification(){
             this.$store.commit('SHOW_APP_LOADING' , 1)
-            this.$http.post(`notifications/send` , {id:this.notif_id , api_token:this.user.api_token})
+            this.$http.post(`notifications/send` , {id:this.notif_id , user_id:this.user.id})
                 .then(res => {
                     this.create_notif_modal = false
                     this.notif_id = null

@@ -8,19 +8,15 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderMusicController extends Controller
 {
-
     public function addOrderMusic(Request $request)
     {
-
-
         $api_token = $request->header("ApiToken");
 
         $user = UserController::getUserByToken($api_token);
         if ($user) {
             $user_id = $user->id;
 
-
-            $messsages = array(
+            $messages = array(
                 'music_name.required' => 'نام آهنگ الزامی است',
                 'singer_name.required' => 'نام خواننده الزامی است'
             );
@@ -28,7 +24,7 @@ class OrderMusicController extends Controller
             $validator = Validator::make($request->all(), [
                 'music_name' => 'required',
                 'singer_name' => 'required',
-            ], $messsages);
+            ], $messages);
 
             if ($validator->fails()) {
                 $arr = [
@@ -39,13 +35,11 @@ class OrderMusicController extends Controller
                 return response()->json($arr, 400);
             }
 
-
             $order = new OrderMusic();
             $order->music_name = $request->music_name;
             $order->singer_name = $request->singer_name;
             $order->user_id = $user_id;
             $order->save();
-
 
             $arr = [
                 'data' => null,
@@ -53,7 +47,7 @@ class OrderMusicController extends Controller
                 'message' => "سفارش آهنگ شما با موفقیت ثبت شد.",
             ];
 
-            return response()->json($arr, 200);
+            return response()->json($arr);
 
         } else {
             $arr = [
@@ -63,7 +57,5 @@ class OrderMusicController extends Controller
             ];
             return response()->json($arr, 400);
         }
-
     }
-
 }

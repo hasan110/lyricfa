@@ -408,6 +408,12 @@ export default {
     },
     mounted(){
         this.filter.sort_by = 'newest';
+
+        const english_name = this.$route.query.english_name;
+        if (english_name) {
+            this.filter.search_key = english_name;
+        }
+
         this.getList();
     },
     beforeMount(){

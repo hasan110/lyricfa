@@ -17,7 +17,7 @@ class NotificationController extends Controller
 {
     public function addNotification(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'title.required' => 'عنوان نوتیفیکیشن الزامی است',
             'body.required' => 'بدنه نوتیفیکیشن الزامی است',
             'type.required' => 'نوع نوتیفیکیشن الزامی است',
@@ -31,8 +31,7 @@ class NotificationController extends Controller
             'body' => 'required',
             'type' => 'required',
             'image' => 'file|mimes:jpg|dimensions:min_width=200,min_height=200,max_width=500,max_height=500',
-        ], $messsages);
-
+        ], $messages);
 
         if ($validator->fails()) {
             $arr = [
@@ -42,7 +41,6 @@ class NotificationController extends Controller
             ];
             return response()->json($arr, 400);
         }
-
 
         $notification = new Notification();
         $notification->title = $request->title;
@@ -60,7 +58,7 @@ class NotificationController extends Controller
 
     public function editNotification(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'id.required' => 'شناسه ی نوتیفیکیشن الزامی است',
             'id.numeric' => 'شناسه نوتیفیکیشن باید عدد باشد',
             'title.required' => 'عنوان نوتیفیکیشن الزامی است',
@@ -77,7 +75,7 @@ class NotificationController extends Controller
             'body' => 'required',
             'type' => 'required',
             'image' => 'file|mimes:jpg|dimensions:min_width=200,min_height=200,max_width=500,max_height=500',
-        ], $messsages);
+        ], $messages);
 
 
         if ($validator->fails()) {
@@ -143,16 +141,16 @@ class NotificationController extends Controller
         $notif = Notification::find($request->id);
 
         if($notif->type == "one"){
-            if(!isset($request->api_token)){
+            if(!isset($request->user_id)){
                 $arr = [
                     'data' => null,
-                    'errors' => array("با توجه به اینکه نوتیفیکیشن تکی هست api_token ضروری هست"),
+                    'errors' => array("با توجه به اینکه نوتیفیکیشن تکی هست user_id ضروری هست"),
                     'message' => "ارسال نوتیفیکیشن شکست خورد",
                 ];
                 return response()->json($arr, 400);
             }else{
                 try{
-                    $user = UserController::getUserByToken($request->api_token);
+                    $user = UserController::getUserById($request->user_id);
                     if($user->fcm_refresh_token == ""){
                         $arr = [
                             'data' => null,
@@ -179,15 +177,12 @@ class NotificationController extends Controller
             'Content-Type: application/json'
         );
 
-        //notification content
         $notificationData = [
             'title' => $notif->title,
             'body' => $notif->body,
             'image' => 'https://dl.lyricfa.app/uploads/notifications/'.$notif->id.'.jpg'
-            // 'click_action' => 'activities.notifhandler'
         ];
 
-        //Optional
         $dataPayload = [
             'to' => 'VIP',
             'date' => Carbon::now(),
@@ -195,7 +190,6 @@ class NotificationController extends Controller
             "sound" => "default"
         ];
 
-        //Create Api body
         if($notif->type == "all"){
             $tokens = UserController::getListUsersTokenNotifications();
             foreach($tokens as $token)
@@ -206,14 +200,12 @@ class NotificationController extends Controller
                 ]);
             }
 
-        }else if($notif->type == "one" && isset(UserController::getUserByToken($request->api_token)->fcm_refresh_token) && UserController::getUserByToken($request->api_token)->fcm_refresh_token != ""){
+        }else if($notif->type == "one" && isset(UserController::getUserById($request->user_id)->fcm_refresh_token) && UserController::getUserById($request->user_id)->fcm_refresh_token != ""){
             $notifBody = [
                 'notification' => $notificationData,
-                //data payload is optional
                 'data' => $dataPayload,
-                //optional in seconds max_time : 4 week
                 'time_to_live' => 3600,
-                'to' => UserController::getUserByToken($request->api_token)->fcm_refresh_token
+                'to' => UserController::getUserById($request->user_id)->fcm_refresh_token
             ];
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
@@ -253,7 +245,7 @@ class NotificationController extends Controller
 
                 $musics = Music::whereBetween('id', [$from, $to])->get();
                 foreach ($musics as $music) {
-                    $singers = SingerController::getSingerById($music->singers);
+                    $singers = SingerController::getSingerById($music->id);
                     $singer_names = [];
                     foreach ($singers as $singer) {
                         $singer_names[] = $singer->english_name;
@@ -272,7 +264,7 @@ class NotificationController extends Controller
                     throw new Exception('موزیک یافت نشد');
                 }
 
-                $singers = SingerController::getSingerById($music->singers);
+                $singers = SingerController::getSingerById($music->id);
                 $singer_names = [];
                 foreach ($singers as $singer) {
                     $singer_names[] = $singer->english_name;

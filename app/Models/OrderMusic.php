@@ -10,6 +10,7 @@ class OrderMusic extends Model
 {
     use HasFactory;
     protected $guarded = [];
+    protected $table = 'music_orders';
 
     public function user(){
         return $this->belongsTo(User::class);

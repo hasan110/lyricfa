@@ -92,19 +92,20 @@
                             <td>{{ item.id }}</td>
                             <td>
                                 <img :src="Url + 'albums/'+item.id+'.png'" class="item-profile">
-                                <td>
-                                    <div class="d-flex flex-column">
-                                        <span>{{item.album_name_english}}</span>
-                                        <span>{{item.album_name_persian}}</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <v-btn color="primary" dens>
-                                        <router-link :to="{ name:'edit_album' , params:{ id:item.id } }">
-                                            ویرایش
-                                        </router-link>
-                                    </v-btn>
-                                </td>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span>{{item.english_name}}</span>
+                                    <span>{{item.persian_name}}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <v-btn color="primary" dens>
+                                    <router-link :to="{ name:'edit_album' , params:{ id:item.id } }">
+                                        ویرایش
+                                    </router-link>
+                                </v-btn>
+                            </td>
                         </tr>
                         </tbody>
                     </template>

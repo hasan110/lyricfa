@@ -34,47 +34,29 @@
                         label="عنوان فارسی آلبوم"
                     ></v-text-field>
                 </v-col>
-                <v-col cols="3" class="pb-0">
-                    <v-text-field
-                        v-model="singers_count"
-                        append-outer-icon="mdi-minus"
-                        @click:append-outer="toggleSingers(false)"
-                        prepend-icon="mdi-plus"
-                        @click:prepend="toggleSingers(true)"
-                        outlined
-                        dense
-                        label="تعداد خواننده ها"
-                        type="number"
-                        min="1"
-                        :max="max_number_of_singers"
-                        readonly
-                    ></v-text-field>
-                </v-col>
 
             </v-row>
 
             <div class="pb-5">
-                <div v-for="(item , key) in singers_count" :key="key">
-
-                    <v-row>
-                        <v-col cols="4" class="pb-0">
-                            <v-text-field
-                                v-model="form_data.singers[key]"
-                                outlined
-                                dense
-                                :label="'شناسه خواننده ' + (key+1)"
-                            ></v-text-field>
-                        </v-col>
-                    </v-row>
-
-                </div>
+                <v-row>
+                    <v-col cols="6" class="pb-0">
+                        <v-autocomplete
+                            chips deletable-chips multiple small-chips
+                            v-model="form_data.singers"
+                            outlined :items="singers"
+                            item-value="id" dense
+                            item-text="english_name"
+                            label="انتخاب خواننده (ها)"
+                            :search-input.sync="singers_filter.search_key"
+                        ></v-autocomplete>
+                    </v-col>
+                </v-row>
             </div>
 
             <hr>
             <br>
 
             <v-row>
-
                 <v-col cols="4" class="pb-0">
                     <v-file-input
                         show-size
@@ -86,11 +68,9 @@
                         accept="image/*"
                     ></v-file-input>
                 </v-col>
-
             </v-row>
 
             <v-row>
-
                 <v-col cols="12" class="pb-0 text-center">
                     <v-btn
                         color="accent"
@@ -102,9 +82,7 @@
                         ثبت
                     </v-btn>
                 </v-col>
-
             </v-row>
-
 
         </v-container>
     </div>
@@ -116,32 +94,31 @@ export default {
         form_data:{
             singers: [],
         },
-        singers_count: 1,
-        max_number_of_singers: 5,
+        singers: [],
+        singers_filter:{
+            no_page:true
+        },
         errors:{},
         loading: false,
         banner_image: null,
     }),
     watch:{
-        singers_count(){
-            this.singers_count = parseInt(this.singers_count);
+        singers_filter: {
+            handler(){
+                this.getSingers();
+            },
+            deep: true
         }
     },
     methods:{
-        toggleSingers(state){
-            if(state){
-                if(this.singers_count >= 5){
-                    return;
-                }else{
-                    this.singers_count++;
-                }
-            }else{
-                if(this.singers_count <= 1){
-                    return;
-                }else{
-                    this.singers_count--;
-                }
-            }
+        getSingers(){
+            this.singers_filter.singer_ids = this.form_data.singers;
+            this.$http.post(`singers/list?page=1` , this.singers_filter)
+                .then(res => {
+                    this.singers = res.data.data
+                })
+                .catch( () => {
+                });
         },
         saveAlbum(){
             this.loading = true
@@ -153,48 +130,39 @@ export default {
             x.image ? d.append('image_url', x.image) : '';
 
             if(x.singers.length){
-
-                x.singers[0] ? d.append('id_first_singer', x.singers[0]) : '';
-                x.singers[1] ? d.append('id_second_singer', x.singers[1]) : '';
-                x.singers[2] ? d.append('id_third_singer', x.singers[2]) : '';
-                x.singers[3] ? d.append('id_fourth_singer', x.singers[3]) : '';
-
+                d.append('singers', x.singers);
             }
 
             this.$http.post(`albums/create` , d)
-                .then(res => {
-                    this.form_data = {
-                        singers: [],
-                    };
+            .then(res => {
+                this.form_data = {
+                    singers: [],
+                };
 
-                    this.$fire({
-                        title: "موفق",
-                        text: res.data.message,
-                        type: "success",
-                        timer: 5000
-                    })
-
-                    this.$router.push({name:'albums'})
-
+                this.$fire({
+                    title: "موفق",
+                    text: res.data.message,
+                    type: "success",
+                    timer: 5000
                 })
-                .catch( err => {
-                    this.loading = false
-                    const e = err.response.data
-                    // if(e.errors){ this.errors = e.errors }
-                    // else if(e.message){
 
-                    this.$fire({
-                        title: "خطا",
-                        text: e.message,
-                        type: "error",
-                        timer: 5000
-                    })
+                this.$router.push({name:'albums'})
 
-                    // }
-                });
+            })
+            .catch( err => {
+                this.loading = false
+                const e = err.response.data
+                this.$fire({
+                    title: "خطا",
+                    text: e.message,
+                    type: "error",
+                    timer: 5000
+                })
+            });
         }
     },
     mounted(){
+        this.getSingers()
     },
     beforeMount(){
         this.checkAuth()

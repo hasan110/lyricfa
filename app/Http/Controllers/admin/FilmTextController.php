@@ -9,20 +9,17 @@ use App\Http\Controllers\Controller;
 
 class FilmTextController extends Controller
 {
-
     public function getTextList(Request $request)
     {
-
         $id_film = $request->id_film;
-        $films = FilmText::where('id_film', '=', $id_film)->orderBy("id")->get();
+        $films = FilmText::where('film_id', '=', $id_film)->orderBy("id")->get();
 
         $arr = [
             'data' => $films,
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
         ];
-        return response()->json($arr, 200);
-
+        return response()->json($arr);
     }
 
     private function getStartTime(string $request)
@@ -47,10 +44,6 @@ class FilmTextController extends Controller
 
         return $compute;
     }
-
-    //str::limit
-
-
 
     public function insertListTexts(Request $request)
     {
@@ -96,7 +89,7 @@ class FilmTextController extends Controller
                 $text->start_time = $startTime;
                 $text->end_time = $endTime;
                 $text->comments = $comments;
-                $text->id_film = $filmId;
+                $text->film_id = $filmId;
                 $text->save();
             }
 
@@ -119,8 +112,7 @@ class FilmTextController extends Controller
 
     public function updateListTexts(Request $request)
     {
-
-        $messsages = array(
+        $messages = array(
             'film_id.required' => 'film_id نمی تواند خالی باشد',
             'film_id.numeric' => 'film_id باید فقط شامل عدد باشد',
             'texts.required' => 'texts نمی تواند خالی باشد',
@@ -133,7 +125,7 @@ class FilmTextController extends Controller
             'texts.*.text_english' => 'required',
             'texts.*.end_time' => 'required',
             'texts.*.start_time' => 'required',
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
             $arr = [
@@ -148,7 +140,6 @@ class FilmTextController extends Controller
         $isFilmExist = FilmController::getFilmById($filmId);
 
         if ($isFilmExist) {
-
 
             if (!$this->deleteListTexts($request)) {
                 $arr = [
@@ -172,7 +163,7 @@ class FilmTextController extends Controller
                 $text->start_time = $startTime;
                 $text->end_time = $endTime;
                 $text->comments = $comments;
-                $text->id_film = $filmId;
+                $text->film_id = $filmId;
                 $text->save();
             }
 
@@ -193,8 +184,6 @@ class FilmTextController extends Controller
         }
     }
 
-
-
     public function deleteListTexts(Request $request): bool
     {
         $listTexts = $this->getAllTextFilms($request->film_id);
@@ -207,9 +196,10 @@ class FilmTextController extends Controller
 
     private function getAllTextFilms($film_id)
     {
-        $texts = FilmText::where('id_film', "=", $film_id)->get();
+        $texts = FilmText::where('film_id', "=", $film_id)->get();
         return $texts;
     }
+
     public function uploadFileGetInfoAndSave(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -329,7 +319,7 @@ class FilmTextController extends Controller
                 $text->start_time = $startTime;
                 $text->end_time = $endTime;
                 $text->priority = $index + 1;
-                $text->id_film = $filmId;
+                $text->film_id = $filmId;
                 $text->save();
             }
         }
@@ -352,7 +342,7 @@ class FilmTextController extends Controller
             ], 400);
         }
 
-        $film_texts = FilmText::where('id_film',$request->id)->orderBy("id")->get();
+        $film_texts = FilmText::where('film_id',$request->id)->orderBy("id")->get();
 
         $file_texts = '';
         foreach ($film_texts as $key => $text)

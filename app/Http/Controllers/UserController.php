@@ -9,13 +9,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use PharIo\Manifest\ElementCollectionException;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class UserController extends Controller
 {
     public static function isUserSubscriptionValid(Request $request)
     {
         $api_token = $request->header("ApiToken");
-//        $data = User::header('ApiToken', $api_token)->first();
 
         $data = self::getUserByToken($api_token);
 
@@ -52,16 +52,16 @@ class UserController extends Controller
             return response()->json($arr, 400);
         }
 
-
-
         $api_token = $request->header("ApiToken");
         $user = UserController::getUserByToken($api_token);
         if ($user) {
-            $user->fcm_refresh_token = $request->token;
-                        unset($user['days_remain']);
+            unset($user['days_remain']);
             unset($user['hours_remain']);
             unset($user['minutes_remain']);
-            $user->save();
+            unset($user['api_token']);
+            $user->update([
+                'fcm_refresh_token' => $request->token
+            ]);
 
             $response = [
                 'data' => null,
@@ -69,7 +69,7 @@ class UserController extends Controller
                 ],
                 'message' => " ویرایش کاربر با موفقیت انجام شد",
             ];
-            return response()->json($response, 200);
+            return response()->json($response);
         } else {
 
             $response = [
@@ -85,44 +85,50 @@ class UserController extends Controller
 
     public function addRewardsByUser(Request $request)
     {
-        $api_token = $request->header("ApiToken");
-        $user = self::getUserByToken($api_token);
-        if ($user) {
-            $expired = Carbon::parse($user->expired_at);
-            if( $expired> Carbon::now()){
-                $user->expired_at = $expired->addMinutes(30);
-            }else{
-                $user->expired_at =Carbon::now()->addMinutes(30);
-            }
+        return response()->json([
+            'data' => null,
+            'errors' => [
+            ],
+            'message' => "اشتراک شما با موفقیت تمدید شد",
+        ]);
 
-            unset($user['days_remain']);
-            unset($user['hours_remain']);
-            unset($user['minutes_remain']);
-            $user->save();
-            $response = [
-                'data' => null,
-                'errors' => [
-                ],
-                'message' => "اشتراک شما با موفقیت تمدید شد",
-            ];
-            return response()->json($response, 200);
-
-        } else {
-
-            $response = [
-                'data' => null,
-                'errors' => [
-                ],
-                'message' => "مشکل در احراز هویت",
-            ];
-            return response()->json($response, 401);
-        }
+        // $api_token = $request->header("ApiToken");
+        // $user = self::getUserByToken($api_token);
+        // if ($user) {
+        //     $expired = Carbon::parse($user->expired_at);
+        //     if( $expired> Carbon::now()){
+        //         $user->expired_at = $expired->addMinutes(30);
+        //     }else{
+        //         $user->expired_at =Carbon::now()->addMinutes(30);
+        //     }
+        //     unset($user['days_remain']);
+        //     unset($user['hours_remain']);
+        //     unset($user['minutes_remain']);
+        //     $user->save();
+        //     $response = [
+        //         'data' => null,
+        //         'errors' => [
+        //         ],
+        //         'message' => "اشتراک شما با موفقیت تمدید شد",
+        //     ];
+        //     return response()->json($response, 200);
+        // } else {
+        //     $response = [
+        //         'data' => null,
+        //         'errors' => [
+        //         ],
+        //         'message' => "مشکل در احراز هویت",
+        //     ];
+        //     return response()->json($response, 401);
+        // }
     }
 
 
     public static function getUserByToken($api_token)
     {
-        $user =  User::where('api_token', $api_token)->first();
+        $token = PersonalAccessToken::findToken($api_token);
+        $user = $token->tokenable;
+        $user->api_token = $api_token;
 
         $now = Carbon::now();
         $expiredAt = $user->expired_at;
@@ -176,16 +182,18 @@ class UserController extends Controller
             $phone_number = substr($phone_number, -strlen($phone_number) + 1);
         }
         $user = User::where('phone_number', $phone_number)->first();
-        $user->api_token = Str::random(64);
-        $user->save();
+        $user->tokens()->delete();
+        $token = $user->createToken(config('app.name'));
+        $user->api_token = $token->plainTextToken;
         return $user;
     }
 
     public static function changeTokenAndCReturnUser($phone_number , $prefix)
     {
         $user = User::where('phone_number', $phone_number)->where('prefix_code', $prefix)->first();
-        $user->api_token = Str::random(64);
-        $user->save();
+        $user->tokens()->delete();
+        $token = $user->createToken(config('app.name'));
+        $user->api_token = $token->plainTextToken;
         return $user;
     }
 
@@ -205,11 +213,14 @@ class UserController extends Controller
         $user->phone_number = $phone_number;
         $user->prefix_code = $prefix;
         $user->expired_at = Carbon::now()->addDays(2); //Free subscription
-        $user->api_token = Str::random(64);
         $user->code_introduce = $code_introduce;
         $user->referral_code = $referral_code;
 
         $user->save();
+
+        $user->tokens()->delete();
+        $token = $user->createToken(config('app.name'));
+        $user->api_token = $token->plainTextToken;
 
         if ($referral_code)
         {
@@ -302,15 +313,18 @@ class UserController extends Controller
             $daysSubscription = $plan->subscription_days;
             $expired = Carbon::parse($user->expired_at);
             if( $expired> Carbon::now()){
-                $user->expired_at = $expired->addDays($daysSubscription);
+                $expired_at = $expired->addDays($daysSubscription);
             }else{
-                $user->expired_at =Carbon::now()->addDays($daysSubscription);
+                $expired_at =Carbon::now()->addDays($daysSubscription);
             }
 
             unset($user['days_remain']);
             unset($user['hours_remain']);
             unset($user['minutes_remain']);
-            $user->save();
+            unset($user['api_token']);
+            $user->update([
+                'expired_at' => $expired_at
+            ]);
 
             if ($user->referral_code)
             {
@@ -336,7 +350,6 @@ class UserController extends Controller
     {
 
         $api_token = $request->header("ApiToken");
-//        $data = User::header('ApiToken', $api_token)->first();
 
         $data = $this->getUserByToken($api_token);
 
@@ -370,9 +383,7 @@ class UserController extends Controller
         }
     }
 
-        public static function getUserById($id){
+    public static function getUserById($id){
         return  User::where('id', $id)->first();
     }
-
-
 }

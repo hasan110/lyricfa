@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\UserController;
+use App\Models\Comment;
 use App\Models\CommentMusic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -14,7 +15,7 @@ class CommentMusicController extends Controller
 {
     public function changeStatusMusicComment(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'status.required' => 'وضعیت الزامی است',
             'id.required' => 'شناسه کامنت الزامی است',
             'id.numeric' => 'شناسه کامنت باید شامل عدد باشد'
@@ -23,7 +24,7 @@ class CommentMusicController extends Controller
         $validator = Validator::make($request->all(), [
             'id' => 'required|numeric',
             'status' => 'required|numeric',
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
             $arr = [
@@ -55,6 +56,7 @@ class CommentMusicController extends Controller
 
         if($request->status === 1){
             $comment->id_admin_confirmed = $admin->id;
+            $comment->status = 1;
             $comment->save();
         }else{
             $comment->delete();
@@ -65,14 +67,12 @@ class CommentMusicController extends Controller
             'errors' => null,
             'message' => "تغییر وضعیت کامنت موفقیت آمیز بود",
         ];
-
         return response()->json($arr, 200);
-
     }
 
     public function getMusicCommentsNotConfirmed(Request $request)
     {
-        $response = CommentMusic::where("id_admin_confirmed", 0)->with('music')->get();
+        $response = Comment::where("status", 0)->with('commentable')->get();
 
         $arr = [
             'data' => $response,
@@ -86,7 +86,7 @@ class CommentMusicController extends Controller
     public function getCommentById($id)
     {
 
-        return CommentMusic::where('id', $id)->first();
+        return Comment::where('id', $id)->first();
 
     }
 }

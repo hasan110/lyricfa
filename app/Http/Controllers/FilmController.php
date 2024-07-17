@@ -96,8 +96,8 @@ class FilmController extends Controller
 
     public static function getFilmById($id)
     {
-        $get_music = Film::where('id', $id)->first();
+        $film = Film::where('id', $id)->first();
 
-        return $get_music;
+        return $film;
     }
 }

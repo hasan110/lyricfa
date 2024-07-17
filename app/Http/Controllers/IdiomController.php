@@ -24,7 +24,7 @@ class IdiomController extends Controller
                 ],
                 'message' => "هیچ کلمه ای پیدا نشد",
             ];
-            return response()->json($arr, 200);
+            return response()->json($arr);
         } else {
             $arr = [
                 'data' => $get_idioms,
@@ -32,17 +32,14 @@ class IdiomController extends Controller
                 ],
                 'message' => "اطلاعات با موفقیت گرفته شد",
             ];
-            return response()->json($arr, 200);
+            return response()->json($arr);
         }
-
     }
 
     public static function getIdiomById(int $id)
     {
         $idiom =  Idiom::where('id', $id)->first();
-
         $rooms = json_decode($idiom->definition, true);
-
         $idiom->parse = $rooms;
         return $idiom;
     }
@@ -54,7 +51,6 @@ class IdiomController extends Controller
         orWhere('definition', 'LIKE', "%{$request->search_text}%")->
         paginate(25);
 
-
         foreach ($idioms as $index => $item) {
             $rooms = json_decode($item->definition, true);
 
@@ -63,12 +59,10 @@ class IdiomController extends Controller
 
         $response = [
             'data' => $idioms,
-            'errors' => [
-            ],
+            'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
         ];
-        return response()->json($response, 200);
-
+        return response()->json($response);
     }
 
     public function getWordIdiomsByRate(Request $request)
@@ -218,18 +212,18 @@ class IdiomController extends Controller
             'message' => "اطلاعات با موفقیت گرفته شد",
         ];
 
-        return response()->json($response, 200);
+        return response()->json($response);
     }
 
     public function getWordIdioms(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'word.required' => 'کلمه الزامی است.'
         );
 
         $validator = Validator::make($request->all(), [
             'word' => 'required'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
             return response()->json([
@@ -280,7 +274,6 @@ class IdiomController extends Controller
             $base_word_data = null;
         }
 
-
         $response = [
             'data' => [
                 'word' => $word_data,
@@ -295,13 +288,13 @@ class IdiomController extends Controller
 
     public function getIdiomData(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'idiom.required' => 'اصطلاح الزامی است.'
         );
 
         $validator = Validator::make($request->all(), [
             'idiom' => 'required'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
             return response()->json([
@@ -319,14 +312,14 @@ class IdiomController extends Controller
                 'errors' => [],
                 'message' => "اطلاعات با موفقیت گرفته شد",
             ];
-            return response()->json($response, 200);
+            return response()->json($response);
         }else{
             $response = [
                 'data' => null,
                 'errors' => [],
                 'message' => "اصطلاح یافت نشد",
             ];
-            return response()->json($response, 200);
+            return response()->json($response);
         }
     }
 }

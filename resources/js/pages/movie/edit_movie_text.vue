@@ -13,7 +13,7 @@
         </div>
 
         <div class="edit-texts-wrapper" id="edit-texts-wrapper">
-            <v-container>
+            <v-container fluid>
                 <v-row>
                     <v-col cols="4">
 

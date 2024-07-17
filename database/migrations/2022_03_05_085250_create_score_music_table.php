@@ -14,9 +14,9 @@ class CreateScoreMusicTable extends Migration
     public function up()
     {
         Schema::create('score_music', function (Blueprint $table) {
-            $table->id();
-            $table->bigInteger('id_user')->require();
-            $table->bigInteger('id_song')->require();
+            $table->bigIncrements('id');
+            $table->bigInteger('user_id')->require();
+            $table->bigInteger('music_id')->require();
             $table->integer('score')->require();
             $table->timestamps();
         });

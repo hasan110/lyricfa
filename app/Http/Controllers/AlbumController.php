@@ -9,33 +9,31 @@ class AlbumController extends Controller
 {
     public static function getAlbumById($album_id)
     {
-
-
         $arr = [];
         foreach (explode(',', $album_id) as $item) {
-            $arr[] = Album::where('id', $item)->first();
+            $album = Album::where('id', $item)->first();
+            $album['album_name_english'] = $album->english_name;
+            $album['album_name_persian'] = $album->persian_name;
+            $album['image_url'] = 'albums/'.$album->id.'.png';
+            $album['create_time'] = $album->published_at;
+            $arr[] = $album;
         }
-
-
         return $arr;
-
     }
 
     public function getAlbumsList(Request $request)
     {
-
-
         $api_token = $request->header("ApiToken");
 
         $user = UserController::getUserByToken($api_token);
         $user_id  = $user->id;
         if ($user_id) {
-            $albums = Album::orderBy('id', 'DESC')->
-            where('album_name_english', 'LIKE', "%{$request->search_text}%")->
-            orWhere('album_name_english', 'LIKE', "%{$request->search_text}%")->
+            $albums = Album::select(
+                ['id','english_name AS album_name_english', 'persian_name AS album_name_persian', 'published_at AS create_time', 'created_at', 'updated_at'],
+            )->orderBy('id', 'DESC')->
+            where('english_name', 'LIKE', "%{$request->search_text}%")->
+            orWhere('persian_name', 'LIKE', "%{$request->search_text}%")->
             paginate(25);
-
-
             $response = [
                 'data' => $albums,
                 'errors' => [
@@ -56,15 +54,14 @@ class AlbumController extends Controller
 
     public function getNAlbumList(Request $request)
     {
-
-
-
         $api_token = $request->header("ApiToken");
 
         $user = UserController::getUserByToken($api_token);
         $user_id  = $user->id;
         if($user_id) {
-            $albums = Album::orderBy('id', 'DESC')->take(10)->get();
+            $albums = Album::select(
+                ['id','english_name AS album_name_english', 'persian_name AS album_name_persian', 'published_at AS create_time', 'created_at', 'updated_at'],
+            )->orderBy('id', 'DESC')->take(10)->get();
             $response = [
                 'data' => $albums,
                 'errors' => [

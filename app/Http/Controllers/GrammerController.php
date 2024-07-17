@@ -16,10 +16,6 @@ class GrammerController extends Controller
         $user = UserController::getUserByToken($api_token);
 
         $list = Grammer::paginate(25);
-//
-//        foreach ($list as $item) {
-//
-//        }
 
         return response()->json([
             'data' => $list,

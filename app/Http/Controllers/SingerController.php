@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Album;
+use App\Models\Music;
 use App\Models\Singer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -9,24 +11,28 @@ use Illuminate\Support\Str;
 
 class SingerController extends Controller
 {
-    public static function getSingerById($singer_id)
+    public static function getSingerById($music_id)
     {
-
-
-        $arr = [];
-        foreach (explode(',', $singer_id) as $item) {
-            $arr[] = Singer::where('id', $item)->first();
+        $music = Music::find($music_id);
+        if (!$music) {
+            return [];
         }
 
+        return $music->singers;
+    }
 
-        return $arr;
+    public static function getSingerByAlbumId($album_id)
+    {
+        $album = Album::find($album_id);
+        if (!$album) {
+            return [];
+        }
 
+        return $album->singers;
     }
 
     public function getSingersList(Request $request)
     {
-
-
         $api_token = $request->header("ApiToken");
 
         $user = UserController::getUserByToken($api_token);
@@ -112,23 +118,17 @@ class SingerController extends Controller
 
     public function getSingerByIdWithLike(Request $request)
     {
-
-
         $api_token = $request->header("ApiToken");
-
         $user = UserController::getUserByToken($api_token);
         $user_id = $user->id;
 
-
-        $messsages = array(
+        $messages = array(
             'singer_id.required' => 'شناسه ی خواننده الزامی است'
-
         );
 
         $validator = Validator::make($request->all(), [
             'singer_id' => 'required',
-        ], $messsages);
-
+        ], $messages);
 
         if ($validator->fails()) {
             $arr = [
@@ -138,7 +138,6 @@ class SingerController extends Controller
             ];
             return response()->json($arr, 400);
         }
-
 
         if ($user_id) {
 
@@ -158,24 +157,18 @@ class SingerController extends Controller
 
             $response = [
                 'data' => $data,
-                'errors' => [
-                ],
+                'errors' => [],
                 'message' => "اطلاعات با موفقیت گرفته شد",
             ];
-            return response()->json($response, 200);
+            return response()->json($response);
 
-        }
-        else {
+        } else {
             $response = [
                 'data' => null,
-                'errors' => [
-                ],
+                'errors' => [],
                 'message' => "کاربر احراز هویت نشد",
             ];
             return response()->json($response, 401);
         }
-
     }
-
-
 }

@@ -36,7 +36,7 @@ class MusicController extends Controller
                     $musics = $musics->orderBy('created_at', 'asc');
                     break;
                 case 'publish':
-                    $musics = $musics->orderBy('publicated_at', 'asc');
+                    $musics = $musics->whereNotNull('published_at')->orderBy('published_at', 'desc');
                     break;
                 case 'easy':
                     $musics = $musics->where('degree', 1);
@@ -50,43 +50,36 @@ class MusicController extends Controller
                 case 'expert':
                     $musics = $musics->where('degree', 4);
                     break;
-                case 'seen':
+                case 'most_seen':
                     $musics = $musics->orderByRaw('CAST(views as SIGNED INTEGER) DESC');
                     break;
                 case 'has_album':
-                    $musics = $musics->whereNotNul('album');
+                    $musics = $musics->whereNotNull('album_id');
                     break;
             }
         }
         $musics = $musics->paginate(50);
 
         foreach ($musics as $music) {
-
-            $music->singers = \App\Http\Controllers\SingerController::getSingerById($music->singers);
+            $music->singers = \App\Http\Controllers\SingerController::getSingerById($music->id);
             $music->num_like = LikeMusicController::getNumberMusicLike($music->id);
             $music->num_comment = CommentMusicController::getNumberMusicComment($music->id);
-
         }
 
         $response = [
             'data' => $musics,
-            'errors' => [
-            ],
+            'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
         ];
-        return response()->json($response, 200);
+        return response()->json($response);
     }
 
     public function musicsCreate(Request $request)
     {
-        $messsages = array(
-            'id_first_singer.required' => 'شناسه ی اولین خواننده نمی تواند خالی باشد',
-            'id_first_singer.numeric' => 'id_first_singer باید فقط شامل عدد باشد',
-            'id_second_singer.numeric' => 'id_second_singer باید فقط شامل عدد باشد',
-            'id_third_singer.numeric' => 'id_third_singer باید فقط شامل عدد باشد',
-            'id_fourth_singer.numeric' => 'id_fourth_singer باید فقط شامل عدد باشد',
+        $message = array(
             'english_title.required' => 'عنوان انگلیسی آهنگ نمی تواند خالی باشد',
             'persian_title.required' => 'عنوان فارسی آهنگ نمی تواند خالی باشد',
+            'singers.required' => 'حتما یک خواننده باید انتخاب شود.',
             'start_demo.required' => 'زمان شروع دمو آهنگ نمی تواند خالی باشد',
             'start_demo.numeric' => 'زمان شروع دمو آهنگ باید عدد باشد',
             'end_demo.required' => 'زمان پایان دمو آهنگ نمی تواند خالی باشد',
@@ -97,27 +90,24 @@ class MusicController extends Controller
             'date_publication.date' => 'تاریخ انتشار آهنگ باید از جنس تاریخ باشد',
             'music.required' => 'فایل موزیک باید آپلود شود',
             'music.file' => 'نوع موزیک باید فایل باشد',
-            //  'music.mimetypes' => 'نوع فایل باید mp3 باشد',
             'image.file' => 'نوع عکس باید فایل باشد',
             'image.mimes' => 'نوع فایل باید jpg باشد',
             'image.dimensions' => 'عکس باید 300 در 300 باشد',
             'is_user_request.required' => 'سفارش شده توسط کاربر نمی تواند خالی باشد',
             'is_user_request.numeric' => 'سفارش شده توسط کاربر باید عدد باشد',
-
         );
 
         $validator = Validator::make($request->all(), [
-            'id_first_singer' => 'required|numeric',
             'english_title' => 'required',
             'persian_title' => 'required',
+            'singers' => 'required',
             'start_demo' => 'required|numeric',
             'end_demo' => 'required|numeric',
             'hardest_degree' => 'required|numeric',
             'date_publication' => 'required|date',
-            //  'music' => 'required|file|mimetypes:mp3',
-            'image' => 'file|mimes:jpg|dimensions:min_width=300,min_height=300,max_width=300,max_height=300'
-            ,     'is_user_request' => 'required|numeric'
-        ], $messsages);
+            'image' => 'file|mimes:jpg|dimensions:min_width=300,min_height=300,max_width=300,max_height=300',
+            'is_user_request' => 'required|numeric'
+        ], $message);
 
         if ($validator->fails()) {
             $arr = [
@@ -131,26 +121,14 @@ class MusicController extends Controller
         $music = new Music();
         $music->name = $request->english_title;
         $music->persian_name = $request->persian_title;
-        $music->singers = $this->set4digit($request->id_first_singer);
-        if ($request->id_second_singer) {
-            $music->singers = $music->singers . "," . $this->set4digit($request->id_second_singer);
-        }
-        if ($request->id_third_singer) {
-            $music->singers = $music->singers . "," . $this->set4digit($request->id_third_singer);
-        }
-        if ($request->id_fourth_singer) {
-            $music->singers = $music->singers . "," . $this->set4digit($request->id_fourth_singer);
-        }
-
         $music->start_demo = $request->start_demo;
         $music->end_demo = $request->end_demo;
         $music->degree = $request->hardest_degree;
-        $music->publicated_at = $request->date_publication;
-            $music->is_user_request = $request->is_user_request;
+        $music->published_at = $request->date_publication;
+        $music->is_user_request = $request->is_user_request;
 
-
-        if ($request->album) {
-            $music->album = $request->album;
+        if ($request->album_id) {
+            $music->album_id = $request->album;
         }
 
         $music->save();
@@ -163,15 +141,17 @@ class MusicController extends Controller
             $this->uploadFileById($request->image,"musics_banner", $music->id);
         }
 
+        if ($request->singers) {
+            $music->singers()->attach(explode(',', $request->singers));
+        }
+
         $arr = [
             'data' => $music,
             'errors' => null,
             'message' => "موزیک با موفقیت اضافه شد"
         ];
 
-        return response()->json($arr, 200);
-
-
+        return response()->json($arr);
     }
 
 
@@ -179,15 +159,10 @@ class MusicController extends Controller
     //TODO this before added
     public function musicsUpdate(Request $request)
     {
-        $messsages = array(
-
+        $messages = array(
             'id.required' => 'id نمی تواند خالی باشد',
             'id.numeric' => 'id باید فقط شامل عدد باشد',
-            'id_first_singer.required' => 'شناسه ی اولین خواننده نمی تواند خالی باشد',
-            'id_first_singer.numeric' => 'id_first_singer باید فقط شامل عدد باشد',
-            'id_second_singer.numeric' => 'id_second_singer باید فقط شامل عدد باشد',
-            'id_third_singer.numeric' => 'id_third_singer باید فقط شامل عدد باشد',
-            'id_fourth_singer.numeric' => 'id_fourth_singer باید فقط شامل عدد باشد',
+            'singers.required' => 'لیست خواننده ها نمی تواند خالی باشد',
             'english_title.required' => 'عنوان انگلیسی آهنگ نمی تواند خالی باشد',
             'persian_title.required' => 'عنوان فارسی آهنگ نمی تواند خالی باشد',
             'start_demo.required' => 'زمان شروع دمو آهنگ نمی تواند خالی باشد',
@@ -199,7 +174,6 @@ class MusicController extends Controller
             'date_publication.required' => 'تاریخ انتشار آهنگ نمی تواند خالی باشد',
             'date_publication.date' => 'تاریخ انتشار آهنگ باید از جنس تاریخ باشد',
             'music.file' => 'نوع موزیک باید فایل باشد',
-            //  'music.mimeType' => 'نوع فایل باید mp3 باشد',
             'image.file' => 'نوع عکس باید فایل باشد',
             'image.mimes' => 'نوع فایل باید jpg باشد',
             'image.dimensions' => 'عکس باید 300 در 300 باشد',
@@ -207,16 +181,15 @@ class MusicController extends Controller
 
         $validator = Validator::make($request->all(), [
             'id'=> 'required|numeric',
-            'id_first_singer' => 'required|numeric',
+            'singers' => 'required',
             'english_title' => 'required',
             'persian_title' => 'required',
             'start_demo' => 'required|numeric',
             'end_demo' => 'required|numeric',
             'hardest_degree' => 'required|numeric',
             'date_publication' => 'required|date',
-            //  'music' => 'file|mimeType:mp3',
             'image' => 'file|mimes:jpg|dimensions:min_width=300,min_height=300,max_width=300,max_height=300'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
             $arr = [
@@ -229,39 +202,24 @@ class MusicController extends Controller
 
         $music = $this->getMusicById($request->id);
         if(!$music){
-
             $arr = [
                 'data' => null,
                 'errors' => null,
                 'message' => "این موزیک وجود ندارد برای به روز رسانی"
             ];
-
-            return response()->json($arr, 200);
+            return response()->json($arr, 400);
         }
+
         $music->name = $request->english_title;
         $music->persian_name = $request->persian_title;
-        $music->singers = $this->set4digit($request->id_first_singer);
-        if ($request->id_second_singer) {
-            $music->singers = $music->singers . "," . $this->set4digit($request->id_second_singer);
-        }
-        if ($request->id_third_singer) {
-            $music->singers = $music->singers . "," . $this->set4digit($request->id_third_singer);
-        }
-        if ($request->id_fourth_singer) {
-            $music->singers = $music->singers . "," . $this->set4digit($request->id_fourth_singer);
-        }
-
         $music->is_user_request = $request->has('is_user_request') ? intval($request->is_user_request) : 0;
         $music->start_demo = $request->start_demo;
         $music->end_demo = $request->end_demo;
         $music->degree = $request->hardest_degree;
-        $music->publicated_at = $request->date_publication;
-
-
+        $music->published_at = $request->date_publication;
         if ($request->album) {
-            $music->album = $request->album;
+            $music->album_id = $request->album;
         }
-
         $music->save();
 
         if ($request->hasFile('music')) {
@@ -272,75 +230,43 @@ class MusicController extends Controller
             $this->uploadFileById($request->image,"musics_banner", $music->id);
         }
 
+        if ($request->singers) {
+            $music->singers()->sync(explode(',', $request->singers));
+        }
+
         $arr = [
             'data' => $music,
             'errors' => null,
             'message' => "موزیک با موفقیت اضافه شد"
         ];
 
-        return response()->json($arr, 200);
+        return response()->json($arr);
 
 
     }
-
-    private function set4digit(string $mainString)
-    {
-        $length = Str::length($mainString);
-
-        switch ($length) {
-            case 1:
-                return '000' . $mainString;
-                break;
-            case 2:
-                return '00' . $mainString;
-                break;
-            case 3:
-                return '0' . $mainString;
-                break;
-            case 4:
-                return $mainString;
-                break;
-            default:
-                return '0000';
-                break;
-        }
-    }
-
 
     public static function getMusicById($id)
     {
-
-        $get_music = Music::where('id', $id)->first();
-
-        return $get_music;
+        return Music::where('id', $id)->first();
     }
 
-
-    //Todo add below
     public function getMusicCompleteInfo(Request $request)
     {
         $id = $request->id;
         $music = $this->getMusicById($id);
-        $singer_id = $music->singers;
-
-        $singer = SingerController::getSingerById($singer_id);
-
+        $singer = SingerController::getSingerById($music->id);
         $api_token = $request->header("ApiToken");
-
         $user_id = AdminController::getAdminByToken($api_token)->id;
-
         $num_like = LikeMusicController::getNumberMusicLike($id);
-
         $num_comment = CommentMusicController::getNumberMusicComment($id);
-
         $user_like_it = LikeMusicController::isUserLike($id, $user_id);
-
         $average_score = ScoreMusicController::getAverageMusicScore($id);
 
         $singers = [];
         foreach ($singer as $item){
             $singers[] = $item->id;
         }
+
         $data = [
             'music' => $music,
             'singers' => $singers,
@@ -356,11 +282,6 @@ class MusicController extends Controller
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
         ];
-
-        return response()->json($arr, 200);
-
+        return response()->json($arr);
     }
-
-
-
 }

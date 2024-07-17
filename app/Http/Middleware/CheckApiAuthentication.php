@@ -6,6 +6,7 @@ use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Laravel\Sanctum\PersonalAccessToken;
 use Morilog\Jalali\Jalalian;
 
 class CheckApiAuthentication
@@ -20,24 +21,27 @@ class CheckApiAuthentication
     public function handle(Request $request, Closure $next)
     {
         $api_token = $request->header("ApiToken");
-        // dd($request->header("ApiToken"));
-        // return response()->json($api_token, 401);
         if (!$api_token) {
-            // return Response::error(null , 'کاربر احراز هویت نشده' , null , 401);
-
             $arr = [
                 'data' => null,
                 'errors' => null,
                 'message' => "اوه خطا در احراز هویت",
             ];
             return response()->json($arr, 401);
-
         }
 
-        $user = User::where('api_token', $api_token)->first();
-        if (!$user) {
-            // return Response::error(null , 'کاربر احراز هویت نشده' , null , 401);
+        $token = PersonalAccessToken::findToken($api_token);
+        if (!$token) {
+            $arr = [
+                'data' => null,
+                'errors' => null,
+                'message' => "اوه خطا در احراز هویت",
+            ];
+            return response()->json($arr, 401);
+        }
+        $user = $token->tokenable;
 
+        if (!$user) {
             $arr = [
                 'data' => null,
                 'errors' => null,
@@ -46,10 +50,6 @@ class CheckApiAuthentication
             return response()->json($arr, 401);
 
         }
-
-           
-        // return response()->json(Jalalian::fromCarbon($user->updated_at)->format('Y-m-d H:i:s'), 200);
-
          return $next($request);
     }
 }

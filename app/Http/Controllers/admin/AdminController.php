@@ -9,13 +9,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
+use Laravel\Sanctum\PersonalAccessToken;
 
 
 class AdminController extends Controller
 {
-
     public function login(Request $request){
-        $messsages = array(
+        $messages = array(
             'username.required' => 'نام کاربری نمی تواند خالی باشد',
             'password.required' => 'پسورد نمی تواند خالی باشد',
         );
@@ -23,7 +23,7 @@ class AdminController extends Controller
         $validator = Validator::make($request->all(), [
             'username' => 'required',
             'password' => 'required',
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
             $arr = [
@@ -36,14 +36,15 @@ class AdminController extends Controller
 
         $admin = $this->getAdmin($request->username, $request->password);
         if($admin){
-            $admin->api_token = Str::random(64);
-            $admin->save();
+            $admin->tokens()->delete();
+            $token = $admin->createToken(config('app.name'));
+            $admin->api_token = $token->plainTextToken;
             $arr = [
                 'data' => $admin,
                 'errors' => null,
                 'message' => "لاگین موفقیت آمیز بود",
             ];
-            return response()->json($arr, 200);
+            return response()->json($arr);
 
         }else{
             $arr = [
@@ -63,7 +64,7 @@ class AdminController extends Controller
     public function get_admin_data(Request $request)
     {
         $token = $request->header('ApiToken');
-        $admin =  $admin = $this->getAdminByToken($token);
+        $admin = $this->getAdminByToken($token);
         if(!$admin){
             $arr = [
                 'data' => null,
@@ -77,12 +78,12 @@ class AdminController extends Controller
             'errors' => null,
             'message' => "اطلاعات ادمین با موفقیت دریافت شد",
         ];
-        return response()->json($arr, 200);
+        return response()->json($arr);
     }
 
     public static function getAdminByToken($api_token)
     {
-        $admin =  Admin::where('api_token', $api_token)->first();
-        return $admin;
+        $token = PersonalAccessToken::findToken($api_token);
+        return $token->tokenable;
     }
 }

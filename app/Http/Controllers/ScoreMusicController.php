@@ -11,15 +11,14 @@ class ScoreMusicController extends Controller
 
     public static function getNumberMusicScore($id_music)
     {
-        return ScoreMusic::where('id_song', $id_music)->count();
+        return ScoreMusic::where('music_id', $id_music)->count();
     }
 
     public static function getAverageMusicScore($id_music)
     {
-
-        $scoreMusic = ScoreMusic::where('id_song', $id_music);
+        $scoreMusic = ScoreMusic::where('music_id', $id_music);
         if ($scoreMusic)
-            return ScoreMusic::where('id_song', $id_music)->avg('score');
+            return ScoreMusic::where('music_id', $id_music)->avg('score');
         else
             return 0;
     }
@@ -53,7 +52,7 @@ class ScoreMusicController extends Controller
             $user_id = $user->id;
 
 
-            $scoreMusic = ScoreMusic::where('id_song', $request->music_id)->where('id_user', $user_id);
+            $scoreMusic = ScoreMusic::where('music_id', $request->music_id)->where('user_id', $user_id);
             if ($scoreMusic->count() == 0) {
                 $arr = [
                     'data' => 0.0,
@@ -128,8 +127,8 @@ class ScoreMusicController extends Controller
             $user_id = $user->id;
 
             $score = new ScoreMusic();
-            $score->id_song = (int)$request->music_id;
-            $score->id_user = $user_id;
+            $score->music_id = (int)$request->music_id;
+            $score->user_id = $user_id;
             $score->score = (int)$request->score;
             $score->save();
 
@@ -205,7 +204,7 @@ class ScoreMusicController extends Controller
         $user = UserController::getUserByToken($api_token);
         if ($user) {
             $user_id = $user->id;
-            return ScoreMusic::where('id_song', $request->music_id)->where('id_user', $user_id)->first();
+            return ScoreMusic::where('music_id', $request->music_id)->where('user_id', $user_id)->first();
         } else {
             return null;
         }

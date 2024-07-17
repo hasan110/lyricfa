@@ -34,20 +34,6 @@
                     ></v-text-field>
                 </v-col>
                 <v-col cols="3" class="pb-0">
-                    <!--          <v-text-field-->
-                    <!--            v-model="singers_count"-->
-                    <!--            append-outer-icon="mdi-minus"-->
-                    <!--            @click:append-outer="toggleSingers(false)"-->
-                    <!--            prepend-icon="mdi-plus"-->
-                    <!--            @click:prepend="toggleSingers(true)"-->
-                    <!--            outlined-->
-                    <!--            dense-->
-                    <!--            label="تعداد خواننده ها"-->
-                    <!--            type="number"-->
-                    <!--            min="1"-->
-                    <!--            :max="max_number_of_singers"-->
-                    <!--            readonly-->
-                    <!--          ></v-text-field>-->
                 </v-col>
 
             </v-row>
@@ -223,9 +209,7 @@ export default {
             is_user_request: false,
             singers: [],
         },
-        singers_count: 1,
         singers: [],
-        max_number_of_singers: 5,
         menu: false,
         singers_filter:{
             no_page:true
@@ -267,19 +251,14 @@ export default {
             x.has_album ? d.append('has_album', 1) : d.append('has_album', 0);
             x.is_user_request ? d.append('is_user_request', 1) : d.append('is_user_request', 0);
             x.album_id ? d.append('album_id', x.album_id) : '';
-            d.append('hardest_degree', x.hardest_degree);
+            d.append('hardest_degree', parseInt(x.hardest_degree));
             x.image ? d.append('image', x.image) : '';
             x.music ? d.append('music', x.music) : '';
             d.append('start_demo', x.start_demo);
             d.append('end_demo', x.end_demo);
 
             if(x.singers.length){
-
-                x.singers[0] ? d.append('id_first_singer', x.singers[0]) : '';
-                x.singers[1] ? d.append('id_second_singer', x.singers[1]) : '';
-                x.singers[2] ? d.append('id_third_singer', x.singers[2]) : '';
-                x.singers[3] ? d.append('id_fourth_singer', x.singers[3]) : '';
-
+                d.append('singers', x.singers);
             }
 
             this.$http.post(`musics/create` , d)

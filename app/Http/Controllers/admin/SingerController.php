@@ -15,7 +15,6 @@ use App\Http\Controllers\Controller;
 
 class SingerController extends Controller
 {
-
     public function SingersList(Request $request)
     {
         $list = Singer::whereNotNull('id');
@@ -50,24 +49,21 @@ class SingerController extends Controller
         }
 
         foreach ($list as $item) {
-
             $item->num_like = LikeSingerController::getNumberSingerLike($item->id);
-            $item->num_musics = 0;
-
+            $item->num_musics = $item->musics()->count();
         }
 
         $response = [
             'data' => $list,
-            'errors' => [
-            ],
+            'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
         ];
-        return response()->json($response, 200);
+        return response()->json($response);
     }
 
     public function singersCreate(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'english_name.required' => 'نام انگلیسی خواننده نمی تواند خالی باشد',
             'persian_name.required' => 'نام فارسی خواننده نمی تواند خالی باشد',
             'image.required' => 'عکس خواننده اجباری است',
@@ -80,7 +76,7 @@ class SingerController extends Controller
             'english_name' => 'required',
             'persian_name' => 'required',
             'image' => 'required|file|mimes:jpg|dimensions:min_width=300,min_height=300,max_width=300,max_height=300'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
             $arr = [
@@ -106,16 +102,12 @@ class SingerController extends Controller
             'errors' => null,
             'message' => "موزیک با موفقیت اضافه شد"
         ];
-
-        return response()->json($arr, 200);
-
-
+        return response()->json($arr);
     }
-
 
     public function singersUpdate(Request $request)
     {
-        $messsages = array(
+        $messages = array(
 
             'id.required' => 'id نمی تواند خالی باشد',
             'id.numeric' => 'id باید فقط شامل عدد باشد',
@@ -131,7 +123,7 @@ class SingerController extends Controller
             'english_name' => 'required',
             'persian_name' => 'required',
             'image' => 'file|mimes:jpg|dimensions:min_width=300,min_height=300,max_width=300,max_height=300'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
             $arr = [
@@ -151,7 +143,7 @@ class SingerController extends Controller
                 'message' => "این خواننده وجود ندارد برای به روز رسانی"
             ];
 
-            return response()->json($arr, 200);
+            return response()->json($arr);
         }
         $singer->english_name = $request->english_name;
         $singer->persian_name = $request->persian_name;
@@ -168,33 +160,24 @@ class SingerController extends Controller
             'message' => "خواننده با موفقیت به روز رسانی شد"
         ];
 
-        return response()->json($arr, 200);
-
-
+        return response()->json($arr);
     }
-
 
     public static function getSingerById($id)
     {
-
-        $get_singer= Singer::where('id', $id)->first();
-
-        return $get_singer;
-
+        return Singer::where('id', $id)->first();
     }
-
 
     public function getSinger(Request $request)
     {
-
-        $messsages = array(
+        $messages = array(
             'id.required' => 'id نمی تواند خالی باشد',
             'id.numeric' => 'id باید فقط شامل عدد باشد',
         );
 
         $validator = Validator::make($request->all(), [
             'id' => 'required|numeric'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
             $arr = [
@@ -214,6 +197,4 @@ class SingerController extends Controller
         ];
         return response()->json($arr, 200);
     }
-
-
 }

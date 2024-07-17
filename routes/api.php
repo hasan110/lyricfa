@@ -44,6 +44,8 @@ Route::post('/check-verify-code', [SmsVerifyController::class, 'checkVerifyCode'
 
 //setting
 Route::get('/get_setting', [SettingController::class, 'getSetting']);
+Route::get('/like_movements', [SettingController::class, 'like_movements']);
+Route::get('/singer_movements', [SettingController::class, 'singer_movements']);
 
 Route::middleware('CheckApiAuthentication')->group(function () {
 
@@ -55,7 +57,6 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/get_music_all_info', [MusicController::class, 'getMusicCompleteInfo']);
     Route::post('/get_music_list', [MusicController::class, 'getMusicList']);
     Route::post('/search_singers_music', [MusicController::class, 'getMusicSingersSearchList']);
-    Route::post('/get_music_video_list', [MusicController::class, 'getMusicVideoList']);
     Route::post('/get_n_music_list', [MusicController::class, 'getNMusicList']);
     Route::post('/get_last_music_list', [MusicController::class, 'getLastMusicList']);
     Route::post('/get_music_hardest', [MusicController::class, 'getMusicWithHardest']);
@@ -63,7 +64,6 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/add_view', [MusicController::class, 'addMusicViewOne']);
     Route::post('/get_singer_musics', [MusicController::class, 'getSingerMusics']);
     Route::post('/get_album_musics', [MusicController::class, 'getAlbumMusics']);
-    Route::post('/get_sum_musics', [MusicController::class, 'getSumMusics']);
     Route::post('/get_singer_musics_no_paging', [MusicController::class, 'getSingerMusicsNoPaging']);
     Route::post('/get_requested_music', [MusicController::class, 'getRequestedMusic']);
     Route::post('/get_n_requested_music', [MusicController::class, 'getNRequestedMusic']);
@@ -140,7 +140,7 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/check_word', [WordController::class, 'checkWord']);
 
 
-    //english english words
+    // english words
     Route::post('/get_english_all_words', [WordEnEnController::class, 'getAllWords']);
     Route::post('/get_english_word', [WordEnEnController::class, 'getWord']);
 
@@ -150,7 +150,6 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/get_word_idioms_by_rate', [IdiomController::class, 'getWordIdiomsByRate']);
     Route::post('/get_word_idioms', [IdiomController::class, 'getWordIdioms']);
     Route::post('/get_idiom_data', [IdiomController::class, 'getIdiomData']);
-    Route::post('/get_text_idioms', [TextIdiomsController::class, 'getTextIdioms']);
 
     //map
     Route::post('/get_base_word', [MapController::class, 'getBaseWord']);

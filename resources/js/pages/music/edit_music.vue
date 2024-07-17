@@ -34,22 +34,6 @@
                         label="عنوان فارسی آهنگ"
                     ></v-text-field>
                 </v-col>
-<!--                <v-col cols="3" class="pb-0">-->
-<!--                    <v-text-field-->
-<!--                        v-model="singers_count"-->
-<!--                        append-outer-icon="mdi-minus"-->
-<!--                        @click:append-outer="toggleSingers(false)"-->
-<!--                        prepend-icon="mdi-plus"-->
-<!--                        @click:prepend="toggleSingers(true)"-->
-<!--                        outlined-->
-<!--                        dense-->
-<!--                        label="تعداد خواننده ها"-->
-<!--                        type="number"-->
-<!--                        min="1"-->
-<!--                        :max="max_number_of_singers"-->
-<!--                        readonly-->
-<!--                    ></v-text-field>-->
-<!--                </v-col>-->
 
             </v-row>
 
@@ -83,7 +67,7 @@
                     >
                         <template #activator="{ on, attrs }">
                             <v-text-field
-                                v-model="form_data.publicated_at"
+                                v-model="form_data.published_at"
                                 label="تاریخ انتشار"
                                 outlined
                                 dense
@@ -102,7 +86,7 @@
                 </v-col>
                 <v-col v-if="form_data.has_album" cols="4" class="pb-2">
                     <v-text-field
-                        v-model="form_data.album"
+                        v-model="form_data.album_id"
                         outlined
                         dense
                         label="شناسه آلبوم"
@@ -125,19 +109,19 @@
                     >
                         <v-radio
                             label="آسان"
-                            value="1"
+                            :value="1"
                         ></v-radio>
                         <v-radio
                             label="متوسط"
-                            value="2"
+                            :value="2"
                         ></v-radio>
                         <v-radio
                             label="سخت"
-                            value="3"
+                            :value="3"
                         ></v-radio>
                         <v-radio
                             label="خیلی سخت"
-                            value="4"
+                            :value="4"
                         ></v-radio>
                     </v-radio-group>
                 </v-col>
@@ -227,8 +211,6 @@ export default {
             singers: [],
         },
         singers: [],
-        singers_count: 0,
-        max_number_of_singers: 5,
         menu: false,
         errors:{},
         singers_filter:{
@@ -255,28 +237,13 @@ export default {
                 .catch( () => {
                 });
         },
-        toggleSingers(state){
-            if(state){
-                if(this.singers_count >= 5){
-                    return;
-                }else{
-                    this.singers_count++;
-                }
-            }else{
-                if(this.singers_count <= 1){
-                    return;
-                }else{
-                    this.singers_count--;
-                }
-            }
-        },
         getMusic(){
             this.$store.commit('SHOW_APP_LOADING' , 1)
             this.$http.get(`musics/music/${this.music_id}`)
                 .then(res => {
                     this.form_data = res.data.data.music
                     this.form_data.singers = res.data.data.singers
-                    this.form_data.album ? this.form_data.has_album = true : this.form_data.has_album = false
+                    this.form_data.album_id ? this.form_data.has_album = true : this.form_data.has_album = false
                     this.getSingers();
                     this.$store.commit('SHOW_APP_LOADING' , 0)
                 })
@@ -300,11 +267,11 @@ export default {
             d.append('id', this.music_id)
             x.name ? d.append('english_title', x.name) : '';
             x.persian_name ? d.append('persian_title', x.persian_name) : '';
-            x.publicated_at ? d.append('date_publication', x.publicated_at) : '';
+            x.published_at ? d.append('date_publication', x.published_at) : '';
             x.has_album ? d.append('has_album', 1) : d.append('has_album', 0);
             x.is_user_request ? d.append('is_user_request', 1) : d.append('is_user_request', 0);
-            x.album ? d.append('album', x.album) : '';
-            x.degree ? d.append('hardest_degree', x.degree) : '';
+            x.album_id ? d.append('album', x.album_id) : '';
+            x.degree ? d.append('hardest_degree', parseInt(x.degree)) : '';
             x.image ? d.append('image', x.image) : '';
             x.music ? d.append('music', x.music) : '';
             d.append('start_demo', x.start_demo);
@@ -344,11 +311,6 @@ export default {
                         timer: 5000
                     })
                 });
-        },
-        prepare(){
-            this.singers_count = this.form_data.singers.length
-
-            return true;
         }
     },
     mounted(){

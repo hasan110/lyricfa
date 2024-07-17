@@ -59,7 +59,7 @@ class ReplaceController extends Controller
                     'message' => "فیلم یافت نشد",
                 ], 400);
             }
-            $texts_query = FilmText::select(['id', 'text_english', 'text_persian'])->where('id_film' , $request->input('id'))->orderBy('id');
+            $texts_query = FilmText::select(['id', 'text_english', 'text_persian'])->where('film_id' , $request->input('id'))->orderBy('id');
             $total = $texts_query->count();
             $texts = $texts_query->offset(($page - 1) * $per_page)->limit($per_page)->get();
 
@@ -242,7 +242,7 @@ class ReplaceController extends Controller
             } else if ($request->type === 'film') {
                 $model = Film::find($request->input('id'));
                 $text_model = new FilmText();
-                $related_column = 'id_film';
+                $related_column = 'film_id';
             } else {
                 throw new Exception(" نوع متن معتبر نیست.");
             }

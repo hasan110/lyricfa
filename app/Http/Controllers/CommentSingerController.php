@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CommentSinger;
+use App\Models\Singer;
+use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class CommentSingerController extends Controller
 {
-
-
     public static function getNumberSingerComment($id_singer)
     {
-        return CommentSinger::where('id_singer', $id_singer)->count();
+        $singer = Singer::where('id', $id_singer)->first();
+
+        return $singer ? $singer->comments()->count() : 0;
     }
 
     public function getSingerComment(Request $request)
@@ -20,7 +21,6 @@ class CommentSingerController extends Controller
         $messsages = array(
             'singer_id.required' => 'شناسه خواننده الزامی است',
             'singer_id.numeric' => 'شناسه خواننده باید شامل عدد باشد',
-
         );
 
         $validator = Validator::make($request->all(), [
@@ -36,7 +36,16 @@ class CommentSingerController extends Controller
             return response()->json($arr, 400);
         }
 
-        $response = CommentSinger::where('id_singer', $request->singer_id)->get();
+        $singer = Singer::where('id', $request->singer_id)->first();
+        if (!$singer) {
+            $arr = [
+                'data' => null,
+                'errors' => [],
+                'message' => "  خواننده یافت نشد",
+            ];
+            return response()->json($arr, 400);
+        }
+        $response = $singer->comments;
 
         $arr = [
             'data' => $response,
@@ -44,8 +53,7 @@ class CommentSingerController extends Controller
             'message' => "دریافت لیست کامنت موفقیت آمیز بود",
         ];
 
-        return response()->json($arr, 200);
-
+        return response()->json($arr);
     }
 
     public function addSingerComment(Request $request)
@@ -77,11 +85,20 @@ class CommentSingerController extends Controller
         if ($user) {
             $user_id = $user->id;
 
-            $comment = new CommentSinger();
-            $comment->id_user = $user_id;
-            $comment->id_singer = (int)$request->singer_id;
-            $comment->comment = $request->comment;
-            $comment->save();
+            $singer = Singer::where('id', $request->singer_id)->first();
+            if (!$singer) {
+                $arr = [
+                    'data' => null,
+                    'errors' => [],
+                    'message' => "  خواننده یافت نشد",
+                ];
+                return response()->json($arr, 400);
+            }
+
+            $singer->comments()->create([
+                'user_id' => $user_id,
+                'comment' => $request->comment
+            ]);
 
             $arr = [
                 'data' => null,
@@ -89,7 +106,7 @@ class CommentSingerController extends Controller
                 'message' => "افزودن کامنت موفقیت آمیز بود",
             ];
 
-            return response()->json($arr, 200);
+            return response()->json($arr);
         } else {
             $arr = [
                 'data' => null,
@@ -123,9 +140,9 @@ class CommentSingerController extends Controller
             return response()->json($arr, 400);
         }
 
-        $name = $this->commentIsExistInListComments($request);
+        $comment = $this->commentIsExistInListComments($request);
 
-        if (!isset($name)) { // array use count
+        if (!isset($comment)) { // array use count
             $arr = [
                 'data' => null,
                 'errors' => null,
@@ -135,10 +152,8 @@ class CommentSingerController extends Controller
             return response()->json($arr, 400);
         }
 
-        $comment = $name;
-        $comment->id = (int)$name->id;
-        $comment->id_singer = (int)$name->id_singer;
         $comment->comment = $request->comment;
+        $comment->status = 0;
         $comment->save();
 
         $arr = [
@@ -147,13 +162,12 @@ class CommentSingerController extends Controller
             'message' => "ویرایش کامنت موفقیت آمیز بود",
         ];
 
-        return response()->json($arr, 200);
+        return response()->json($arr);
 
     }
 
     public function removeSingerComment(Request $request)
     {
-
         $messsages = array(
             'id.required' => 'شناسه کامنت الزامی است',
             'id.numeric' => 'شناسه کامنت باید شامل عدد باشد'
@@ -172,22 +186,17 @@ class CommentSingerController extends Controller
             return response()->json($arr, 400);
         }
 
-        $name = $this->commentIsExistInListComments($request);
+        $comment = $this->commentIsExistInListComments($request);
 
-        if (!isset($name)) { // array use count
+        if (!isset($comment)) { // array use count
             $arr = [
                 'data' => null,
                 'errors' => null,
                 'message' => "چنین کامنتی وجود ندارد جهت حذف",
             ];
-
             return response()->json($arr, 400);
         }
 
-
-        $comment = $name;
-        $comment->id = (int)$name->id;
-        $comment->id_singer = (int)$name->id_singer;
         $comment->delete();
 
         $arr = [
@@ -196,23 +205,19 @@ class CommentSingerController extends Controller
             'message' => "حذف کامنت موفقیت آمیز بود",
         ];
 
-        return response()->json($arr, 200);
-
+        return response()->json($arr);
     }
 
     public function commentIsExistInListComments(Request $request)
     {
-
-
         $api_token = $request->header("ApiToken");
 
         $user = UserController::getUserByToken($api_token);
         if ($user) {
             $user_id = $user->id;
-            return CommentSinger::where('id', $request->id)->where('id_user', $user_id)->first();
+            return Comment::where('id', $request->id)->where('user_id', $user_id)->first();
         }else{
             return null;
         }
-
     }
 }

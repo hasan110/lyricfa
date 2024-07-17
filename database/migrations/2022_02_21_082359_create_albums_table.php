@@ -14,12 +14,10 @@ class CreateAlbumsTable extends Migration
     public function up()
     {
         Schema::create('albums', function (Blueprint $table) {
-            $table->id();
-            $table->string('album_name_english')->default("");
-            $table->string('album_name_persian')->default("");
-            $table->string('singers')->default("");
-            $table->text('image_url')->default("");
-            $table->date('create_time')->default("1900/01/01");
+            $table->bigIncrements('id');
+            $table->string('english_name')->nullable();
+            $table->string('persian_name')->nullable();
+            $table->date('published_at')->nullable();
             $table->timestamps();
         });
     }

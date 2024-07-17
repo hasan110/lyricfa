@@ -53,7 +53,8 @@
                             <th>#</th>
                             <th>کاربر</th>
                             <th>متن نظر</th>
-                            <th>آهنگ</th>
+                            <th>نظر برای</th>
+                            <th>اطلاعات</th>
                             <th>عملیات</th>
                         </tr>
                         </thead>
@@ -79,40 +80,59 @@
                                 <template v-else>
                                     ---
                                 </template>
-                                <td>{{item.comment}}</td>
-                                <td>
-                                    <template v-if="item.music">
-                                        <router-link :to="{name:'edit_music' , params:{id:item.music.id}}">{{item.music.persian_name}}</router-link>
+                            </td>
+                            <td>{{item.comment}}</td>
+                            <td>
+                                <template v-if="item.commentable">
+                                    <template v-if="item.commentable_type === 'App\\Models\\Singer'">
+                                        خواننده
                                     </template>
-                                    <template v-else>
-                                        ---
+                                    <template v-else-if="item.commentable_type === 'App\\Models\\Music'">
+                                        آهنگ
                                     </template>
-                                </td>
-                                <td>
-                                    <v-btn
-                                        class="mx-2"
-                                        fab small
-                                        dark
-                                        @click="toggleStatusModal(item.id , 1)"
-                                        color="indigo"
-                                    >
-                                        <v-icon dark>
-                                            mdi-check-bold
-                                        </v-icon>
-                                    </v-btn>
+                                </template>
+                                <template v-else>
+                                    ---
+                                </template>
+                            </td>
+                            <td>
+                                <template v-if="item.commentable">
+                                    <template v-if="item.commentable_type === 'App\\Models\\Singer'">
+                                        <router-link :to="{name:'singers' , query:{english_name:item.commentable.english_name}}">{{item.commentable.english_name}}</router-link>
+                                    </template>
+                                    <template v-else-if="item.commentable_type === 'App\\Models\\Music'">
+                                        <router-link :to="{name:'edit_music' , params:{id:item.commentable.id}}">{{item.commentable.name}}</router-link>
+                                    </template>
+                                </template>
+                                <template v-else>
+                                    ---
+                                </template>
+                            </td>
+                            <td>
+                                <v-btn
+                                    class="mx-2"
+                                    fab small
+                                    dark
+                                    @click="toggleStatusModal(item.id , 1)"
+                                    color="indigo"
+                                >
+                                    <v-icon dark>
+                                        mdi-check-bold
+                                    </v-icon>
+                                </v-btn>
 
-                                    <v-btn
-                                        class="mx-2"
-                                        fab small
-                                        dark
-                                        @click="toggleStatusModal(item.id , 0)"
-                                        color="red"
-                                    >
-                                        <v-icon dark>
-                                            mdi-close-thick
-                                        </v-icon>
-                                    </v-btn>
-                                </td>
+                                <v-btn
+                                    class="mx-2"
+                                    fab small
+                                    dark
+                                    @click="toggleStatusModal(item.id , 0)"
+                                    color="red"
+                                >
+                                    <v-icon dark>
+                                        mdi-close-thick
+                                    </v-icon>
+                                </v-btn>
+                            </td>
                         </tr>
                         </tbody>
                     </template>
