@@ -316,12 +316,16 @@ export default {
             return true;
         },
         getRuleTitle(item){
-            if (item.proccess_method === 1) {
-                return item.id + " - جستجو در مپ - علت مپ: " + item.map_reason.english_title;
-            } else if (item.proccess_method === 2) {
-                return item.id + " - جستجو در متن - " + (item.words && item.words.length > 20 ? item.words.slice(0,20) + ' ...' : item.words) + ' - ' + item.type;
-            } else if (item.proccess_method === 3) {
-                return item.id + " - جستجو در نوع لغت - " + item.type;
+            if (parseInt(item.apply_method) === 1) {
+                if (item.proccess_method === 1) {
+                    return item.id + " - جستجو در مپ - علت مپ: " + item.map_reason.english_title;
+                } else if (item.proccess_method === 2) {
+                    return item.id + " - جستجو در متن - " + (item.words && item.words.length > 20 ? item.words.slice(0,20) + ' ...' : item.words) + ' - ' + item.type;
+                } else if (item.proccess_method === 3) {
+                    return item.id + " - جستجو در نوع لغت - " + item.type;
+                }
+            } else if (parseInt(item.apply_method) === 2) {
+                return item.id + " - اعمال گروهی - " + item.type;
             }
         },
         saveGrammer(){
@@ -362,9 +366,15 @@ export default {
                 });
         },
         getGrammerRulesList(){
+            if (this.form_data.rules) {
+                const rules = [];
+                this.form_data.rules.forEach((val) => rules.push(val.id));
+                this.rules_filter.rule_ids = rules;
+            }
+            this.rules_filter.no_page = true;
             this.$http.post(`grammers/rules/list?page=1` , this.rules_filter)
                 .then(res => {
-                    this.rules_list = res.data.data.data
+                    this.rules_list = res.data.data
                 })
                 .catch( err => {
                     console.log(err)

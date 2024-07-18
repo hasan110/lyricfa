@@ -68,6 +68,7 @@
                         <thead>
                         <tr>
                             <th>#</th>
+                            <th>نوع اعمال</th>
                             <th>نوع جست و جو</th>
                             <th>اطلاعات</th>
                             <th>لغات</th>
@@ -88,24 +89,38 @@
                         >
                             <td>{{ item.id }}</td>
                             <td>
-                                <template v-if="item.proccess_method === 1">
-                                    جستجو در مپ ها
+                                <template v-if="item.apply_method === 1">
+                                    اعمال تکی
                                 </template>
-                                <template v-else-if="item.proccess_method === 2">
-                                    جستجو در متن
-                                </template>
-                                <template v-else-if="item.proccess_method === 3">
-                                    جستجو در نوع لغت
+                                <template v-else-if="item.apply_method === 2">
+                                    اعمال گروهی
                                 </template>
                             </td>
                             <td>
-                                <template v-if="item.proccess_method === 1">
-                                    علت مپ:
-                                    {{item.map_reason.english_title}} - {{item.map_reason.persian_title}}
+                                <template v-if="parseInt(item.apply_method) === 1">
+                                    <template v-if="item.proccess_method === 1">
+                                        جستجو در مپ ها
+                                    </template>
+                                    <template v-else-if="item.proccess_method === 2">
+                                        جستجو در متن
+                                    </template>
+                                    <template v-else-if="item.proccess_method === 3">
+                                        جستجو در نوع لغت
+                                    </template>
                                 </template>
-                                <template v-else>
-                                    {{ item.type }}
+                                <template v-else>---</template>
+                            </td>
+                            <td>
+                                <template v-if="parseInt(item.apply_method) === 1">
+                                    <template v-if="item.proccess_method === 1">
+                                        علت مپ:
+                                        {{item.map_reason.english_title}} - {{item.map_reason.persian_title}}
+                                    </template>
+                                    <template v-else>
+                                        {{ item.type }}
+                                    </template>
                                 </template>
+                                <template v-else>{{ item.type }}</template>
                             </td>
                             <td>
                                 <template v-if="item.proccess_method === 2">
@@ -147,6 +162,17 @@
                 <hr>
                 <v-container>
                     <v-row class="pt-3">
+                        <v-col cols="12" xs="12" sm="12" class="pb-0">
+                            <v-select
+                                v-model="form_data.apply_method"
+                                outlined clearable :items="rule_types_items"
+                                item-value="value" item-text="title"
+                                :error-messages="errors.apply_method"
+                                dense label="نوع اعمال قانون"
+                            ></v-select>
+                        </v-col>
+                    </v-row>
+                    <v-row v-if="form_data.apply_method === 1">
                         <v-col cols="12" xs="12" sm="12" class="pb-0">
                             <div>ابتدا نوع جستجو را برای قانون گرامر تنظیم کنید:</div>
                             <v-radio-group v-model="form_data.proccess_method" row>
@@ -192,6 +218,27 @@
                             ></v-autocomplete>
                         </v-col>
                     </v-row>
+                    <v-row v-if="form_data.apply_method === 2">
+                        <v-col cols="12" xs="12" sm="12" class="pb-0">
+                            <v-autocomplete
+                                dense multiple chips
+                                v-model="form_data.sub_rules"
+                                outlined :items="rules_list"
+                                item-value="id"
+                                :item-text="getRuleTitle"
+                                :error-messages="errors.sub_rules"
+                                label="انتخاب زیرمجموعه ها"
+                            ></v-autocomplete>
+                        </v-col>
+                        <v-col cols="12" xs="12" sm="12" class="pb-0">
+                            <v-text-field
+                                v-model="form_data.type"
+                                outlined clearable
+                                :error-messages="errors.type"
+                                dense label="عنوان"
+                            ></v-text-field>
+                        </v-col>
+                    </v-row>
                 </v-container>
 
                 <v-divider></v-divider>
@@ -218,6 +265,17 @@
                 <hr>
                 <v-container>
                     <v-row class="pt-3">
+                        <v-col cols="12" xs="12" sm="12" class="pb-0">
+                            <v-select
+                                v-model="edit_form_data.apply_method"
+                                outlined clearable :items="rule_types_items"
+                                item-value="value" item-text="title"
+                                :error-messages="edit_errors.apply_method"
+                                dense label="نوع اعمال قانون" disabled
+                            ></v-select>
+                        </v-col>
+                    </v-row>
+                    <v-row v-if="parseInt(edit_form_data.apply_method) === 1">
                         <v-col cols="12" xs="12" sm="12" class="pb-0">
                             <div> نوع جستجو:</div>
                             <v-radio-group disabled v-model="edit_form_data.proccess_method" row>
@@ -263,6 +321,27 @@
                             ></v-autocomplete>
                         </v-col>
                     </v-row>
+                    <v-row v-if="parseInt(edit_form_data.apply_method) === 2">
+                        <v-col cols="12" xs="12" sm="12" class="pb-0">
+                            <v-autocomplete
+                                dense multiple chips
+                                v-model="edit_form_data.sub_rules"
+                                outlined :items="rules_list"
+                                item-value="id"
+                                :item-text="getRuleTitle"
+                                :error-messages="edit_errors.sub_rules"
+                                label="انتخاب زیرمجموعه ها"
+                            ></v-autocomplete>
+                        </v-col>
+                        <v-col cols="12" xs="12" sm="12" class="pb-0">
+                            <v-text-field
+                                v-model="edit_form_data.type"
+                                outlined clearable
+                                :error-messages="edit_errors.type"
+                                dense label="عنوان"
+                            ></v-text-field>
+                        </v-col>
+                    </v-row>
                 </v-container>
 
                 <v-divider></v-divider>
@@ -286,9 +365,13 @@ export default {
     name:'words',
     data: () => ({
         list:[],
+        rules_list:[],
         filter:{},
+        get_rules_filter:{},
         edit_form_data:{},
-        form_data:{},
+        form_data:{
+            proccess_method:1
+        },
         errors:{},
         edit_errors:{},
         sort_by_list: [
@@ -301,7 +384,18 @@ export default {
             'search_disorder',
             'search_part_of_word',
             'search_first_of_word',
-            'search_end_of_word'
+            'search_end_of_word',
+            'search_multiple'
+        ],
+        rule_types_items: [
+            {
+                value:1,
+                title:'تکی',
+            },
+            {
+                value:2,
+                title:'گروهی',
+            }
         ],
         current_page:1,
         last_page:0,
@@ -328,6 +422,13 @@ export default {
                     this.fetch_loading = false
                 });
         },
+        getRules(){
+            this.$http.post(`grammers/rules/list?page=1&limit=1000&apply_method=1` , this.get_rules_filter)
+                .then(res => {
+                    this.rules_list = res.data.data
+                })
+                .catch( () => {});
+        },
         Search(e){
             if (e.keyCode === 13) {
                 this.current_page = 1
@@ -339,6 +440,15 @@ export default {
             this.current_page = 1
             this.list = []
             this.getList()
+        },
+        getRuleTitle(item){
+            if (item.proccess_method === 1) {
+                return item.id + " - جستجو در مپ - علت مپ: " + item.map_reason.english_title;
+            } else if (item.proccess_method === 2) {
+                return item.id + " - جستجو در متن - " + (item.words && item.words.length > 20 ? item.words.slice(0,20) + ' ...' : item.words) + ' - ' + item.type;
+            } else if (item.proccess_method === 3) {
+                return item.id + " - جستجو در نوع لغت - " + item.type;
+            }
         },
         saveGrammerRule(){
             this.loading = true;
@@ -446,6 +556,7 @@ export default {
     mounted(){
         this.filter.sort_by = 'desc';
         this.getList();
+        this.getRules();
         this.getMapReasonsList();
         this.getWordTypes();
     },

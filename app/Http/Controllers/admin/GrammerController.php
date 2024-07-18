@@ -43,12 +43,15 @@ class GrammerController extends Controller
 
     public function GrammerRulesList(Request $request)
     {
-        $list = GrammerRule::with('map_reason');
+        $list = GrammerRule::with(['map_reason','rule_group']);
 
         if ($request->search_key) {
             $list = $list->where('type', 'LIKE', "%{$request->search_key}%")
                 ->orWhere('words', 'LIKE', "%{$request->search_key}%")
                 ->orWhere('id', $request->search_key);
+        }
+        if ($request->apply_method) {
+            $list = $list->where('apply_method', $request->apply_method);
         }
         if ($request->sort_by) {
             switch ($request->sort_by) {
@@ -61,7 +64,24 @@ class GrammerController extends Controller
                     break;
             }
         }
-        $list = $list->paginate(50);
+        if ($request->has('limit') && $request->input('limit')) {
+            $list = $list->limit((int)$request->input('limit'))->get();
+        } else {
+            $list = $list->paginate(50);
+        }
+
+        if (($request->rule_ids and !empty($request->rule_ids)) || $request->no_page) {
+            $new_list = GrammerRule::with(['map_reason','rule_group'])->whereIn('id', $request->rule_ids ?? [0])->get();
+            $list = $list->merge($new_list);
+        }
+
+        foreach ($list as $item) {
+            $sub_rules = [];
+            if ($item->apply_method == 2) {
+                $sub_rules = $item->rule_group()->get()->pluck('id')->toArray();
+            }
+            $item->sub_rules = $sub_rules;
+        }
 
         return response()->json([
             'data' => $list,
@@ -167,8 +187,10 @@ class GrammerController extends Controller
     public function createGrammerRule(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'apply_method' => 'required',
             'proccess_method' => 'required',
         ], [
+            'apply_method.required' => 'نوع اعمال قانون نمی تواند خالی باشد',
             'proccess_method.required' => 'نوع جستجو نمی تواند خالی باشد',
         ]);
 
@@ -180,36 +202,52 @@ class GrammerController extends Controller
             ], 400);
         }
 
+        $apply_method = $request->input('apply_method');
         $proccess_method = $request->input('proccess_method');
         $map_reason = null;
         $type = null;
         $words = null;
-        switch ($proccess_method) {
-            case 1:
-                $map_reason = $request->map_reason_id;
-            break;
-            case 2:
-                $type = $request->type;
-                $words = $request->words;
-            break;
-            case 3:
-                $type = $request->word_type;
-            break;
-            default:
-            return response()->json([
-                'data' => null,
-                'errors' => null,
-                'message' => "نوع جستجو نامعتبر می باشد.",
-            ], 400);
+        if ((int)$apply_method === 1) {
+            switch ($proccess_method) {
+                case 1:
+                    $map_reason = $request->map_reason_id;
+                    break;
+                case 2:
+                    $type = $request->type;
+                    $words = $request->words;
+                    break;
+                case 3:
+                    $type = $request->word_type;
+                    break;
+                default:
+                    return response()->json([
+                        'data' => null,
+                        'errors' => null,
+                        'message' => "نوع جستجو نامعتبر می باشد.",
+                    ], 400);
+            }
+        } else if ((int)$apply_method === 2) {
+            if (empty($request->sub_rules)) {
+                return response()->json([
+                    'data' => null,
+                    'errors' => null,
+                    'message' => "لیست قوانین زیر مجموعه را خالی نگذارید.",
+                ], 400);
+            }
+            $type = $request->type;
         }
 
-
         $grammer_rule = new GrammerRule();
+        $grammer_rule->apply_method = (int)$apply_method;
         $grammer_rule->proccess_method = $proccess_method;
         $grammer_rule->map_reason_id = $map_reason;
         $grammer_rule->type = $type;
         $grammer_rule->words = $words;
         $grammer_rule->save();
+
+        if ((int)$apply_method === 2) {
+            $grammer_rule->rule_group()->attach($request->sub_rules);
+        }
 
         $arr = [
             'data' => $grammer_rule,
@@ -224,9 +262,11 @@ class GrammerController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required',
+            'apply_method' => 'required',
             'proccess_method' => 'required',
         ], [
             'id.required' => 'شناسه نمی تواند خالی باشد',
+            'apply_method.required' => 'نوع اعمال قانون نمی تواند خالی باشد',
             'proccess_method.required' => 'نوع جستجو نمی تواند خالی باشد',
         ]);
 
@@ -238,36 +278,52 @@ class GrammerController extends Controller
             ], 400);
         }
 
+        $apply_method = $request->input('apply_method');
         $proccess_method = $request->input('proccess_method');
         $map_reason = null;
         $type = null;
         $words = null;
-        switch ($proccess_method) {
-            case 1:
-                $map_reason = $request->map_reason_id;
-            break;
-            case 2:
-                $type = $request->type;
-                $words = $request->words;
-            break;
-            case 3:
-                $type = $request->word_type;
-            break;
-            default:
-            return response()->json([
-                'data' => null,
-                'errors' => null,
-                'message' => "نوع جستجو نامعتبر می باشد.",
-            ], 400);
+        if ((int)$apply_method === 1) {
+            switch ($proccess_method) {
+                case 1:
+                    $map_reason = $request->map_reason_id;
+                break;
+                case 2:
+                    $type = $request->type;
+                    $words = $request->words;
+                break;
+                case 3:
+                    $type = $request->type;
+                break;
+                default:
+                return response()->json([
+                    'data' => null,
+                    'errors' => null,
+                    'message' => "نوع جستجو نامعتبر می باشد.",
+                ], 400);
+            }
+        } else if ((int)$apply_method === 2) {
+            if (empty($request->sub_rules)) {
+                return response()->json([
+                    'data' => null,
+                    'errors' => null,
+                    'message' => "لیست قوانین زیر مجموعه را خالی نگذارید.",
+                ], 400);
+            }
+            $type = $request->type;
         }
-
 
         $grammer_rule = GrammerRule::find($request->id);
         $grammer_rule->proccess_method = $proccess_method;
+        $grammer_rule->apply_method = (int)$apply_method;
         $grammer_rule->map_reason_id = $map_reason;
         $grammer_rule->type = $type;
         $grammer_rule->words = $words;
         $grammer_rule->save();
+
+        if ((int)$apply_method === 2) {
+            $grammer_rule->rule_group()->sync($request->sub_rules);
+        }
 
         $arr = [
             'data' => $grammer_rule,
@@ -439,6 +495,7 @@ class GrammerController extends Controller
             $rules[] = [
                 'id' => intval($item->pivot->grammer_rule_id),
                 'proccess_method' => intval($item->proccess_method),
+                'apply_method' => intval($item->apply_method),
                 'type' => $item->type,
                 'words' => $item->words,
                 'level' => intval($item->pivot->level),

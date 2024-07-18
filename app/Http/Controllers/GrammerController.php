@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Grammer;
+use App\Models\GrammerRule;
 use App\Models\Word;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -16,10 +18,6 @@ class GrammerController extends Controller
         $user = UserController::getUserByToken($api_token);
 
         $list = Grammer::paginate(25);
-//
-//        foreach ($list as $item) {
-//
-//        }
 
         return response()->json([
             'data' => $list,
@@ -71,9 +69,51 @@ class GrammerController extends Controller
                 $separated_words[] = $separated;
             }
         }
+        $found_group_rules = [];
+        $group_rules = GrammerRule::where('apply_method' , 2)->with('rule_group')->get();
+        foreach ($group_rules as $rules){
+            $phrase_has_rule = false;
+            foreach ($rules->rule_group as $rule){
+                $proccess_method = $rule->proccess_method;
+                if ($proccess_method == 1) {
+                    $map_reason = $rule->map_reason;
+                    if (!$map_reason) {
+                        continue;
+                    }
+
+                    $map = $map_reason->maps()->whereIn('word' , $separated_words)->first();
+                    if ($map) {
+                        $phrase_has_rule = true;
+                    }
+
+                } else if ($proccess_method == 2) {
+                    if ($this->searchInText($rule , $phrase , $separated_words)) {
+                        $phrase_has_rule = true;
+                    }
+                } else if ($proccess_method == 3) {
+                    $type_is_exists = false;
+                    $check_words = Word::whereIn('english_word' , $separated_words)->get();
+                    foreach ($check_words as $word) {
+                        $types = explode(',' , $word->word_types);
+                        if (in_array($rule->type , $types)) {
+                            $type_is_exists = true;
+                        }
+                    }
+                    if ($type_is_exists) {
+                        $phrase_has_rule = true;
+                    }
+                }
+                if ($phrase_has_rule) {
+                    break;
+                }
+            }
+            if ($phrase_has_rule) {
+                $found_group_rules[] = $rules->id;
+            }
+        }
 
         $grammers = Grammer::with(['grammer_rules' => function($q){
-            $q->with('map_reason')->get();
+            $q->with(['map_reason','rule_group'])->get();
         }])->get();
 
         $found_grammers = [];
@@ -89,44 +129,51 @@ class GrammerController extends Controller
             }
 
             $checking_level = 1;
-            $checked_rules = [];
+            // $checked_rules = [];
             foreach ($grammer->grammer_rules as $grammer_rule) {
-                $rule_level = (int)$grammer_rule->pivot->level;
-                if($rule_level > $checking_level) {
-                    $grammer_match = false;
-                    break;
-                }
-                if ($rule_level !== $checking_level) continue;
 
-                $proccess_method = $grammer_rule->proccess_method;
                 $phrase_has_rule = false;
-                $checked_rules[] = $grammer_rule;
-                if ($proccess_method == 1) {
-                    $map_reason = $grammer_rule->map_reason;
-                    if (!$map_reason) {
-                        continue;
-                    }
-
-                    $map = $map_reason->maps()->whereIn('word' , $separated_words)->first();
-                    if ($map) {
+                if ($grammer_rule->apply_method == 2) {
+                    if (in_array($grammer_rule->id , $found_group_rules)) {
                         $phrase_has_rule = true;
                     }
-
-                } else if ($proccess_method == 2) {
-                    if ($this->searchInText($grammer_rule , $phrase , $separated_words)) {
-                        $phrase_has_rule = true;
+                } else {
+                    $rule_level = (int)$grammer_rule->pivot->level;
+                    if($rule_level > $checking_level) {
+                        $grammer_match = false;
+                        break;
                     }
-                } else if ($proccess_method == 3) {
-                    $type_is_exists = false;
-                    $check_words = Word::whereIn('english_word' , $separated_words)->get();
-                    foreach ($check_words as $word) {
-                        $types = explode(',' , $word->word_types);
-                        if (in_array($grammer_rule->type , $types)) {
-                            $type_is_exists = true;
+                    if ($rule_level !== $checking_level) continue;
+
+                    $proccess_method = $grammer_rule->proccess_method;
+                    // $checked_rules[] = $grammer_rule;
+                    if ($proccess_method == 1) {
+                        $map_reason = $grammer_rule->map_reason;
+                        if (!$map_reason) {
+                            continue;
                         }
-                    }
-                    if ($type_is_exists) {
-                        $phrase_has_rule = true;
+
+                        $map = $map_reason->maps()->whereIn('word' , $separated_words)->first();
+                        if ($map) {
+                            $phrase_has_rule = true;
+                        }
+
+                    } else if ($proccess_method == 2) {
+                        if ($this->searchInText($grammer_rule , $phrase , $separated_words)) {
+                            $phrase_has_rule = true;
+                        }
+                    } else if ($proccess_method == 3) {
+                        $type_is_exists = false;
+                        $check_words = Word::whereIn('english_word' , $separated_words)->get();
+                        foreach ($check_words as $word) {
+                            $types = explode(',' , $word->word_types);
+                            if (in_array($grammer_rule->type , $types)) {
+                                $type_is_exists = true;
+                            }
+                        }
+                        if ($type_is_exists) {
+                            $phrase_has_rule = true;
+                        }
                     }
                 }
 
