@@ -52,8 +52,10 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::get('/get_user', [UserController::class, 'getUser']);
     Route::post('/add_rewards', [UserController::class, 'addRewardsByUser']);
     Route::post('/save_fcm_refresh_token', [UserController::class, 'saveFcmRefreshTokenInServer']);
+    Route::get('/get_home_page_data', [SettingController::class, 'getHomePageData']);
 
     //music
+    Route::post('/music/list', [MusicController::class, 'getMusics']);
     Route::post('/get_music_all_info', [MusicController::class, 'getMusicCompleteInfo']);
     Route::post('/get_music_list', [MusicController::class, 'getMusicList']);
     Route::post('/search_singers_music', [MusicController::class, 'getMusicSingersSearchList']);

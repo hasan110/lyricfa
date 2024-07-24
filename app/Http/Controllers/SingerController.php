@@ -50,6 +50,7 @@ class SingerController extends Controller
                 $num_comment = CommentSingerController::getNumberSingerComment($singer->id);
 
                 $singer->num_like = $num_like;
+                $singer->readable_like = $this->getReadableNumber(intval($num_like));
                 $singer->num_comment = $num_comment;
                 $singer->user_like_it = LikeSingerController::isUserLike($singer->id,$user_id);
 

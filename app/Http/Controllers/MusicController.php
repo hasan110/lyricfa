@@ -114,6 +114,79 @@ class MusicController extends Controller
         return response()->json($response, 200);
     }
 
+    public function getMusics(Request $request)
+    {
+        $search_text = $request->input('search_text');
+
+        $sort = $request->input('sort');
+        $available_sort = [
+            'most_viewed' => 'views',
+            'publish_date' => 'published_at',
+            'newest' => 'created_at',
+        ];
+        if (in_array($sort , array_keys($available_sort))) {
+            $sort = $available_sort[$sort];
+        } else {
+            $sort = 'views';
+        }
+
+        $order_by = $request->input('order_by');
+        if ($order_by !== 'asc' && $order_by !== 'desc') {
+            $order_by = 'asc';
+        }
+
+        $difficulty = $request->input('difficulty');
+        if (intval($difficulty) > 4) {
+            $difficulty = 0;
+        }
+
+        $musics = Music::query();
+
+        if (strlen(trim($search_text))) {
+            $musics = $musics->where(function($query) use ($search_text){
+                $query->where('name', 'LIKE', "%{$search_text}%")->
+                orWhere('persian_name', 'LIKE', "%{$search_text}%")->
+                orWhere('id', $search_text);
+            });
+        }
+        if ($difficulty > 0) {
+            $musics = $musics->where('degree', $difficulty);
+        }
+
+        $musics = $musics->orderBy($sort , $order_by)->paginate(24);
+
+        $list = [];
+        $last_page = $musics->lastPage();
+        $total = $musics->total();
+        foreach ($musics as $music) {
+            $singer = SingerController::getSingerById($music->id);
+            $num_like = LikeMusicController::getNumberMusicLike($music->id);
+            $num_comment = CommentMusicController::getNumberMusicComment($music->id);
+            $average_score = ScoreMusicController::getAverageMusicScore($music->id);
+
+            $list[] = [
+                'music' => $music,
+                'singers' => $singer,
+                'num_like' => $num_like,
+                'readable_like' => $this->getReadableNumber(intval($num_like)),
+                'readable_views' => $this->getReadableNumber(intval($music->views)),
+                'num_comment' => $num_comment,
+                'user_like_it' => 0,
+                'average_score' => +number_format($average_score,1)
+            ];
+        }
+
+        return response()->json([
+            'data' => [
+                'data' => $list,
+                'last_page' => $last_page,
+                'total' => $total,
+            ],
+            'errors' => [],
+            'message' => "اطلاعات با موفقیت گرفته شد",
+        ]);
+    }
+
     public function getMusicSingersSearchList(Request $request)
     {
         $api_token = $request->header("ApiToken");
