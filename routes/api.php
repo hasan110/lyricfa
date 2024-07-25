@@ -154,6 +154,7 @@ Route::middleware('CheckApiAuthentication')->group(function () {
 
     //map
     Route::post('/get_base_word', [MapController::class, 'getBaseWord']);
+    Route::post('/get_word_map_reasons', [MapController::class, 'getWordMapReasons']);
 
     //user suggestion
     Route::post('/insert_user_suggestion', [UserSuggestionController::class, 'insertUserSuggestion']);
@@ -177,6 +178,7 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     // grammer
     Route::get('/grammer_list', [GrammerController::class, 'grammerList']);
     Route::post('/get_grammer', [GrammerController::class, 'getGrammer']);
+    Route::post('/get_grammer_prerequisites', [GrammerController::class, 'getGrammerPrerequisites']);
     Route::post('/find_grammer', [GrammerController::class, 'findGrammer']);
 
 });

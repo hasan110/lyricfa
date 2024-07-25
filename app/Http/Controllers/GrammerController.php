@@ -17,7 +17,7 @@ class GrammerController extends Controller
         $api_token = $request->header("ApiToken");
         $user = UserController::getUserByToken($api_token);
 
-        $list = Grammer::paginate(25);
+        $list = Grammer::orderBy('priority')->paginate(25);
 
         return response()->json([
             'data' => $list,
@@ -28,7 +28,9 @@ class GrammerController extends Controller
 
     function getGrammer(Request $request)
     {
-        $grammer = Grammer::with('grammer_sections')->where('id' , $request->grammer_id)->first();
+        $grammer = Grammer::with(['grammer_sections' => function ($query) {
+            $query->orderBy('priority');
+        }])->where('id' , $request->grammer_id)->first();
 
         if (!$grammer) {
             return response()->json([
@@ -40,6 +42,29 @@ class GrammerController extends Controller
 
         return response()->json([
             'data' => $grammer,
+            'errors' => [],
+            'message' => "اطلاعات با موفقیت گرفته شد"
+        ]);
+    }
+
+    function getGrammerPrerequisites(Request $request)
+    {
+        $grammer = Grammer::where('id' , $request->grammer_id)->first();
+
+        if (!$grammer) {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => "اطلاعات گرامر یافت نشد."
+            ] , 404);
+        }
+
+        $grammers = $grammer->grammer_prerequisites()->with(['grammer_sections' => function ($query) {
+            $query->orderBy('priority');
+        }])->orderBy('priority')->get();
+
+        return response()->json([
+            'data' => $grammers,
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد"
         ]);
@@ -132,19 +157,18 @@ class GrammerController extends Controller
             // $checked_rules = [];
             foreach ($grammer->grammer_rules as $grammer_rule) {
 
+                $rule_level = (int)$grammer_rule->pivot->level;
+                if($rule_level > $checking_level) {
+                    $grammer_match = false;
+                    break;
+                }
+                if ($rule_level !== $checking_level) continue;
                 $phrase_has_rule = false;
                 if ($grammer_rule->apply_method == 2) {
                     if (in_array($grammer_rule->id , $found_group_rules)) {
                         $phrase_has_rule = true;
                     }
                 } else {
-                    $rule_level = (int)$grammer_rule->pivot->level;
-                    if($rule_level > $checking_level) {
-                        $grammer_match = false;
-                        break;
-                    }
-                    if ($rule_level !== $checking_level) continue;
-
                     $proccess_method = $grammer_rule->proccess_method;
                     // $checked_rules[] = $grammer_rule;
                     if ($proccess_method == 1) {

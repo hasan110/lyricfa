@@ -25,10 +25,10 @@ class GrammerController extends Controller
             switch ($request->sort_by) {
                 case 'asc':
                 default:
-                    $list = $list->orderBy('id');
+                    $list = $list->orderBy('priority');
                     break;
                 case 'desc':
-                    $list = $list->orderBy('id', 'desc');
+                    $list = $list->orderBy('priority', 'desc');
                     break;
             }
         }
@@ -97,10 +97,12 @@ class GrammerController extends Controller
             'persian_name.required' => 'نام فارسی نمی تواند خالی باشد',
             'description.required' => 'توضیحات نمی تواند خالی باشد',
             'level.required' => 'انتخاب سطح اجباری است.',
+            'priority.required' => '.اولویت نمی تواند خالی باشد',
             'rules.required' => 'انتخاب قوانین اجباری است.',
             'rules.array' => 'قوانین باید آرایه باشد.',
             'prerequisite.array' => 'گرامر های پیش نیاز باید آرایه باشد.',
             'grammer_sections.*.title.required' => 'عنوان بخش نمی تواند خالی باشد.',
+            'grammer_sections.*.priority.required' => 'اولویت بخش نمی تواند خالی باشد.',
             'grammer_sections.*.grammer_explanations.*.type.filled' => 'نوع توضیح گرامر نمی تواند خالی باشد.',
             'grammer_sections.*.grammer_explanations.*.content.filled' => 'متن توضیح گرامر نمی تواند خالی باشد.',
             'grammer_sections.*.grammer_explanations.*.grammer_examples.*.english_content.filled' => 'متن انگلیسی مثال گرامر نمی تواند خالی باشد.',
@@ -112,9 +114,11 @@ class GrammerController extends Controller
             'persian_name' => 'required',
             'description' => 'required',
             'level' => 'required',
+            'priority' => 'required',
             'rules' => 'required|array',
             'prerequisite' => 'array',
             'grammer_sections.*.title' => 'required',
+            'grammer_sections.*.priority' => 'required',
             'grammer_sections.*.grammer_explanations.*.type' => 'filled',
             'grammer_sections.*.grammer_explanations.*.content' => 'filled',
             'grammer_sections.*.grammer_explanations.*.grammer_examples.*.english_content' => 'filled',
@@ -135,6 +139,7 @@ class GrammerController extends Controller
         $grammer->persian_name = $request->persian_name;
         $grammer->description = $request->description;
         $grammer->level = $request->level;
+        $grammer->priority = $request->priority;
         $grammer->save();
 
         if($request->has('rules')) {
@@ -153,6 +158,7 @@ class GrammerController extends Controller
             $grammer_section = new GrammerSection();
             $grammer_section->grammer_id = $grammer->id;
             $grammer_section->title = $section['title'];
+            $grammer_section->priority = $section['priority'];
             $grammer_section->save();
             foreach ($section['grammer_explanations'] as $explanation)
             {
@@ -363,10 +369,12 @@ class GrammerController extends Controller
             'persian_name.required' => 'نام فارسی نمی تواند خالی باشد',
             'description.required' => 'توضیحات نمی تواند خالی باشد',
             'level.required' => 'انتخاب سطح اجباری است.',
+            'priority.required' => '.اولویت نمی تواند خالی باشد',
             'rules.required' => 'انتخاب قوانین اجباری است.',
             'rules.array' => 'قوانین باید آرایه باشد.',
             'prerequisite.array' => 'گرامر های پیش نیاز باید آرایه باشد.',
             'grammer_sections.*.title.required' => 'عنوان بخش نمی تواند خالی باشد.',
+            'grammer_sections.*.priority.required' => 'اولویت بخش نمی تواند خالی باشد.',
             'grammer_sections.*.grammer_explanations.*.type.filled' => 'نوع توضیح گرامر نمی تواند خالی باشد.',
             'grammer_sections.*.grammer_explanations.*.content.filled' => 'متن توضیح گرامر نمی تواند خالی باشد.',
             'grammer_sections.*.grammer_explanations.*.grammer_examples.*.english_content.filled' => 'متن انگلیسی مثال گرامر نمی تواند خالی باشد.',
@@ -379,9 +387,11 @@ class GrammerController extends Controller
             'persian_name' => 'required',
             'description' => 'required',
             'level' => 'required',
+            'priority' => 'required',
             'rules' => 'required|array',
             'prerequisite' => 'array',
             'grammer_sections.*.title' => 'required',
+            'grammer_sections.*.priority' => 'required',
             'grammer_sections.*.grammer_explanations.*.type' => 'filled',
             'grammer_sections.*.grammer_explanations.*.content' => 'filled',
             'grammer_sections.*.grammer_explanations.*.grammer_examples.*.english_content' => 'filled',
@@ -402,6 +412,7 @@ class GrammerController extends Controller
         $grammer->persian_name = $request->persian_name;
         $grammer->description = $request->description;
         $grammer->level = $request->level;
+        $grammer->priority = $request->priority;
         $grammer->save();
 
         if($request->has('rules')) {
@@ -431,6 +442,7 @@ class GrammerController extends Controller
             $grammer_section = new GrammerSection();
             $grammer_section->grammer_id = $grammer->id;
             $grammer_section->title = $section['title'];
+            $grammer_section->priority = $section['priority'];
             $grammer_section->save();
             foreach ($section['grammer_explanations'] as $explanation)
             {
@@ -481,7 +493,9 @@ class GrammerController extends Controller
             return response()->json($arr, 400);
         }
 
-        $get = Grammer::with('grammer_sections')->find($request->id);
+        $get = Grammer::with(['grammer_sections' => function ($query) {
+            $query->orderBy('priority', 'asc');
+        }])->find($request->id);
         if(!$get){
             return response()->json([
                 'data' => null,

@@ -39,14 +39,21 @@
                                     dense label="عنوان فارسی"
                                 ></v-text-field>
                             </v-col>
-                            <v-col cols="12" xs="12" sm="12" class="pb-0">
+                            <v-col cols="12" xs="12" sm="6" class="pb-0">
                                 <v-select
                                     v-model="form_data.level"
-                                    outlined clearable
+                                    outlined
                                     :error-messages="errors.level"
                                     :items="['beginner', 'medium', 'advanced']"
                                     dense label="سطح"
                                 ></v-select>
+                            </v-col>
+                            <v-col cols="12" xs="12" sm="6" class="pb-0">
+                                <v-text-field
+                                    v-model="form_data.priority"
+                                    :error-messages="errors.priority"
+                                    dense label="اولویت" outlined
+                                ></v-text-field>
                             </v-col>
                             <v-col cols="12" xs="12" sm="12" class="pb-0">
                                 <v-textarea
@@ -106,7 +113,10 @@
                             <v-expansion-panels accordion multiple>
                                 <v-expansion-panel v-for="(section_item, section_key) in form_data.grammer_sections" :key="section_key">
                                     <v-expansion-panel-header>
-                                        بخش {{ section_key+1 }}
+                                        <template v-if="section_item.title">
+                                            {{section_item.title}}
+                                        </template>
+                                        <template v-else>بخش {{ section_key+1 }}</template>
                                     </v-expansion-panel-header>
                                     <v-expansion-panel-content>
                                         <v-row>
@@ -117,7 +127,14 @@
                                                     dense :label="'عنوان بخش ' + (section_key + 1)" hide-details
                                                 ></v-text-field>
                                             </v-col>
-                                            <v-col cols="12" xs="12" sm="6" class="pb-0">
+                                            <v-col cols="12" xs="12" sm="4" class="pb-0">
+                                                <v-text-field
+                                                    v-model="section_item.priority" outlined
+                                                    :error-messages="errors[`grammer_sections.${section_key}.priority`] ? errors[`grammer_sections.${section_key}.priority`] : null"
+                                                    dense :label="'اولویت بخش ' + (section_key + 1)" hide-details
+                                                ></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12" xs="12" sm="2" class="pb-0">
                                                 <v-btn
                                                     dark small color="error"
                                                     @click="removeSection(section_key)"
