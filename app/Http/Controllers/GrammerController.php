@@ -40,6 +40,10 @@ class GrammerController extends Controller
             ] , 404);
         }
 
+        $grammer->prerequisites = $grammer->grammer_prerequisites()->with(['grammer_sections' => function ($query) {
+            $query->orderBy('priority');
+        }])->orderBy('priority')->get();
+
         return response()->json([
             'data' => $grammer,
             'errors' => [],
