@@ -18,13 +18,6 @@ class MapController extends Controller
     function getWordMapReasons(Request $request)
     {
         $map = Map::where('word', $request->word)->with('map_reasons')->first();
-        if (!$map) {
-            return response()->json([
-                'data' => null,
-                'errors' => [],
-                'message' => "اطلاعات گرامر یافت نشد."
-            ] , 404);
-        }
 
         return response()->json([
             'data' => $map,
