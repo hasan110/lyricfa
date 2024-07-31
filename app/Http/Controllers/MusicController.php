@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Music;
 use App\Models\Singer;
+use App\Models\Text;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -510,13 +511,21 @@ class MusicController extends Controller
 
         $average_score = ScoreMusicController::getAverageMusicScore($id);
 
+        $texts = [];
+        if (UserController::isUserSubscriptionValid($request)) {
+            $texts = Text::where('id_music', '=', $id)->orderBy("id")->get();
+        }
+
         $data = [
             'music' => $music,
+            'texts' => $texts,
             'singers' => $singer,
             'num_like' => $num_like,
+            'readable_like' => $this->getReadableNumber(intval($num_like)),
             'num_comment' => $num_comment,
+            'readable_comment' => $this->getReadableNumber(intval($num_comment)),
             'user_like_it' => $user_like_it,
-            'average_score' => $average_score
+            'average_score' => +number_format($average_score,1)
         ];
 
         $arr = [
@@ -775,10 +784,12 @@ class MusicController extends Controller
             $num_like = LikeMusicController::getNumberMusicLike($music->id);
             $num_comment = CommentMusicController::getNumberMusicComment($music->id);
             $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-            $music->average_score = $average_score;
+            $music->average_score = +number_format($average_score,1);
             $music->singers = $singer;
             $music->num_like = $num_like;
+            $music->readable_like = $this->getReadableNumber(intval($num_like));
             $music->num_comment = $num_comment;
+            $music->readable_comment = $this->getReadableNumber(intval($num_comment));
 
             unset($music['id'], $music['name'], $music['persian_name'], $music['album'],
                 $music['degree'], $music['size'], $music['interest'],
