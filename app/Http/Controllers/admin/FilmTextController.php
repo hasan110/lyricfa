@@ -275,34 +275,63 @@ class FilmTextController extends Controller
                 $mainList[] = $object;
             }
         } else {
-            foreach ($content as $key => $value) {
-                switch ($key) {
-                    case $key % 5 == 1 :
+            $separated_blocks = [];
+            $new_block = [];
+            foreach ($content as $block) {
+                if (strlen(trim($block)) === 0) {
+                    $separated_blocks[] = $new_block;
+                    $new_block = [];
+                    continue;
+                }
+                $new_block[] = $block;
+            }
 
-                        $object = array(
-                            "text_english" => "",
-                            "text_persian" => "",
-                            "start_time" => "",
-                            "end_time" => "",
-                        );
+            $english_characters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+            $persian_characters = ['آ','ا','ب','پ','ت','ث','ج','چ','ح','خ','د','ذ','ر','ز','ژ','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ک','گ','ل','م','ن','و','ه','ی'];
 
-                        $object["start_time"] = $this->getStartTime($value);
-                        $object["end_time"] = $this->getEndTime($value);
-                        break;
-                    case $key % 5 == 2 :
-                        $object["text_english"] = $value;
-                        break;
-                    case $key % 5 == 3 :
-                        $object["text_persian"] = $value;
-                        break;
-                    case $key % 5 == 4 :
-                        // $object = $value;
-                        break;
-                    case $key % 5 == 0 :
-                        // $object = $value;
-                        if ($object["text_english"] != "")
-                            $mainList[] = $object;
-                        break;
+            foreach ($separated_blocks as $key => $block) {
+                $object = array(
+                    "text_english" => "",
+                    "text_persian" => "",
+                    "start_time" => "",
+                    "end_time" => "",
+                );
+                foreach ($block as $block_key => $item) {
+                    if ($block_key === 0) continue;
+                    if ($block_key === 1) {
+                         $object["start_time"] = $this->getStartTime($item);
+                         $object["end_time"] = $this->getEndTime($item);
+                        continue;
+                    }
+                    $array = str_split($item);
+
+                    $english_count = 0;
+                    $persian_count = 0;
+                    foreach($array as $letter) {
+                        if (in_array($letter , $english_characters)) {
+                            $english_count++;
+                        } else if (in_array($letter , $persian_characters)) {
+                            $persian_count++;
+                        }
+                    }
+
+                    if($english_count > $persian_count) {
+                        if (strlen($object["text_english"])) {
+                            $object["text_english"] = $object["text_english"] . "\n" . $item;
+                        } else {
+                            $object["text_english"] = $item;
+                        }
+                    } else {
+                        if (strlen($object["text_persian"])) {
+                            $object["text_persian"] = $object["text_persian"] . "\n" . $item;
+                        } else {
+                            $object["text_persian"] = $item;
+                        }
+                    }
+
+                }
+                if ($object["start_time"]) {
+                    $mainList[] = $object;
                 }
             }
         }
