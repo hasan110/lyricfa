@@ -153,6 +153,8 @@ class SingerController extends Controller
                 'singer' => $singer,
                 'num_like' => $num_like,
                 'num_comment' => $num_comment,
+                'readable_like' => $this->getReadableNumber(intval($num_like)),
+                'readable_comment' => $this->getReadableNumber(intval($num_comment)),
                 'user_like_it' => $user_like_it
             ];
 

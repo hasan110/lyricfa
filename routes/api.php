@@ -121,6 +121,7 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/get_album_by_id', [AlbumController::class, 'getAlbumById']);
     Route::post('/get_albums', [AlbumController::class, 'getAlbumsList']);
     Route::post('/get_n_album', [AlbumController::class, 'getNAlbumList']);
+    Route::post('/get_album_data', [AlbumController::class, 'getAlbumData']);
 
     //like music
     Route::post('/add_like_music', [LikeMusicController::class, 'addMusicLike']);

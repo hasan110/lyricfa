@@ -684,6 +684,9 @@ class MusicController extends Controller
             $music->singers = $singer;
             $music->num_like = $num_like;
             $music->num_comment = $num_comment;
+            $music->readable_like = $this->getReadableNumber(intval($num_like));
+            $music->readable_views = $this->getReadableNumber(intval($music->views));
+            $music->readable_comment = $this->getReadableNumber(intval($num_comment));
 
             unset($music['id'], $music['name'], $music['persian_name'], $music['album'],
                 $music['degree'], $music['size'], $music['interest'],
@@ -732,6 +735,9 @@ class MusicController extends Controller
             $music->singers = $singer;
             $music->num_like = $num_like;
             $music->num_comment = $num_comment;
+            $music->readable_like = $this->getReadableNumber(intval($num_like));
+            $music->readable_views = $this->getReadableNumber(intval($music->views));
+            $music->readable_comment = $this->getReadableNumber(intval($num_comment));
 
             unset($music['id'], $music['name'], $music['persian_name'], $music['album'],
                 $music['degree'], $music['size'], $music['interest'],
