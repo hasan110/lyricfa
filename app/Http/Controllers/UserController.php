@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Services\Notification;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use PharIo\Manifest\ElementCollectionException;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class UserController extends Controller
@@ -343,6 +343,37 @@ class UserController extends Controller
                 'message' => " مشکل در احراز هویت، درصورتی که از حساب شما کم شد و عملیاتی انجام نشد با پشتیبان تماس بگیرید",
             ];
             return response()->json($response, 401);
+        }
+    }
+
+    public static function addSubscription($user_id , $plan_id)
+    {
+        $user = UserController::getUserById($user_id);
+        if ($user) {
+            $plan = SubscriptionController::getSubscriptionById($plan_id);
+            $daysSubscription = $plan->subscription_days;
+            $expired = Carbon::parse($user->expired_at);
+            if( $expired> Carbon::now()){
+                $expired_at = $expired->addDays($daysSubscription);
+            }else{
+                $expired_at =Carbon::now()->addDays($daysSubscription);
+            }
+
+            $user->update([
+                'expired_at' => $expired_at
+            ]);
+
+            if ($user->referral_code)
+            {
+                try {
+                    $addDays = floor($daysSubscription * 0.1);
+                    self::referOperations('subscription' , $user , $addDays);
+                }catch (Exception $e){}
+            }
+            return true;
+
+        } else {
+            return false;
         }
     }
 

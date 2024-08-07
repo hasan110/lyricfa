@@ -22,8 +22,11 @@ use App\Http\Controllers\admin\WordController;
 use App\Http\Controllers\admin\GrammerController;
 use App\Http\Controllers\admin\MapController;
 use App\Http\Controllers\admin\ReplaceController;
+use App\Http\Controllers\admin\PaymentController;
 
 Route::get('/get_id', [MusicController::class, 'getGuessId']);
+
+Route::get('/payment/verify', [PaymentController::class, 'verifyPayment'])->name('payment.verify');
 
 //Admin
 Route::post('/login_admin', [AdminController::class, 'login']);

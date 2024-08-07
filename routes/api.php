@@ -29,6 +29,7 @@ use App\Http\Controllers\UserSuggestionController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\OrderMusicController;
 use App\Http\Controllers\GrammerController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 //panel
@@ -180,5 +181,7 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::get('/grammer_list', [GrammerController::class, 'grammerList']);
     Route::post('/get_grammer', [GrammerController::class, 'getGrammer']);
     Route::post('/find_grammer', [GrammerController::class, 'findGrammer']);
+
+    Route::post('/subscription/payment', [PaymentController::class, 'createSubscriptionPayment']);
 
 });
