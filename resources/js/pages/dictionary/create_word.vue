@@ -38,14 +38,13 @@
                         ></v-text-field>
                     </v-col>
                     <v-col cols="12" class="pb-0">
-                        <v-text-field
-                            v-model="form_data.word_types"
+                        <v-select
+                            v-model="form_data.word_type"
                             outlined
-                            clearable
-                            dense
+                            :items="word_types"
+                            dense multiple
                             label="نوع لغت"
-                            hint="برای افزودن چند مورد, موارد را با ویرگول جدا کنید"
-                        ></v-text-field>
+                        ></v-select>
                     </v-col>
                 </v-row>
                 <hr class="mt-3">
@@ -139,9 +138,7 @@
                             <v-col cols="12" xs="12" sm="6" class="pb-0">
                                 <v-select
                                     v-model="item.word_type"
-                                    :items="english_words_type"
-                                    item-text="text"
-                                    item-value="value"
+                                    :items="word_types"
                                     outlined clearable
                                     append-outer-icon="mdi-delete"
                                     @click:append-outer="removeDefinition(2 , en_key)"
@@ -181,6 +178,7 @@ export default {
             ],
             english_definitions: [],
         },
+        word_types: [],
         english_words_type:[
             {text:"article" , value:"article"},
             {text:"prefix" , value:"prefix"},
@@ -243,6 +241,9 @@ export default {
         },
         saveWord(){
             this.loading = true;
+            if (this.form_data.word_types) {
+                this.form_data.word_types = this.form_data.word_type.join(',')
+            }
             this.$http.post(`words/create` , this.form_data)
                 .then(res => {
                     this.form_data = {
@@ -273,6 +274,15 @@ export default {
 
                     }
                 });
+        },
+        getWordTypes(){
+            this.$http.get(`words/types`)
+                .then(res => {
+                    this.word_types = res.data.data
+                })
+                .catch( err => {
+                    console.log(err)
+                });
         }
     },
     mounted() {
@@ -280,6 +290,7 @@ export default {
         if (word) {
             this.form_data.english_word = word;
         }
+        this.getWordTypes();
     },
     beforeMount(){
         this.checkAuth()

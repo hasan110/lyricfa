@@ -45,11 +45,14 @@ class GrammerController extends Controller
     {
         $list = GrammerRule::with(['map_reason','rule_group']);
 
-        if ($request->search_key) {
+        if ($request->search_key === 'علت مپ') {
+            $list = $list->where('proccess_method', 1)->where('apply_method', 1);
+        } else if ($request->search_key) {
             $list = $list->where('type', 'LIKE', "%{$request->search_key}%")
                 ->orWhere('words', 'LIKE', "%{$request->search_key}%")
                 ->orWhere('id', $request->search_key);
         }
+
         if ($request->apply_method) {
             $list = $list->where('apply_method', $request->apply_method);
         }
@@ -241,6 +244,15 @@ class GrammerController extends Controller
                 ], 400);
             }
             $type = $request->type;
+        }
+
+        $check_is_exists = GrammerRule::where('apply_method' , (int)$apply_method)->where('proccess_method' , $proccess_method)->where('map_reason_id' , $map_reason)->where('type' , $type)->where('words' , $words)->first();
+        if ($check_is_exists) {
+            return response()->json([
+                'data' => null,
+                'errors' => null,
+                'message' => "به نظر میرسد این قانون تکراری است.",
+            ], 400);
         }
 
         $grammer_rule = new GrammerRule();

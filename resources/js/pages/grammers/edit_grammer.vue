@@ -44,7 +44,7 @@
                                     v-model="form_data.level"
                                     outlined
                                     :error-messages="errors.level"
-                                    :items="['beginner', 'medium', 'advanced']"
+                                    :items="['A1', 'A2', 'B1', 'B2', 'C1', 'C2']"
                                     dense label="سطح"
                                 ></v-select>
                             </v-col>
@@ -72,6 +72,7 @@
                                     item-text="persian_name"
                                     :error-messages="errors.prerequisite"
                                     label="گرامرهای پیش نیاز"
+                                    :search-input.sync="prerequisites_filter.search_key"
                                 ></v-autocomplete>
                             </v-col>
                             <v-col cols="12" xs="12" sm="12" class="pb-0">
@@ -243,8 +244,10 @@ export default {
     name:'edit_grammer',
     data: () => ({
         tab:'main',
-        grammers_filter:{},
         rules_filter:{},
+        prerequisites_filter:{
+            search_key:''
+        },
         form_data:{
             grammer_explanations: [
                 {
@@ -269,6 +272,12 @@ export default {
         rules_filter: {
             handler(){
                 this.getGrammerRulesList();
+            },
+            deep: true
+        },
+        prerequisites_filter: {
+            handler(){
+                this.getGrammersList();
             },
             deep: true
         }
@@ -382,7 +391,7 @@ export default {
                 });
         },
         getGrammersList(){
-            this.$http.post(`grammers/list?page=1` , this.grammers_filter)
+            this.$http.post(`grammers/list?page=1` , this.prerequisites_filter)
                 .then(res => {
                     this.grammers_list = res.data.data.data
                 })

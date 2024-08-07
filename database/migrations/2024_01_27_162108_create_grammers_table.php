@@ -18,7 +18,7 @@ class CreateGrammersTable extends Migration
             $table->string('english_name');
             $table->string('persian_name');
             $table->text('description');
-            $table->enum('level' , ['beginner', 'medium', 'advanced']);
+            $table->enum('level' , ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']);
             $table->timestamps();
         });
     }

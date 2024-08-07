@@ -24,12 +24,13 @@
                         ></v-text-field>
                     </v-col>
                     <v-col cols="12" xs="12" sm="6" class="pb-0">
-                        <v-text-field
-                            v-model="form_data.word_types"
-                            outlined clearable
+                        <v-select
+                            :items="word_types"
+                            v-model="form_data.word_type"
+                            outlined clearable multiple
                             :error-messages="errors.word_types"
                             dense label="نوع لغت"
-                        ></v-text-field>
+                        ></v-select>
                     </v-col>
                     <v-col cols="12" xs="12" sm="6" class="pb-0">
                         <v-text-field
@@ -40,12 +41,13 @@
                         ></v-text-field>
                     </v-col>
                     <v-col cols="12" xs="12" sm="6" class="pb-0">
-                        <v-text-field
-                            v-model="form_data.base_word_types"
-                            outlined clearable
+                        <v-select
+                            :items="word_types"
+                            v-model="form_data.base_word_type"
+                            outlined clearable multiple
                             :error-messages="errors.base_word_types"
                             dense label="نوع لغت پایه"
-                        ></v-text-field>
+                        ></v-select>
                     </v-col>
                     <v-col cols="12" xs="12" sm="12" class="pb-0">
                         <v-autocomplete
@@ -82,6 +84,7 @@ export default {
         form_data:{
             word: '',
         },
+        word_types: [],
         errors:{},
         map_reasons:[],
         loading: false,
@@ -92,6 +95,13 @@ export default {
         },
         saveMap(){
             this.loading = true;
+            if (this.form_data.word_type) {
+                this.form_data.word_types = this.form_data.word_type.join(',')
+            }
+            if (this.form_data.base_word_types) {
+                this.form_data.base_word_types = this.form_data.base_word_type.join(',')
+            }
+
             this.$http.post(`maps/create` , this.form_data)
                 .then(res => {
                     this.form_data = {};
@@ -127,6 +137,15 @@ export default {
                     console.log(err)
                 });
         },
+        getWordTypes(){
+            this.$http.get(`words/types`)
+                .then(res => {
+                    this.word_types = res.data.data
+                })
+                .catch( err => {
+                    console.log(err)
+                });
+        },
     },
     beforeMount(){
         this.checkAuth()
@@ -138,6 +157,7 @@ export default {
             this.form_data.word = word;
         }
         this.getMapReasonsList();
+        this.getWordTypes();
     }
 }
 </script>
