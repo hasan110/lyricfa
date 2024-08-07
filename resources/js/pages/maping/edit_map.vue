@@ -130,8 +130,12 @@ export default {
             this.$http.post(`maps/single` , {id:map_id})
                 .then(res => {
                     this.form_data = res.data.data
-                    this.form_data.word_type = this.form_data.word_types.split(',')
-                    this.form_data.base_word_type = this.form_data.base_word_types.split(',')
+                    if (this.form_data.word_types) {
+                        this.form_data.word_type = this.form_data.word_types.split(',')
+                    }
+                    if (this.form_data.base_word_types) {
+                        this.form_data.base_word_type = this.form_data.base_word_types.split(',')
+                    }
                 })
                 .catch( err => {
                     this.$router.push({name:'maps'})

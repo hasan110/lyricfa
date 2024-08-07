@@ -240,7 +240,9 @@ export default {
             this.$http.post(`words/single` , {id:id})
                 .then(res => {
                     this.form_data = res.data.data
-                    this.form_data.word_type = this.form_data.word_types.split(',')
+                    if (this.form_data.word_types) {
+                        this.form_data.word_type = this.form_data.word_types.split(',')
+                    }
                     this.$store.commit('SHOW_APP_LOADING' , 0)
                 })
                 .catch( () => {
