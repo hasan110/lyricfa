@@ -95,20 +95,23 @@ class SettingController extends Controller
 
     public function like_movements()
     {
-        ini_set('max_execution_time', '1500');
-        foreach (LikeMusic::all() as $like_music) {
-            Like::create([
-                'user_id' => $like_music->id_user,
-                'likeable_id' => $like_music->id_song,
-                'likeable_type' => 'App\Models\Music',
-            ]);
-        }
-        foreach (LikeSinger::all() as $like_singer) {
-            Like::create([
-                'user_id' => $like_singer->id_user,
-                'likeable_id' => $like_singer->id_singer,
-                'likeable_type' => 'App\Models\Singer',
-            ]);
+        ini_set('max_execution_time', '15000');
+        if (request()->get('action') == 'aaa') {
+            foreach (LikeMusic::all() as $like_music) {
+                Like::create([
+                    'user_id' => $like_music->id_user,
+                    'likeable_id' => $like_music->id_song,
+                    'likeable_type' => 'App\Models\Music',
+                ]);
+            }
+        } else {
+            foreach (LikeSinger::all() as $like_singer) {
+                Like::create([
+                    'user_id' => $like_singer->id_user,
+                    'likeable_id' => $like_singer->id_singer,
+                    'likeable_type' => 'App\Models\Singer',
+                ]);
+            }
         }
 
         return response()->json(['data' => 'finished']);
@@ -116,7 +119,7 @@ class SettingController extends Controller
 
     public function singer_movements()
     {
-        ini_set('max_execution_time', '1500');
+        ini_set('max_execution_time', '15000');
         foreach (Music::all() as $music) {
             foreach (explode(',', $music['singers']) as $item) {
                 $singer = Singer::where('id', $item)->first();
