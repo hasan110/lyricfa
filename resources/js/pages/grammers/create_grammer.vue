@@ -39,14 +39,21 @@
                                     dense label="عنوان فارسی"
                                 ></v-text-field>
                             </v-col>
-                            <v-col cols="12" xs="12" sm="12" class="pb-0">
+                            <v-col cols="12" xs="12" sm="6" class="pb-0">
                                 <v-select
                                     v-model="form_data.level"
-                                    outlined clearable
+                                    outlined
                                     :error-messages="errors.level"
-                                    :items="['beginner', 'medium', 'advanced']"
+                                    :items="['A1', 'A2', 'B1', 'B2', 'C1', 'C2']"
                                     dense label="سطح"
                                 ></v-select>
+                            </v-col>
+                            <v-col cols="12" xs="12" sm="6" class="pb-0">
+                                <v-text-field
+                                    v-model="form_data.priority"
+                                    :error-messages="errors.priority"
+                                    dense label="اولویت" outlined
+                                ></v-text-field>
                             </v-col>
                             <v-col cols="12" xs="12" sm="12" class="pb-0">
                                 <v-textarea
@@ -65,6 +72,7 @@
                                     item-text="persian_name"
                                     :error-messages="errors.prerequisite"
                                     label="گرامرهای پیش نیاز"
+                                    :search-input.sync="prerequisites_filter.search_key"
                                 ></v-autocomplete>
                             </v-col>
                             <v-col cols="12" xs="12" sm="12" class="pb-0">
@@ -106,7 +114,10 @@
                             <v-expansion-panels accordion multiple>
                                 <v-expansion-panel v-for="(section_item, section_key) in form_data.grammer_sections" :key="section_key">
                                     <v-expansion-panel-header>
-                                        بخش {{ section_key+1 }}
+                                        <template v-if="section_item.title">
+                                            {{section_item.title}}
+                                        </template>
+                                        <template v-else>بخش {{ section_key+1 }}</template>
                                     </v-expansion-panel-header>
                                     <v-expansion-panel-content>
                                         <v-row>
@@ -117,7 +128,14 @@
                                                     dense :label="'عنوان بخش ' + (section_key + 1)" hide-details
                                                 ></v-text-field>
                                             </v-col>
-                                            <v-col cols="12" xs="12" sm="6" class="pb-0">
+                                            <v-col cols="12" xs="12" sm="4" class="pb-0">
+                                                <v-text-field
+                                                    v-model="section_item.priority" outlined
+                                                    :error-messages="errors[`grammer_sections.${section_key}.priority`] ? errors[`grammer_sections.${section_key}.priority`] : null"
+                                                    dense :label="'اولویت بخش ' + (section_key + 1)" hide-details
+                                                ></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12" xs="12" sm="2" class="pb-0">
                                                 <v-btn
                                                     dark small color="error"
                                                     @click="removeSection(section_key)"
@@ -226,8 +244,10 @@ export default {
     name:'create_idiom',
     data: () => ({
         tab:'main',
-        grammers_filter:{},
         rules_filter:{
+            search_key:''
+        },
+        prerequisites_filter:{
             search_key:''
         },
         form_data:{
@@ -260,6 +280,12 @@ export default {
         rules_filter: {
             handler(){
                 this.getGrammerRulesList();
+            },
+            deep: true
+        },
+        prerequisites_filter: {
+            handler(){
+                this.getGrammersList();
             },
             deep: true
         }
@@ -316,12 +342,16 @@ export default {
             return true;
         },
         getRuleTitle(item){
-            if (item.proccess_method === 1) {
-                return item.id + " - جستجو در مپ - علت مپ: " + item.map_reason.english_title;
-            } else if (item.proccess_method === 2) {
-                return item.id + " - جستجو در متن - " + (item.words && item.words.length > 20 ? item.words.slice(0,20) + ' ...' : item.words) + ' - ' + item.type;
-            } else if (item.proccess_method === 3) {
-                return item.id + " - جستجو در نوع لغت - " + item.type;
+            if (parseInt(item.apply_method) === 1) {
+                if (item.proccess_method === 1) {
+                    return item.id + " - جستجو در مپ - علت مپ: " + item.map_reason.english_title;
+                } else if (item.proccess_method === 2) {
+                    return item.id + " - جستجو در متن - " + (item.words && item.words.length > 20 ? item.words.slice(0,20) + ' ...' : item.words) + ' - ' + item.type;
+                } else if (item.proccess_method === 3) {
+                    return item.id + " - جستجو در نوع لغت - " + item.type;
+                }
+            } else if (parseInt(item.apply_method) === 2) {
+                return item.id + " - اعمال گروهی - " + item.type;
             }
         },
         saveGrammer(){
@@ -353,7 +383,7 @@ export default {
                 });
         },
         getGrammersList(){
-            this.$http.post(`grammers/list?page=1` , this.grammers_filter)
+            this.$http.post(`grammers/list?page=1` , this.prerequisites_filter)
                 .then(res => {
                     this.grammers_list = res.data.data.data
                 })
@@ -362,9 +392,15 @@ export default {
                 });
         },
         getGrammerRulesList(){
+            if (this.form_data.rules) {
+                const rules = [];
+                this.form_data.rules.forEach((val) => rules.push(val.id));
+                this.rules_filter.rule_ids = rules;
+            }
+            this.rules_filter.no_page = true;
             this.$http.post(`grammers/rules/list?page=1` , this.rules_filter)
                 .then(res => {
-                    this.rules_list = res.data.data.data
+                    this.rules_list = res.data.data
                 })
                 .catch( err => {
                     console.log(err)

@@ -17,4 +17,9 @@ class GrammerRule extends Model
     public function map_reason(){
         return $this->belongsTo(MapReason::class);
     }
+
+    public function rule_group()
+    {
+        return $this->belongsToMany(GrammerRule::class, 'grammer_rule_group', 'grammer_rule_parent_id', 'grammer_rule_id');
+    }
 }

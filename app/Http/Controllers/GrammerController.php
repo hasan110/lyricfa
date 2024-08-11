@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Grammer;
+use App\Models\GrammerRule;
 use App\Models\Word;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -15,7 +18,7 @@ class GrammerController extends Controller
         $api_token = $request->header("ApiToken");
         $user = UserController::getUserByToken($api_token);
 
-        $list = Grammer::paginate(25);
+        $list = Grammer::orderBy('priority')->paginate(25);
 
         return response()->json([
             'data' => $list,
@@ -26,7 +29,9 @@ class GrammerController extends Controller
 
     function getGrammer(Request $request)
     {
-        $grammer = Grammer::with('grammer_sections')->where('id' , $request->grammer_id)->first();
+        $grammer = Grammer::with(['grammer_sections' => function ($query) {
+            $query->orderBy('priority');
+        }])->where('id' , $request->grammer_id)->first();
 
         if (!$grammer) {
             return response()->json([
@@ -36,8 +41,35 @@ class GrammerController extends Controller
             ] , 404);
         }
 
+        $grammer->prerequisites = $grammer->grammer_prerequisites()->with(['grammer_sections' => function ($query) {
+            $query->orderBy('priority');
+        }])->orderBy('priority')->get();
+
         return response()->json([
             'data' => $grammer,
+            'errors' => [],
+            'message' => "اطلاعات با موفقیت گرفته شد"
+        ]);
+    }
+
+    function getGrammerPrerequisites(Request $request)
+    {
+        $grammer = Grammer::where('id' , $request->grammer_id)->first();
+
+        if (!$grammer) {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => "اطلاعات گرامر یافت نشد."
+            ] , 404);
+        }
+
+        $grammers = $grammer->grammer_prerequisites()->with(['grammer_sections' => function ($query) {
+            $query->orderBy('priority');
+        }])->orderBy('priority')->get();
+
+        return response()->json([
+            'data' => $grammers,
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد"
         ]);
@@ -67,9 +99,51 @@ class GrammerController extends Controller
                 $separated_words[] = $separated;
             }
         }
+        $found_group_rules = [];
+        $group_rules = GrammerRule::where('apply_method' , 2)->with('rule_group')->get();
+        foreach ($group_rules as $rules){
+            $phrase_has_rule = false;
+            foreach ($rules->rule_group as $rule){
+                $proccess_method = $rule->proccess_method;
+                if ($proccess_method == 1) {
+                    $map_reason = $rule->map_reason;
+                    if (!$map_reason) {
+                        continue;
+                    }
+
+                    $map = $map_reason->maps()->whereIn('word' , $separated_words)->first();
+                    if ($map) {
+                        $phrase_has_rule = true;
+                    }
+
+                } else if ($proccess_method == 2) {
+                    if ($this->searchInText($rule , $phrase , $separated_words)) {
+                        $phrase_has_rule = true;
+                    }
+                } else if ($proccess_method == 3) {
+                    $type_is_exists = false;
+                    $check_words = Word::whereIn('english_word' , $separated_words)->get();
+                    foreach ($check_words as $word) {
+                        $types = explode(',' , $word->word_types);
+                        if (in_array($rule->type , $types)) {
+                            $type_is_exists = true;
+                        }
+                    }
+                    if ($type_is_exists) {
+                        $phrase_has_rule = true;
+                    }
+                }
+                if ($phrase_has_rule) {
+                    break;
+                }
+            }
+            if ($phrase_has_rule) {
+                $found_group_rules[] = $rules->id;
+            }
+        }
 
         $grammers = Grammer::with(['grammer_rules' => function($q){
-            $q->with('map_reason')->get();
+            $q->with(['map_reason','rule_group'])->get();
         }])->get();
 
         $found_grammers = [];
@@ -85,44 +159,50 @@ class GrammerController extends Controller
             }
 
             $checking_level = 1;
-            $checked_rules = [];
+            // $checked_rules = [];
             foreach ($grammer->grammer_rules as $grammer_rule) {
+
                 $rule_level = (int)$grammer_rule->pivot->level;
                 if($rule_level > $checking_level) {
                     $grammer_match = false;
                     break;
                 }
                 if ($rule_level !== $checking_level) continue;
-
-                $proccess_method = $grammer_rule->proccess_method;
                 $phrase_has_rule = false;
-                $checked_rules[] = $grammer_rule;
-                if ($proccess_method == 1) {
-                    $map_reason = $grammer_rule->map_reason;
-                    if (!$map_reason) {
-                        continue;
-                    }
-
-                    $map = $map_reason->maps()->whereIn('word' , $separated_words)->first();
-                    if ($map) {
+                if ($grammer_rule->apply_method == 2) {
+                    if (in_array($grammer_rule->id , $found_group_rules)) {
                         $phrase_has_rule = true;
                     }
-
-                } else if ($proccess_method == 2) {
-                    if ($this->searchInText($grammer_rule , $phrase , $separated_words)) {
-                        $phrase_has_rule = true;
-                    }
-                } else if ($proccess_method == 3) {
-                    $type_is_exists = false;
-                    $check_words = Word::whereIn('english_word' , $separated_words)->get();
-                    foreach ($check_words as $word) {
-                        $types = explode(',' , $word->word_types);
-                        if (in_array($grammer_rule->type , $types)) {
-                            $type_is_exists = true;
+                } else {
+                    $proccess_method = $grammer_rule->proccess_method;
+                    // $checked_rules[] = $grammer_rule;
+                    if ($proccess_method == 1) {
+                        $map_reason = $grammer_rule->map_reason;
+                        if (!$map_reason) {
+                            continue;
                         }
-                    }
-                    if ($type_is_exists) {
-                        $phrase_has_rule = true;
+
+                        $map = $map_reason->maps()->whereIn('word' , $separated_words)->first();
+                        if ($map) {
+                            $phrase_has_rule = true;
+                        }
+
+                    } else if ($proccess_method == 2) {
+                        if ($this->searchInText($grammer_rule , $phrase , $separated_words)) {
+                            $phrase_has_rule = true;
+                        }
+                    } else if ($proccess_method == 3) {
+                        $type_is_exists = false;
+                        $check_words = Word::whereIn('english_word' , $separated_words)->get();
+                        foreach ($check_words as $word) {
+                            $types = explode(',' , $word->word_types);
+                            if (in_array($grammer_rule->type , $types)) {
+                                $type_is_exists = true;
+                            }
+                        }
+                        if ($type_is_exists) {
+                            $phrase_has_rule = true;
+                        }
                     }
                 }
 
@@ -137,6 +217,10 @@ class GrammerController extends Controller
             }
 
         }
+
+        usort($found_grammers, function ($item1, $item2) {
+            return $item1['priority'] <=> $item2['priority'];
+        });
 
         $result = [];
         foreach ($found_grammers as $gr) {
@@ -207,6 +291,25 @@ class GrammerController extends Controller
                 if (str_contains($word , $words)) {
                     return true;
                 }
+            }
+        }
+        if ($type == 'search_multiple') {
+            $first_char = '%';
+            $last_char = '%';
+            if (str_starts_with($words , "###")) {
+                $first_char = '';
+            }
+            if (str_ends_with($words , "###")) {
+                $last_char = '';
+            }
+            $words = str_replace('###' , '' , $words);
+            $search = $first_char.$words.$last_char;
+            $search = str_replace(['"', "'"] , '`' , $search);
+            $phrase = str_replace(["'", '"'] , '`' , $phrase);
+            $data = DB::select("select case when '".$phrase."' like '".$search."' then 1 else 0 end as result");
+
+            if ($data[0]->result == 1) {
+                return true;
             }
         }
 

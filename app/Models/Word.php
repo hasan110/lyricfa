@@ -21,20 +21,24 @@ class Word extends Model
     public static function getWordTypes()
     {
         return [
+            'verb',
             'adverb',
-            'adjective',
-            'noun',
-            'plural',
             'transitive-verb',
             'intransitive-verb',
+            'adjective',
+            'noun',
+            'pronoun',
+            'plural',
             'conjunction',
             'interjection',
             'pronominal',
             'superlative',
             'auxiliary',
-            'adverb',
             'singular',
-            'verb',
+            'abbreviation',
+            'prefix',
+            'suffix',
+            'article',
             'preposition',
         ];
     }
