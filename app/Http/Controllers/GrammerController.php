@@ -219,7 +219,7 @@ class GrammerController extends Controller
         }
 
         usort($found_grammers, function ($item1, $item2) {
-            return $item2['priority'] <=> $item1['priority'];
+            return $item1['priority'] <=> $item2['priority'];
         });
 
         $result = [];
@@ -304,9 +304,11 @@ class GrammerController extends Controller
             }
             $words = str_replace('###' , '' , $words);
             $search = $first_char.$words.$last_char;
+            $search = str_replace(['"', "'"] , '`' , $search);
+            $phrase = str_replace(["'", '"'] , '`' , $phrase);
             $data = DB::select("select case when '".$phrase."' like '".$search."' then 1 else 0 end as result");
 
-            if ($data['result'] == 1) {
+            if ($data[0]->result == 1) {
                 return true;
             }
         }
