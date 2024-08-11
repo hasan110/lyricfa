@@ -6,6 +6,7 @@ use App\Models\Grammer;
 use App\Models\GrammerRule;
 use App\Models\Word;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
@@ -217,6 +218,10 @@ class GrammerController extends Controller
 
         }
 
+        usort($found_grammers, function ($item1, $item2) {
+            return $item2['priority'] <=> $item1['priority'];
+        });
+
         $result = [];
         foreach ($found_grammers as $gr) {
             $result[] = [
@@ -286,6 +291,23 @@ class GrammerController extends Controller
                 if (str_contains($word , $words)) {
                     return true;
                 }
+            }
+        }
+        if ($type == 'search_multiple') {
+            $first_char = '%';
+            $last_char = '%';
+            if (str_starts_with($words , "###")) {
+                $first_char = '';
+            }
+            if (str_ends_with($words , "###")) {
+                $last_char = '';
+            }
+            $words = str_replace('###' , '' , $words);
+            $search = $first_char.$words.$last_char;
+            $data = DB::select("select case when '".$phrase."' like '".$search."' then 1 else 0 end as result");
+
+            if ($data['result'] == 1) {
+                return true;
             }
         }
 
