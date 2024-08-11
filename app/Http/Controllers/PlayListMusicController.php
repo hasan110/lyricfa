@@ -121,7 +121,7 @@ class PlayListMusicController extends Controller
             $listMusic[] = $item->music_id;
         }
 
-        return MusicController::getListMusicByIds($listMusic);
+        return (new MusicController())->getListMusicByIds($listMusic);
     }
 
     public static function getRandom4Music($playListId){

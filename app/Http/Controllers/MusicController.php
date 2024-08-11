@@ -300,7 +300,7 @@ class MusicController extends Controller
         return response()->json($response);
     }
 
-    public static function getListMusicByIds($listMusics)
+    public function getListMusicByIds($listMusics)
     {
         $musics = [];
         foreach ($listMusics as $item) {
@@ -318,6 +318,8 @@ class MusicController extends Controller
             $music->num_comment = $num_comment;
             $music->user_like_it = 0;
             $music->average_score = $average_score;
+            $music->readable_like = $this->getReadableNumber(intval($num_like));
+            $music->readable_views = $this->getReadableNumber(intval($music->views));
 
             unset($music['id'], $music['name'], $music['persian_name'], $music['album'],
                 $music['degree'], $music['size'], $music['interest'],
