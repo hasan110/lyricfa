@@ -18,12 +18,12 @@ class CreateUsersTable extends Migration
             $table->string('phone_number');
             $table->string('prefix_code')->default('98');
             $table->string('email')->nullable();
-            $table->text('api_token')->nullable();
-            $table->text('address')->nullable();
-            $table->text('profile_picture')->nullable();
-            $table->string('birth_place')->nullable();
-            $table->string('birth_date')->nullable();
+            $table->string('password')->nullable();
             $table->string('code_introduce')->nullable();
+            $table->string('referral_code')->nullable();
+            $table->text('fcm_refresh_token')->nullable();
+            $table->string('corridor')->default('app');
+            $table->timestamp('expired_at')->nullable();
             $table->timestamps();
         });
     }

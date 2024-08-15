@@ -37,7 +37,7 @@ class AdminController extends Controller
         $admin = $this->getAdmin($request->username, $request->password);
         if($admin){
             $admin->tokens()->delete();
-            $token = $admin->createToken(config('app.name'));
+            $token = $admin->createToken(config('app.name').'-admin');
             $admin->api_token = $token->plainTextToken;
             $arr = [
                 'data' => $admin,

@@ -175,7 +175,7 @@ class UserController extends Controller
         }
     }
 
-    public static function changeTokenAndReturnUser($phone_number)
+    public static function changeTokenAndReturnUser($phone_number , $corridor = 'app')
     {
         $phone_number = str_replace("+98", "", $phone_number);
         if (substr($phone_number, 0, 1) == "0") {
@@ -183,21 +183,21 @@ class UserController extends Controller
         }
         $user = User::where('phone_number', $phone_number)->first();
         $user->tokens()->delete();
-        $token = $user->createToken(config('app.name'));
+        $token = $user->createToken(config('app.name') . '-' . $corridor);
         $user->api_token = $token->plainTextToken;
         return $user;
     }
 
-    public static function changeTokenAndCReturnUser($phone_number , $prefix)
+    public static function changeTokenAndCReturnUser($phone_number , $prefix , $corridor = 'app')
     {
         $user = User::where('phone_number', $phone_number)->where('prefix_code', $prefix)->first();
         $user->tokens()->delete();
-        $token = $user->createToken(config('app.name'));
+        $token = $user->createToken(config('app.name') . '-' . $corridor);
         $user->api_token = $token->plainTextToken;
         return $user;
     }
 
-    public static function addUser($phone_number , $referral_code = null , $prefix = '98')
+    public static function addUser($phone_number , $referral_code = null , $prefix = '98', $corridor = 'app')
     {
         $phone_number = str_replace("+98", "", $phone_number);
         if (substr($phone_number, 0, 1) == "0") {
@@ -215,11 +215,12 @@ class UserController extends Controller
         $user->expired_at = Carbon::now()->addDays(2); //Free subscription
         $user->code_introduce = $code_introduce;
         $user->referral_code = $referral_code;
+        $user->corridor = $corridor;
 
         $user->save();
 
         $user->tokens()->delete();
-        $token = $user->createToken(config('app.name'));
+        $token = $user->createToken(config('app.name').'-'.$corridor);
         $user->api_token = $token->plainTextToken;
 
         if ($referral_code)

@@ -119,9 +119,14 @@ class SmsVerifyController extends Controller
             ];
             return response()->json($arr, 400);
         }
+        if ($request->corridor === 'web-app') {
+            $corridor = 'web-app';
+        } else {
+            $corridor = 'app';
+        }
 
         if( $request->phone_number == 1234567890 && $request->code == 1234 && $request->type == "login"){ // account google play
-            $user = UserController::changeTokenAndReturnUser($request->phone_number);
+            $user = UserController::changeTokenAndReturnUser($request->phone_number,$corridor);
             $arr = [
                 'data' => $user,
                 'errors' => [
@@ -148,7 +153,7 @@ class SmsVerifyController extends Controller
             if (UserController::getUserIdByPhoneNumber($request->phone_number)) {
 
                 if ($request->code == $sms->code) {
-                    $user = UserController::changeTokenAndReturnUser($request->phone_number);
+                    $user = UserController::changeTokenAndReturnUser($request->phone_number,$corridor);
                     $arr = [
                         'data' => $user,
                         'errors' => [
@@ -168,7 +173,7 @@ class SmsVerifyController extends Controller
             } else {
                 if ($request->code == $sms->code) {
                     $referral_code = UserController::checkReferralCode($request->referral_code);
-                    $user = UserController::addUser($request->phone_number , $referral_code);
+                    $user = UserController::addUser($request->phone_number , $referral_code, $request->prefix_code, $corridor);
                     $arr = [
                         'data' => $user,
                         'errors' => [
@@ -311,7 +316,7 @@ class SmsVerifyController extends Controller
         $prefix_code = str_replace('+' , '' , $this->Homogenization($request->prefix_code));
 
         if($phone_number == 1234567890 && $request->code == 1234){ // account google play
-            $user = UserController::changeTokenAndReturnUser($phone_number);
+            $user = UserController::changeTokenAndCReturnUser($phone_number,$prefix_code);
             $arr = [
                 'data' => $user,
                 'errors' => [
@@ -337,6 +342,11 @@ class SmsVerifyController extends Controller
         $t1 = Carbon::parse($sms->updated_at);
         $t2 = Carbon::now();
         $diff = $t1->diff($t2);
+        if ($request->corridor === 'web-app') {
+            $corridor = 'web-app';
+        } else {
+            $corridor = 'app';
+        }
 
         if ($diff->days == 0 && $diff->h == 0 && $diff->i <= 10) {
 
@@ -344,7 +354,7 @@ class SmsVerifyController extends Controller
             if (UserController::getUserIdByCPhoneNumber($phone_number , $prefix_code)) {
 
                 if ($request->code == $sms->code) {
-                    $user = UserController::changeTokenAndCReturnUser($phone_number , $prefix_code);
+                    $user = UserController::changeTokenAndCReturnUser($phone_number , $prefix_code, $corridor);
                     $arr = [
                         'data' => $user,
                         'errors' => [
@@ -364,7 +374,7 @@ class SmsVerifyController extends Controller
             } else {
                 if ($request->code == $sms->code) {
                     $referral_code = UserController::checkReferralCode($request->referral_code);
-                    $user = UserController::addUser($phone_number , $referral_code , $prefix_code);
+                    $user = UserController::addUser($phone_number , $referral_code , $prefix_code, $corridor);
                     $arr = [
                         'data' => $user,
                         'errors' => [

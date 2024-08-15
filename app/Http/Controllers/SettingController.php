@@ -36,8 +36,8 @@ class SettingController extends Controller
     public function getHomePageData()
     {
         $sliders = Slider::where('show_it', '=', 1)->orderBy("id")->get();
-        $recent_musics = Music::orderBy('id', 'DESC')->where('status' , 'active')->take(20)->get();
-        $most_viewed_musics = Music::orderBy('views', 'DESC')->where('status' , 'active')->take(20)->get();
+        $recent_musics = Music::orderBy('id', 'DESC')->take(20)->get();
+        $most_viewed_musics = Music::orderBy('views', 'DESC')->take(20)->get();
 
         $singers = Singer::take(20)->inRandomOrder()->get();
         $singer_list = [];

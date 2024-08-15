@@ -41,10 +41,14 @@ class PaymentController extends Controller
             $reason = 'پرداخت';
         }
         $date = Jalalian::forge($payment->updated_at)->addMinutes(3.5*60)->format('%Y-%m-%d H:i');
+        $link_status = '';
 
         if ($request->Status != 'OK') {
             $payment->status = 2;
             $payment->save();
+            if ($payment->callback_url == 'http://liricfa/') {
+                $link_status = 'fail';
+            }
 
             $data = [
                 'valid' => 1,
@@ -53,7 +57,7 @@ class PaymentController extends Controller
                 'amount' => $payment->amount,
                 'reason' => $reason,
                 'authority' => $payment->authority,
-                'callback' => $payment->callback_url,
+                'callback' => $payment->callback_url.$link_status,
                 'tracking_code' => null,
                 'date' => $date,
             ];
@@ -70,6 +74,9 @@ class PaymentController extends Controller
         } catch (Exception $e) {
             $payment->status = 2;
             $payment->save();
+            if ($payment->callback_url == 'http://liricfa/') {
+                $link_status = 'fail';
+            }
 
             $data = [
                 'valid' => 1,
@@ -79,11 +86,15 @@ class PaymentController extends Controller
                 'reason' => $reason,
                 'authority' => $payment->authority,
                 'description' => 'خطا هنگام تایید تراکنش !!! درصورت کسر وجه از حساب، حداکثر تا 72 ساعت آینده مبلغ کسر شده به حساب شما باز خواهد گشت.',
-                'callback' => $payment->callback_url,
+                'callback' => $payment->callback_url.$link_status,
                 'tracking_code' => null,
                 'date' => $date,
             ];
             return view('payment' , compact('data'));
+        }
+
+        if ($payment->callback_url == 'http://liricfa/') {
+            $link_status = 'success';
         }
 
         $data = [
@@ -93,7 +104,7 @@ class PaymentController extends Controller
             'amount' => $payment->amount,
             'reason' => $reason,
             'authority' => $payment->authority,
-            'callback' => $payment->callback_url,
+            'callback' => $payment->callback_url.$link_status,
             'tracking_code' => $payment->tracking_code,
             'date' => $date,
         ];
