@@ -328,6 +328,7 @@ class UserWordController extends Controller
             $arrWordsDont = $request->words_not_learn;
 
             foreach ($arrWordsLearn as $item) {
+                if (!$item) continue;
                 $wordInfo = $this->getWordInfo($userId, $item);
                 if (isset($wordInfo)) {
                     $getItem = $wordInfo;
@@ -342,6 +343,7 @@ class UserWordController extends Controller
             }
 
             foreach ($arrWordsDont as $item) {
+                if (!$item) continue;
                 $wordInfo = $this->getWordInfo($userId, $item);
                 if (isset($wordInfo)) {
                     $getItem = $wordInfo;
