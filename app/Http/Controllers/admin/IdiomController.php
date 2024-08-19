@@ -171,10 +171,16 @@ class IdiomController extends Controller
             return response()->json($arr, 422);
         }
 
+        if (in_array(intval($request->type) , [0,1,2])) {
+            $type = intval($request->type);
+        } else {
+            $type = 0;
+        }
+
         $idiom = new Idiom();
         $idiom->phrase = $request->phrase;
         $idiom->base = $request->base;
-        $idiom->definition = '';
+        $idiom->type = $type;
         $idiom->save();
 
         foreach ($request->idiom_definitions as $definition)
@@ -232,6 +238,12 @@ class IdiomController extends Controller
             return response()->json($arr, 422);
         }
 
+        if (in_array(intval($request->type) , [0,1,2])) {
+            $type = intval($request->type);
+        } else {
+            $type = 0;
+        }
+
         $idiom = Idiom::with('idiom_definitions')->find($request->id);
         if(!$idiom){
             return response()->json([
@@ -242,6 +254,7 @@ class IdiomController extends Controller
         }
         $idiom->phrase = $request->phrase;
         $idiom->base = $request->base;
+        $idiom->type = $type;
         $idiom->save();
 
         // delete all word relations and ...

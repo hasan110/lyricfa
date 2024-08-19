@@ -75,6 +75,7 @@
                             <th>موزیک</th>
                             <th>آمار</th>
                             <th>امتیاز از 5</th>
+                            <th>وضعیت</th>
                             <th>عملیات</th>
                         </tr>
                         </thead>
@@ -112,6 +113,14 @@
                                 <span class="pa-2">بازدید : {{ item.views }}</span>
                             </td>
                             <td>-</td>
+                            <td>
+                                <template v-if="parseInt(item.status) === 1">
+                                    <v-badge color="success" content="فعال"></v-badge>
+                                </template>
+                                <template v-else>
+                                    <v-badge color="warning" content="غیر فعال"></v-badge>
+                                </template>
+                            </td>
                             <td>
                                 <v-btn color="primary" small>
                                     <router-link :to="{ name:'edit_music' , params:{ id:item.id } }">

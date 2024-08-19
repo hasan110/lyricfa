@@ -14,8 +14,7 @@
         <v-container>
 
             <v-row>
-
-                <v-col cols="6" class="pb-0">
+                <v-col cols="12" sm="6" class="pb-0">
                     <v-text-field
                         v-model="form_data.english_title"
                         outlined
@@ -24,7 +23,7 @@
                         label="عنوان انگلیسی آهنگ"
                     ></v-text-field>
                 </v-col>
-                <v-col cols="6" class="pb-0">
+                <v-col cols="12" sm="6" class="pb-0">
                     <v-text-field
                         v-model="form_data.persian_title"
                         outlined
@@ -33,14 +32,11 @@
                         label="عنوان فارسی آهنگ"
                     ></v-text-field>
                 </v-col>
-                <v-col cols="3" class="pb-0">
-                </v-col>
-
             </v-row>
 
             <div class="pb-5">
                 <v-row>
-                    <v-col cols="6" class="pb-0">
+                    <v-col cols="12" sm="6" class="pb-0">
                         <v-autocomplete
                             chips deletable-chips multiple small-chips
                             v-model="form_data.singers"
@@ -57,7 +53,7 @@
             <hr>
             <br>
             <v-row>
-                <v-col cols="4" class="pb-0">
+                <v-col cols="12" sm="6" class="pb-0">
                     <v-menu
                         ref="menu"
                         v-model="menu"
@@ -85,7 +81,7 @@
                         ></v-date-picker>
                     </v-menu>
                 </v-col>
-                <v-col v-if="form_data.has_album" cols="4" class="pb-2">
+                <v-col v-if="form_data.has_album" sm="8" lg="4" xl="4" class="pb-2">
                     <v-text-field
                         v-model="form_data.album_id"
                         outlined
@@ -93,7 +89,7 @@
                         label="شناسه آلبوم"
                     ></v-text-field>
                 </v-col>
-                <v-col cols="2" class="pa-0">
+                <v-col sm="4" lg="2" xl="2" class="pa-0">
                     <v-checkbox
                         v-model="form_data.has_album"
                         label="آلبوم دارد؟"
@@ -102,7 +98,7 @@
             </v-row>
 
             <v-row>
-                <v-col cols="8" class="pb-0">
+                <v-col cols="12" sm="12" class="pb-0">
                     درجه سختی
                     <v-radio-group
                         v-model="form_data.hardest_degree"
@@ -126,7 +122,23 @@
                         ></v-radio>
                     </v-radio-group>
                 </v-col>
-                <v-col cols="2" class="pa-0">
+                <v-col cols="12" sm="8" class="pb-0">
+                    وضعیت
+                    <v-radio-group
+                        v-model="form_data.status"
+                        row
+                    >
+                        <v-radio
+                            label="فعال"
+                            :value="1"
+                        ></v-radio>
+                        <v-radio
+                            label="غیر فعال"
+                            :value="0"
+                        ></v-radio>
+                    </v-radio-group>
+                </v-col>
+                <v-col cols="12" sm="4" class="pa-0">
                     <v-checkbox
                         v-model="form_data.is_user_request"
                         label="درخواستی کاربر"
@@ -135,8 +147,7 @@
             </v-row>
 
             <v-row>
-
-                <v-col cols="4" class="pb-0">
+                <v-col cols="12" sm="6" class="pb-0">
                     <v-file-input
                         show-size
                         dense
@@ -147,7 +158,7 @@
                         accept="image/*"
                     ></v-file-input>
                 </v-col>
-                <v-col cols="4" class="pb-0">
+                <v-col cols="12" sm="6" class="pb-0">
                     <v-file-input
                         show-size
                         dense
@@ -157,7 +168,6 @@
                         accept="audio/*"
                     ></v-file-input>
                 </v-col>
-
             </v-row>
 
             <v-row>
@@ -165,7 +175,7 @@
             </v-row>
 
             <v-row>
-                <v-col cols="2" class="pb-0">
+                <v-col cols="6" sm="3" class="pb-0">
                     <v-text-field
                         v-model="form_data.start_demo"
                         outlined
@@ -173,7 +183,7 @@
                         label="دموی آهنگ از"
                     ></v-text-field>
                 </v-col>
-                <v-col cols="2" class="pb-0">
+                <v-col cols="6" sm="3" class="pb-0">
                     <v-text-field
                         v-model="form_data.end_demo"
                         outlined
@@ -183,7 +193,7 @@
                 </v-col>
             </v-row>
 
-            <v-row>
+            <v-row class="mb-4">
                 <v-col cols="12" class="pb-0 text-center">
                     <v-btn
                         color="accent"
@@ -250,6 +260,7 @@ export default {
             x.date_publication ? d.append('date_publication', x.date_publication) : '';
             x.has_album ? d.append('has_album', 1) : d.append('has_album', 0);
             x.is_user_request ? d.append('is_user_request', 1) : d.append('is_user_request', 0);
+            x.status ? d.append('status', 1) : d.append('status', 0);
             x.album_id ? d.append('album_id', x.album_id) : '';
             d.append('hardest_degree', parseInt(x.hardest_degree));
             x.image ? d.append('image', x.image) : '';

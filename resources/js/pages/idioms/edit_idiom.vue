@@ -44,6 +44,32 @@
                         ></v-text-field>
                     </v-col>
                 </v-row>
+                <v-row>
+                    <v-col cols="12" xs="12" sm="12" class="pb-0">
+                        <v-select
+                            :items="[
+                                {
+                                    value:0,
+                                    title:'انتخاب نشده',
+                                },
+                                {
+                                    value:1,
+                                    title:'عبارت دو بخشی',
+                                },
+                                {
+                                    value:2,
+                                    title:'کالوکیشن',
+                                },
+                            ]"
+                            item-value="value"
+                            item-text="title"
+                            v-model="form_data.type"
+                            outlined clearable
+                            :error-messages="errors.type"
+                            dense label="نوع"
+                        ></v-select>
+                    </v-col>
+                </v-row>
                 <hr class="mt-3">
                 <div class="d-flex align-center justify-space-between pa-2">
                     <div>معنی اصطلاح</div>

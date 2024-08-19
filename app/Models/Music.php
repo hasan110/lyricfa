@@ -12,6 +12,7 @@ class Music extends Model
 
     protected $casts = [
         'is_user_request' => 'integer',
+        'status' => 'integer',
         'degree' => 'integer',
     ];
 

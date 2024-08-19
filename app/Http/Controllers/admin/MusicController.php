@@ -126,6 +126,7 @@ class MusicController extends Controller
         $music->degree = $request->hardest_degree;
         $music->published_at = $request->date_publication;
         $music->is_user_request = $request->is_user_request;
+        $music->status = $request->has('status') ? intval($request->status) : 0;
 
         if ($request->album_id) {
             $music->album_id = $request->album;
@@ -213,6 +214,7 @@ class MusicController extends Controller
         $music->name = $request->english_title;
         $music->persian_name = $request->persian_title;
         $music->is_user_request = $request->has('is_user_request') ? intval($request->is_user_request) : 0;
+        $music->status = $request->has('status') ? intval($request->status) : 0;
         $music->start_demo = $request->start_demo;
         $music->end_demo = $request->end_demo;
         $music->degree = $request->hardest_degree;

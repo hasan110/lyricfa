@@ -75,6 +75,7 @@
                             <th>#</th>
                             <th>لغت پایه</th>
                             <th>اصطلاح</th>
+                            <th>نوع</th>
                             <th>عملیات</th>
                         </tr>
                         </thead>
@@ -93,6 +94,13 @@
                             <td>{{ item.id }}</td>
                             <td>{{ item.base }}</td>
                             <td>{{ item.phrase }}</td>
+                            <td>
+                                <template v-if="parseInt(item.type) === 1">عبارت دو بخشی</template>
+                                <template v-else-if="parseInt(item.type) === 2">کالوکیشن</template>
+                                <template v-else>
+                                    انتخاب نشده
+                                </template>
+                            </td>
                             <td>
                                 <v-btn color="primary" dark dens :to="{name:'edit_idiom' , params:{id : item.id}}">
                                     ویرایش

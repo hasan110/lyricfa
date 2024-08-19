@@ -8,8 +8,6 @@ use Illuminate\Support\Facades\Http;
 use SoapClient;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
-use App\Models\Map;
-use Illuminate\Support\Str;
 
 
 class SmsVerifyController extends Controller
@@ -76,11 +74,11 @@ class SmsVerifyController extends Controller
         $smsVerify = new SmsVerify;
         $smsVerify->phone_number = $request->phone_number;
         $smsVerify->type = $request->type;
-          if( $request->phone_number == 1234567890 && $request->type == "login"){
-                $smsVerify->code = 1234; //google play account
-          }else{
-                   $smsVerify->code = $activate_code;
-          }
+        if( $request->phone_number == 1234567890 && $request->type == "login"){
+            $smsVerify->code = 1234; //google play account
+        }else{
+            $smsVerify->code = $activate_code;
+        }
 
 
         $smsVerify->save();
@@ -173,7 +171,7 @@ class SmsVerifyController extends Controller
             } else {
                 if ($request->code == $sms->code) {
                     $referral_code = UserController::checkReferralCode($request->referral_code);
-                    $user = UserController::addUser($request->phone_number , $referral_code, $request->prefix_code, $corridor);
+                    $user = UserController::addUser($request->phone_number , $referral_code, '98', $corridor);
                     $arr = [
                         'data' => $user,
                         'errors' => [
@@ -229,6 +227,13 @@ class SmsVerifyController extends Controller
 
         $phone_number = $this->Homogenization($request->phone_number);
         $prefix_code = str_replace('+' , '' , $this->Homogenization($request->prefix_code));
+        if (!$prefix_code) {
+            $prefix_code = "98";
+        }
+        $phone_number = str_replace("+98", "", $phone_number);
+        if (substr($phone_number, 0, 1) == "0") {
+            $phone_number = substr($phone_number, -strlen($phone_number) + 1);
+        }
 
         $userId = UserController::getUserIdByCPhoneNumber($phone_number , $prefix_code);
 
@@ -314,6 +319,9 @@ class SmsVerifyController extends Controller
 
         $phone_number = $this->Homogenization($request->phone_number);
         $prefix_code = str_replace('+' , '' , $this->Homogenization($request->prefix_code));
+        if (!$prefix_code) {
+            $prefix_code = "98";
+        }
 
         if($phone_number == 1234567890 && $request->code == 1234){ // account google play
             $user = UserController::changeTokenAndCReturnUser($phone_number,$prefix_code);
@@ -327,6 +335,9 @@ class SmsVerifyController extends Controller
         }
 
         $phone_number = str_replace("+98", "", $phone_number);
+        if (substr($phone_number, 0, 1) == "0") {
+            $phone_number = substr($phone_number, -strlen($phone_number) + 1);
+        }
 
         $sms = SmsVerify::orderBy('id', 'DESC')->where('phone_number', $phone_number)->where('prefix_code', $prefix_code)->first();
         if (!$sms) {
