@@ -12,6 +12,10 @@ class Idiom extends Model
     protected $table = 'idioms';
     protected $guarded = [];
 
+    protected $casts = [
+        'type' => 'integer',
+    ];
+
     public function idiom_definitions()
     {
         return $this->hasMany(IdiomDefinition::class);
