@@ -65,13 +65,13 @@
                                 :key="item.id"
                             >
                                 <td>{{ item.id }}</td>
-                                <td>{{ item.text_english }}</td>
+                                <td style="white-space: pre;">{{ item.text_english }}</td>
                                 <td>
                                     <template v-if="item.enable_edit">
                                         <textarea class="inline-text-area" rows="8" v-model="item.changed_text_english_raw"></textarea>
                                     </template>
                                     <template v-else>
-                                        <span v-html="item.changed_text_english"></span>
+                                        <span style="white-space: pre;" v-html="item.changed_text_english"></span>
                                     </template>
                                 </td>
                                 <td>
@@ -193,7 +193,7 @@
                             >
                                 <td style="width: 40px;">{{ item.id }}</td>
                                 <td style="width: 300px;">
-                                    <span style="unicode-bidi: plaintext;" v-html="item.untranslated_words_text"></span>
+                                    <span style="unicode-bidi: plaintext;white-space: pre;" v-html="item.untranslated_words_text"></span>
                                 </td>
                                 <td style="width: 300px;">
                                     <template v-if="item.untranslated_words_changed">
@@ -245,7 +245,7 @@ export default {
     },
     methods:{
         getList(){
-            this.fetch_loading = true;
+            this.$store.commit('SHOW_APP_LOADING' , 1)
             this.$http.post(`replace/process-text` , {
                 id:this.id,
                 type:this.type,
@@ -255,10 +255,10 @@ export default {
                     const response = res.data.data;
                     this.list = response.data;
                     this.last_page = response.last_page;
-                    this.fetch_loading = false
+                    this.$store.commit('SHOW_APP_LOADING' , 0)
                 })
                 .catch( err => {
-                    this.fetch_loading = false;
+                    this.$store.commit('SHOW_APP_LOADING' , 0)
                     const e = err.response.data
                     if(e.errors){ this.errors = e.errors }
                     else if(e.message){

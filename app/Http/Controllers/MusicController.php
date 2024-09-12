@@ -637,6 +637,11 @@ class MusicController extends Controller
         $music->views = $music->views + 1;
         $music->save();
 
+        $user_id = UserController::getUserByToken($request->header("ApiToken"))->id;
+        $music->views()->create([
+            'user_id' => $user_id,
+        ]);
+
         $response = [
             'data' => null,
             'errors' => [],

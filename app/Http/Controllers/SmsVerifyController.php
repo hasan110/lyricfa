@@ -235,6 +235,15 @@ class SmsVerifyController extends Controller
             $phone_number = substr($phone_number, -strlen($phone_number) + 1);
         }
 
+        $check_verify_code = SmsVerify::where('phone_number', $phone_number)->where('prefix_code', $prefix_code)->latest()->first();
+        if ($check_verify_code and $check_verify_code->created_at > Carbon::now()->subMinute()) {
+            return response()->json([
+                'data' => null,
+                'errors' => $validator->errors(),
+                'message' => 'کد فعال سازی قبلا ارسال شده است. برای ارسال مجدد یک دقیقه بعد تلاش کنید.'
+            ], 400);
+        }
+
         $userId = UserController::getUserIdByCPhoneNumber($phone_number , $prefix_code);
 
         $activate_code = rand(1000, 9999);

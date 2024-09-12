@@ -25,14 +25,14 @@
                         ></v-text-field>
                     </v-col>
                     <v-col cols="12" xs="12" sm="12" class="pb-0">
-                        <v-text-field
+                        <v-textarea
                             v-model="form_data.phrase"
                             :error-messages="errors.phrase"
                             outlined
                             clearable
-                            dense
+                            dense rows="3"
                             label="متن اصطلاح"
-                        ></v-text-field>
+                        ></v-textarea>
                     </v-col>
                 </v-row>
                 <v-row>
@@ -50,6 +50,18 @@
                                 {
                                     value:2,
                                     title:'کالوکیشن',
+                                },
+                                {
+                                    value:3,
+                                    title:'افعال عبارتی',
+                                },
+                                {
+                                    value:4,
+                                    title:'اصطلاحات',
+                                },
+                                {
+                                    value:5,
+                                    title:'اسلنگ',
                                 },
                             ]"
                             item-value="value"
@@ -77,14 +89,14 @@
                     <div v-for="(item , key) in form_data.idiom_definitions" :key="key">
                         <v-row>
                             <v-col cols="12" xs="12" sm="12" class="pb-0">
-                                <v-text-field
+                                <v-textarea
                                     v-model="item.definition"
-                                    outlined clearable
+                                    outlined clearable rows="3"
                                     append-outer-icon="mdi-delete"
                                     @click:append-outer="removeDefinition(key)"
                                     :error-messages="errors[`idiom_definitions.${key}.definition`] ? errors[`idiom_definitions.${key}.definition`] : null"
                                     dense :label="'معنی ' + (key + 1)"
-                                ></v-text-field>
+                                ></v-textarea>
                             </v-col>
                         </v-row>
                         <div>
@@ -93,22 +105,22 @@
                         <div v-for="(example , example_key) in item.idiom_definition_examples">
                             <v-row>
                                 <v-col cols="12" xs="12" sm="6" class="pb-0">
-                                    <v-text-field
+                                    <v-textarea
                                         v-model="example.phrase"
-                                        outlined clearable
+                                        outlined clearable rows="3"
                                         dense :label="'عبارت ' + (example_key + 1)"
                                         :error-messages="errors[`idiom_definitions.${key}.idiom_definition_examples.${example_key}.phrase`] ? errors[`idiom_definitions.${key}.idiom_definition_examples.${example_key}.phrase`] : null"
-                                    ></v-text-field>
+                                    ></v-textarea>
                                 </v-col>
                                 <v-col cols="12" xs="12" sm="6" class="pb-0">
-                                    <v-text-field
+                                    <v-textarea
                                         v-model="example.definition"
-                                        outlined clearable
+                                        outlined clearable rows="3"
                                         append-outer-icon="mdi-delete"
                                         @click:append-outer="removeExample(key , example_key)"
                                         dense :label="'معنی عبارت ' + (example_key + 1)"
                                         :error-messages="errors[`idiom_definitions.${key}.idiom_definition_examples.${example_key}.definition`] ? errors[`idiom_definitions.${key}.idiom_definition_examples.${example_key}.definition`] : null"
-                                    ></v-text-field>
+                                    ></v-textarea>
                                 </v-col>
                             </v-row>
                         </div>

@@ -26,7 +26,6 @@ use App\Http\Controllers\LikeSingerController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SmsVerifyController;
 use App\Http\Controllers\UserSuggestionController;
-use App\Http\Controllers\PositionController;
 use App\Http\Controllers\OrderMusicController;
 use App\Http\Controllers\GrammerController;
 use App\Http\Controllers\PaymentController;
@@ -34,7 +33,6 @@ use Illuminate\Support\Facades\Route;
 
 //panel
 Route::get('/get_texts_bigger_id', [TextController::class, 'check10LastRowIsNull']);
-Route::get('/show_profit_banner', [PositionController::class, 'showProfitBanner']);
 
 //sms
 Route::post('/send_sms', [SmsVerifyController::class, 'sendSms']);
@@ -45,8 +43,6 @@ Route::post('/check-verify-code', [SmsVerifyController::class, 'checkVerifyCode'
 
 //setting
 Route::get('/get_setting', [SettingController::class, 'getSetting']);
-Route::get('/like_movements', [SettingController::class, 'like_movements']);
-Route::get('/singer_movements', [SettingController::class, 'singer_movements']);
 
 Route::middleware('CheckApiAuthentication')->group(function () {
 
@@ -64,7 +60,7 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/get_last_music_list', [MusicController::class, 'getLastMusicList']);
     Route::post('/get_music_hardest', [MusicController::class, 'getMusicWithHardest']);
     Route::post('/get_n_last_music_list', [MusicController::class, 'getNLastMusicList']);
-    Route::post('/add_view', [MusicController::class, 'addMusicViewOne']);
+    Route::post('/add_view', [MusicController::class, 'addMusicViewOne'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');;
     Route::post('/get_singer_musics', [MusicController::class, 'getSingerMusics']);
     Route::post('/get_album_musics', [MusicController::class, 'getAlbumMusics']);
     Route::post('/get_singer_musics_no_paging', [MusicController::class, 'getSingerMusicsNoPaging']);
@@ -82,13 +78,13 @@ Route::middleware('CheckApiAuthentication')->group(function () {
 
     //comment music
     Route::post('/get_comment_music', [CommentMusicController::class, 'getMusicComment']);
-    Route::post('/add_comment_music', [CommentMusicController::class, 'addMusicComment']);
+    Route::post('/add_comment_music', [CommentMusicController::class, 'addMusicComment'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');;
     Route::post('/edit_comment_music', [CommentMusicController::class, 'editMusicComment']);
     Route::post('/remove_comment_music', [CommentMusicController::class, 'removeMusicComment']);
 
     //comment singer
     Route::post('/get_comment_singer', [CommentSingerController::class, 'getSingerComment']);
-    Route::post('/add_comment_singer', [CommentSingerController::class, 'addSingerComment']);
+    Route::post('/add_comment_singer', [CommentSingerController::class, 'addSingerComment'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');;
     Route::post('/edit_comment_singer', [CommentSingerController::class, 'editSingerComment']);
     Route::post('/remove_comment_singer', [CommentSingerController::class, 'removeSingerComment']);
 
@@ -96,12 +92,12 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/get_user_words', [UserWordController::class, 'getUserWordsById']);
     Route::post('/get_user_words_review', [UserWordController::class, 'getUserWordsReviews']);
     Route::post('/get_lightener_box_data', [UserWordController::class, 'getLightenerBoxData']);
-    Route::post('/add_word_user', [UserWordController::class, 'insertUserWord']);
+    Route::post('/add_word_user', [UserWordController::class, 'insertUserWord'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');;
     Route::post('/edit_words_user', [UserWordController::class, 'editWordsUser']);
     Route::post('/remove_word_user', [UserWordController::class, 'removeWordUser']);
 
     //playlist
-    Route::post('/insert_user_play_list', [PlayListController::class, 'insertUserPlayList']);
+    Route::post('/insert_user_play_list', [PlayListController::class, 'insertUserPlayList'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');;
     Route::post('/get_user_play_list', [PlayListController::class, 'getUserPlayList']);
     Route::post('/remove_play_list_by_id', [PlayListController::class, 'removePlayListById']);
     Route::post('/edit_play_list_by_id', [PlayListController::class, 'editPlayListById']);
@@ -163,7 +159,7 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/insert_user_suggestion', [UserSuggestionController::class, 'insertUserSuggestion']);
 
     //order music
-    Route::post('/add_order_music', [OrderMusicController::class, 'addOrderMusic']);
+    Route::post('/add_order_music', [OrderMusicController::class, 'addOrderMusic'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');;
 
     //score
     Route::post('/get_average_music_score', [ScoreMusicController::class, 'getAverageMusicScore']);
@@ -182,8 +178,8 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::get('/grammer_list', [GrammerController::class, 'grammerList']);
     Route::post('/get_grammer', [GrammerController::class, 'getGrammer']);
     Route::post('/get_grammer_prerequisites', [GrammerController::class, 'getGrammerPrerequisites']);
-    Route::post('/find_grammer', [GrammerController::class, 'findGrammer']);
+    Route::post('/find_grammer', [GrammerController::class, 'findGrammer'])->withoutMiddleware('throttle:api')->middleware('throttle:600,1');
 
-    Route::post('/subscription/payment', [PaymentController::class, 'createSubscriptionPayment']);
+    Route::post('/subscription/payment', [PaymentController::class, 'createSubscriptionPayment'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');
 
 });

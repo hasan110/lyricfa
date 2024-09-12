@@ -4,9 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Album;
 use App\Models\Film;
-use App\Models\LikeMusic;
-use App\Models\LikeSinger;
-use App\Models\Like;
 use App\Models\Music;
 use App\Models\Setting;
 use App\Models\Singer;
@@ -36,7 +33,8 @@ class SettingController extends Controller
     public function getHomePageData()
     {
         $sliders = Slider::where('show_it', '=', 1)->orderBy("id")->get();
-        $recent_musics = Music::orderBy('id', 'DESC')->take(20)->whereStatus(1)->get();
+        $recent_musics = Music::orderBy('id', 'DESC')->take(40)->whereStatus(1)->get();
+        $shuffled_recent_musics = $recent_musics->shuffle()->take(20);
         $most_viewed_musics = Music::orderBy('views', 'DESC')->take(20)->whereStatus(1)->get();
 
         $singers = Singer::take(20)->inRandomOrder()->get();
@@ -57,7 +55,7 @@ class SettingController extends Controller
 
         $data = [
             'sliders' => $sliders,
-            'recent_musics' => $this->prepareMusicsTemplate($recent_musics),
+            'recent_musics' => $this->prepareMusicsTemplate($shuffled_recent_musics),
             'most_viewed_musics' => $this->prepareMusicsTemplate($most_viewed_musics),
             'singers' => $singer_list,
             'albums' => $albums,
@@ -92,43 +90,4 @@ class SettingController extends Controller
 
         return $musics_array;
     }
-
-    public function like_movements()
-    {
-        ini_set('max_execution_time', '15000');
-        if (request()->get('action') == 'aaa') {
-            foreach (LikeMusic::all() as $like_music) {
-                Like::create([
-                    'user_id' => $like_music->id_user,
-                    'likeable_id' => $like_music->id_song,
-                    'likeable_type' => 'App\Models\Music',
-                ]);
-            }
-        } else {
-            foreach (LikeSinger::all() as $like_singer) {
-                Like::create([
-                    'user_id' => $like_singer->id_user,
-                    'likeable_id' => $like_singer->id_singer,
-                    'likeable_type' => 'App\Models\Singer',
-                ]);
-            }
-        }
-
-        return response()->json(['data' => 'finished']);
-    }
-
-    public function singer_movements()
-    {
-        ini_set('max_execution_time', '15000');
-        foreach (Music::all() as $music) {
-            foreach (explode(',', $music['singers']) as $item) {
-                $singer = Singer::where('id', $item)->first();
-
-                $music->singers()->attach($singer);
-            }
-        }
-
-        return response()->json(['data' => 'finished']);
-    }
-
 }

@@ -150,58 +150,67 @@ class ReplaceController extends Controller
     }
     private function findUntranslatedWords(&$text): void
     {
-        $temp = preg_split("/[, ?;_!.}\n{)(\r]+/" , $text->text_english);
-        $found_words = [];
-        $separateds = [];
-        foreach ($temp as $separated) {
-            if ($separated) {
-                $separateds[] = $separated;
-            }
-        }
-        foreach ($separateds as $key => $separated) {
-            $separated = trim($separated , '"');
-            $raw_word = $separated;
-            if ($raw_word === "-") {
-                continue;
-            }
-            if (str_ends_with($separated , "'s")) {
-                $separated = str_replace("'s" , "" , $separated);
-            }
-            if ($key === 0) {
-                $word_capital_check = Word::where('english_word', ucwords($separated))->first();
-                $word_letter_check = Word::where('english_word', strtolower($separated))->first();
-                if (!$word_capital_check && !$word_letter_check) {
-                    $map_capital_check = Map::where('word', ucwords($separated))->first();
-                    $map_letter_check = Map::where('word', strtolower($separated))->first();
-                    if (!$map_capital_check && !$map_letter_check) {
-                        if (!in_array($raw_word, $found_words)) {
-                            $found_words[$raw_word] = '<a href="/words/create?word='.$raw_word.'" target="_blank" class="red-mark new-word">'.$raw_word.'</a>';
-                        }
-                    }
-                }
-            } else {
-                $word_check = Word::where('english_word', $separated)->first();
-                if (!$word_check) {
-                    $map_check = Map::where('word', $separated)->first();
-                    if (!$map_check) {
-                        if (!in_array($raw_word, $found_words)) {
-                            $found_words[$raw_word] = '<a href="/words/create?word='.$raw_word.'" target="_blank" class="red-mark new-word">'.$raw_word.'</a>';
-                        }
-                    }
-                }
-            }
-        }
+        $content = explode("\n", $text->text_english);
         $text->untranslated_words_changed = false;
-        if (count($found_words) !== 0) {
-            $text->untranslated_words_changed = true;
-            $text->untranslated_words_text = str_replace(
-                array_keys($found_words),
-                array_values($found_words),
-                $text->text_english
-            );
-        } else {
-            $text->untranslated_words_text = $text->text_english;
+        $text->untranslated_words_text = null;
+        $final_text = [];
+        foreach ($content as $phrase) {
+
+            $temp = preg_split("/[, ?;_!.}\n{)(\r]+/" , $phrase);
+            $found_words = [];
+            $separateds = [];
+            foreach ($temp as $separated) {
+                if ($separated && $separated !== '-') {
+                    $separateds[] = $separated;
+                }
+            }
+            foreach ($separateds as $key => $separated) {
+                $separated = trim($separated , '"');
+                $raw_word = $separated;
+                if ($raw_word === "-") {
+                    continue;
+                }
+                if (str_ends_with($separated , "'s")) {
+                    $separated = str_replace("'s" , "" , $separated);
+                }
+                if ($key === 0) {
+                    $word_capital_check = Word::where('english_word', ucwords($separated))->first();
+                    $word_letter_check = Word::where('english_word', strtolower($separated))->first();
+                    if (!$word_capital_check && !$word_letter_check) {
+                        $map_capital_check = Map::where('word', ucwords($separated))->first();
+                        $map_letter_check = Map::where('word', strtolower($separated))->first();
+                        if (!$map_capital_check && !$map_letter_check) {
+                            if (!in_array($raw_word, $found_words)) {
+                                $found_words[$raw_word] = '<a href="/words/create?word='.$raw_word.'" target="_blank" class="red-mark new-word">'.$raw_word.'</a>';
+                            }
+                        }
+                    }
+                } else {
+                    $word_check = Word::where('english_word', $separated)->first();
+                    if (!$word_check) {
+                        $map_check = Map::where('word', $separated)->first();
+                        if (!$map_check) {
+                            if (!in_array($raw_word, $found_words)) {
+                                $found_words[$raw_word] = '<a href="/words/create?word='.$raw_word.'" target="_blank" class="red-mark new-word">'.$raw_word.'</a>';
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (count($found_words) !== 0) {
+                $text->untranslated_words_changed = true;
+                $final_text[] = str_replace(
+                    array_keys($found_words),
+                    array_values($found_words),
+                    $phrase
+                );
+            } else {
+                $final_text[] = $phrase;
+            }
+
         }
+        $text->untranslated_words_text = implode("\n" , $final_text);
         $text->raw_untranslated_words_text = $text->text_english;
     }
 
@@ -311,7 +320,7 @@ class ReplaceController extends Controller
     {
         $messages = array(
             'find_phrase.required' => 'عبارت مورد جست و جو نمی تواند خالی باشد',
-            'replace_phrase.required' => 'عبارت جایگزین نمی تواند خالی باشد',
+            // 'replace_phrase.required' => 'عبارت جایگزین نمی تواند خالی باشد',
             'apply_on.required' => 'این که این قانون چطور اعمال شود را انتخاب کنید',
             'rules.array' => 'لیست اعمال بعد از باید آرایه باشد.',
         );
@@ -333,7 +342,7 @@ class ReplaceController extends Controller
 
         $replace_rule = new ReplaceRule();
         $replace_rule->find_phrase = $request->find_phrase;
-        $replace_rule->replace_phrase = $request->replace_phrase;
+        $replace_rule->replace_phrase = $request->replace_phrase ?? null;
         $replace_rule->apply_on = $request->apply_on;
         $replace_rule->last_character = intval($request->last_character);
         $replace_rule->similar = intval($request->similar);

@@ -34,4 +34,9 @@ class Music extends Model
     {
         return $this->belongsToMany(Singer::class, 'music_singer', 'music_id', 'singer_id');
     }
+
+    public function views()
+    {
+        return $this->morphMany(View::class, 'viewable', 'viewable_type', 'viewable_id');
+    }
 }

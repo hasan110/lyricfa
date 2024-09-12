@@ -79,22 +79,22 @@
                         <div v-for="(example , example_key) in item.definition_examples">
                             <v-row>
                                 <v-col cols="12" xs="12" sm="6" class="pb-0">
-                                    <v-text-field
+                                    <v-textarea
                                         v-model="example.phrase"
-                                        outlined clearable
+                                        outlined clearable rows="3"
                                         dense :label="'عبارت ' + (example_key + 1)"
                                         :error-messages="errors[`definitions.${key}.definition_examples.${example_key}.phrase`] ? errors[`definitions.${key}.definition_examples.${example_key}.phrase`] : null"
-                                    ></v-text-field>
+                                    ></v-textarea>
                                 </v-col>
                                 <v-col cols="12" xs="12" sm="6" class="pb-0">
-                                    <v-text-field
+                                    <v-textarea
                                         v-model="example.definition"
-                                        outlined clearable
+                                        outlined clearable rows="3"
                                         append-outer-icon="mdi-delete"
                                         @click:append-outer="removeExample(key , example_key)"
                                         dense :label="'معنی عبارت ' + (example_key + 1)"
                                         :error-messages="errors[`definitions.${key}.definition_examples.${example_key}.definition`] ? errors[`definitions.${key}.definition_examples.${example_key}.definition`] : null"
-                                    ></v-text-field>
+                                    ></v-textarea>
                                 </v-col>
                             </v-row>
                         </div>
@@ -120,12 +120,12 @@
                     <div v-for="(item , en_key) in form_data.english_definitions" :key="en_key">
                         <v-row>
                             <v-col cols="12" xs="12" sm="12" class="pb-0">
-                                <v-text-field
+                                <v-textarea
                                     v-model="item.definition"
-                                    outlined clearable
+                                    outlined clearable rows="3"
                                     :error-messages="errors[`english_definitions.${en_key}.definition`] ? errors[`english_definitions.${en_key}.definition`] : null"
                                     dense :label="'معنی انگلیسی ' + (en_key + 1)"
-                                ></v-text-field>
+                                ></v-textarea>
                             </v-col>
                             <v-col cols="12" xs="12" sm="6" class="pb-0">
                                 <v-text-field
