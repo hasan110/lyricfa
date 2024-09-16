@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Film;
+use App\Models\FilmText;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -57,6 +58,13 @@ class FilmController extends Controller
 
         $film['items'] = $films;
         $film['items_count'] = $films->count();
+        $film['texts'] = [];
+
+        if (UserController::isUserSubscriptionValid($request) && $request->with_text) {
+            $id_film = $request->id;
+            $texts = FilmText::where('film_id', '=', $id_film)->orderBy("id")->get();
+            $film['texts'] = $texts;
+        }
 
         return response()->json([
             'data' => $film,

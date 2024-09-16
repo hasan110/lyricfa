@@ -8,6 +8,8 @@ use App\Models\Music;
 use App\Models\Setting;
 use App\Models\Singer;
 use App\Models\Slider;
+use App\Models\View;
+use Carbon\Carbon;
 
 
 class SettingController extends Controller
@@ -35,7 +37,10 @@ class SettingController extends Controller
         $sliders = Slider::where('show_it', '=', 1)->orderBy("id")->get();
         $recent_musics = Music::orderBy('id', 'DESC')->take(40)->whereStatus(1)->get();
         $shuffled_recent_musics = $recent_musics->shuffle()->take(20);
-        $most_viewed_musics = Music::orderBy('views', 'DESC')->take(20)->whereStatus(1)->get();
+
+        $views = View::selectRaw('viewable_id , COUNT(*) AS cnt')->where('viewable_type',Music::class)->where('created_at', '>' , Carbon::now()->subWeek()->format("Y-m-d H:i:s"))->groupBy("viewable_id")->orderBy("cnt","desc")->limit(20)->get();
+        $most_viewed_ids = array_column($views->toArray(),'viewable_id');
+        $most_viewed_musics = Music::whereIn('id' , $most_viewed_ids)->orderByRaw('FIELD(id, '.implode(',' , $most_viewed_ids).')')->get();
 
         $singers = Singer::take(20)->inRandomOrder()->get();
         $singer_list = [];

@@ -788,7 +788,9 @@ class MusicController extends Controller
                 'message' => "خواننده یافت نشد.",
             ], 400);
         }
-        $musics = $singer->musics()->orderBy('views', 'DESC')->get();
+
+        $limit = $request->input('limit', 200);
+        $musics = $singer->musics()->orderBy('views', 'DESC')->limit($limit)->get();
 
         foreach ($musics as $music) {
             $music->music = json_decode(json_encode($music));

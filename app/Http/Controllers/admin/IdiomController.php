@@ -171,7 +171,7 @@ class IdiomController extends Controller
             return response()->json($arr, 422);
         }
 
-        if (in_array(intval($request->type) , [0,1,2])) {
+        if (in_array(intval($request->type) , [0,1,2,3,4,5])) {
             $type = intval($request->type);
         } else {
             $type = 0;
@@ -238,7 +238,7 @@ class IdiomController extends Controller
             return response()->json($arr, 422);
         }
 
-        if (in_array(intval($request->type) , [0,1,2])) {
+        if (in_array(intval($request->type) , [0,1,2,3,4,5])) {
             $type = intval($request->type);
         } else {
             $type = 0;
