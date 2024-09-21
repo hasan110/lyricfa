@@ -169,26 +169,6 @@ class NotificationController extends Controller
                 }
             }
         }
-        $url = "https://fcm.googleapis.com/fcm/send";
-        //serverKey
-        $apiKey = "AAAABTTSEFI:APA91bHnEDLP8s_WQQw-cMm7Rf7NsGtquWDT3JJPLnxDUBCJJUV3fvLbgQ5fAD4mh0TZOW77WnjVKLUnFlGxxk9wObBRFSl-9vnBcLUFwJQC-LaG4nhgq8LG6_tvtiMcmz0-ILAaskPd";
-        $headers = array(
-            'Authorization:key=' . $apiKey,
-            'Content-Type: application/json'
-        );
-
-        $notificationData = [
-            'title' => $notif->title,
-            'body' => $notif->body,
-            'image' => 'https://dl.lyricfa.app/uploads/notifications/'.$notif->id.'.jpg'
-        ];
-
-        $dataPayload = [
-            'to' => 'VIP',
-            'date' => Carbon::now(),
-            'other_data' => 'not important',
-            "sound" => "default"
-        ];
 
         if($notif->type == "all"){
             $tokens = UserController::getListUsersTokenNotifications();
@@ -200,22 +180,16 @@ class NotificationController extends Controller
                 ]);
             }
 
-        }else if($notif->type == "one" && isset(UserController::getUserById($request->user_id)->fcm_refresh_token) && UserController::getUserById($request->user_id)->fcm_refresh_token != ""){
-            $notifBody = [
-                'notification' => $notificationData,
-                'data' => $dataPayload,
-                'time_to_live' => 3600,
-                'to' => UserController::getUserById($request->user_id)->fcm_refresh_token
-            ];
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($notifBody));
+        } else if($notif->type == "one" && isset(UserController::getUserById($request->user_id)->fcm_refresh_token) && UserController::getUserById($request->user_id)->fcm_refresh_token != ""){
 
-            //Execute
-            curl_exec($ch);
-            curl_close($ch);
+            $notificationData = [
+                'token' => UserController::getUserById($request->user_id)->fcm_refresh_token,
+                'title' => $notif->title,
+                'body' => $notif->body,
+                'image' => 'https://dl.lyricfa.app/uploads/notifications/'.$notif->id.'.jpg'
+            ];
+
+            \App\Services\Notification::send('google_notification' , $notificationData);
         }
 
         $notif->status_send = 1;

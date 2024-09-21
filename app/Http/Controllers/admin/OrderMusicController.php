@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\OrderMusic;
+use App\Services\Notification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -43,38 +44,14 @@ class OrderMusicController extends Controller
             $user = UserController::getUserById($order->user_id);
             try {
                 if ($request->notification_title && $request->notification_text && ($user && $user->fcm_refresh_token !== '')) {
-                    $url = "https://fcm.googleapis.com/fcm/send";
-                    //serverKey
-                    $apiKey = "AAAABTTSEFI:APA91bHnEDLP8s_WQQw-cMm7Rf7NsGtquWDT3JJPLnxDUBCJJUV3fvLbgQ5fAD4mh0TZOW77WnjVKLUnFlGxxk9wObBRFSl-9vnBcLUFwJQC-LaG4nhgq8LG6_tvtiMcmz0-ILAaskPd";
-                    $headers = array(
-                        'Authorization:key=' . $apiKey,
-                        'Content-Type: application/json'
-                    );
 
-                    $notifBody = [
-                        'notification' => [
-                            'title' => $request->notification_title,
-                            'body' => $request->notification_text,
-                            'image' => ''
-                        ],
-                        'data' => [
-                            'to' => 'VIP',
-                            'date' => Carbon::now(),
-                            'other_data' => 'not important',
-                            "sound" => "default"
-                        ],
-                        'time_to_live' => 3600,
-                        'to' => $user->fcm_refresh_token
+                    $notificationData = [
+                        'token' => $user->fcm_refresh_token,
+                        'title' => $request->notification_title,
+                        'body' => $request->notification_text
                     ];
-                    $ch = curl_init();
-                    curl_setopt($ch, CURLOPT_URL, $url);
-                    curl_setopt($ch, CURLOPT_POST, true);
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($notifBody));
 
-                    //Execute
-                    curl_exec($ch);
-                    curl_close($ch);
+                    Notification::send('google_notification' , $notificationData);
                 }
             } catch (\Exception $exception) {
                 $error = $exception->getMessage();

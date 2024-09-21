@@ -16,30 +16,41 @@ class Notification
                 $apiKey = env('GOOGLEAPIS_APIKEY');
 
                 $headers = array(
-                    'Authorization:key=' . $apiKey,
+                    'Authorization:Bearer ' . $apiKey,
                     'Content-Type: application/json'
                 );
 
-                $notificationData = [
-                    'title' => $data['title'],
-                    'body' => $data['body'],
-                    'image' => isset($data['image']) ?? null
-                    // 'click_action' => 'activities.notifhandler'
-                ];
+                //$notificationData = [
+                //    'title' => $data['title'],
+                //    'body' => $data['body'],
+                //    'image' => isset($data['image']) ?? null
+                //    // 'click_action' => 'activities.notifhandler'
+                //];
 
-                $dataPayload = [
-                    'to' => 'VIP',
-                    'date' => Carbon::now(),
-                    'other_data' => 'not important',
-                    "sound" => "default"
-                ];
+                //$dataPayload = [
+                //    'to' => 'VIP',
+                //    'date' => Carbon::now(),
+                //    'other_data' => 'not important',
+                //    "sound" => "default"
+                //];
+
+                //$notificationBody = [
+                //    'notification' => $notificationData,
+                //    'data' => $dataPayload,
+                //    'time_to_live' => 3600,
+                //    'to' => $data['token']
+                //];
 
                 $notificationBody = [
-                    'notification' => $notificationData,
-                    'data' => $dataPayload,
-                    'time_to_live' => 3600,
-                    'to' => $data['token']
+                    'message' => [
+                        "token" => $data['token'],
+                        "notification" => [
+                            "title" => $data['title'],
+                            "body" => $data['body'],
+                        ],
+                    ]
                 ];
+
                 $ch = curl_init();
                 curl_setopt($ch, CURLOPT_URL, $url);
                 curl_setopt($ch, CURLOPT_POST, true);
