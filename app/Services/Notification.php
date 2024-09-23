@@ -2,7 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\Setting;
 use Carbon\Carbon;
+use Exception;
+use Google_Client;
+use Illuminate\Support\Facades\Storage;
 
 class Notification
 {
@@ -13,33 +17,12 @@ class Notification
 
                 if(!isset($data['token'])) return false;
                 $url = env('GOOGLEAPIS_URL');
-                $apiKey = env('GOOGLEAPIS_APIKEY');
+                $apiKey = self::getFCMToken();
 
                 $headers = array(
                     'Authorization:Bearer ' . $apiKey,
                     'Content-Type: application/json'
                 );
-
-                //$notificationData = [
-                //    'title' => $data['title'],
-                //    'body' => $data['body'],
-                //    'image' => isset($data['image']) ?? null
-                //    // 'click_action' => 'activities.notifhandler'
-                //];
-
-                //$dataPayload = [
-                //    'to' => 'VIP',
-                //    'date' => Carbon::now(),
-                //    'other_data' => 'not important',
-                //    "sound" => "default"
-                //];
-
-                //$notificationBody = [
-                //    'notification' => $notificationData,
-                //    'data' => $dataPayload,
-                //    'time_to_live' => 3600,
-                //    'to' => $data['token']
-                //];
 
                 $notificationBody = [
                     'message' => [
@@ -66,5 +49,30 @@ class Notification
         }
 
         return false;
+    }
+
+    public static function getFCMToken()
+    {
+        $token = Setting::getItem('google_fcm_access_token');
+        $expire_at = Setting::getItem('google_fcm_expires_at');
+
+        if ($token && $expire_at && $expire_at > Carbon::now()) {
+            return $token;
+        }
+
+        try {
+            $credentialsFilePath = Storage::path('json/lyricfa.json');
+            $client = new Google_Client();
+            $client->setApplicationName("Lyricfa");
+            $client->setAuthConfig($credentialsFilePath);
+            $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
+            $client->refreshTokenWithAssertion();
+            $token = $client->getAccessToken();
+        } catch (Exception $e) {
+            return null;
+        }
+        Setting::setItem('google_fcm_access_token', $token['access_token']);
+        Setting::setItem('google_fcm_expires_at', Carbon::now()->addSeconds(3500));
+        return $token['access_token'];
     }
 }

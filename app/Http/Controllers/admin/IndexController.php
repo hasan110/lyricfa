@@ -33,17 +33,17 @@ class IndexController extends Controller
         $today_total_pays = Report::where('type', 0)->where('created_at' , '>' , Carbon::today()->subMinutes(210)->format('Y-m-d H:i:s'))->sum('val_money');
 
         $statistics = [
-            'total_users' => $total_users,
+            'total_users' => number_format($total_users),
             'new_users' => $new_users,
-            'total_musics' => $total_musics,
+            'total_musics' => number_format($total_musics),
             'new_musics' => $new_musics,
-            'total_singers' => $total_singers,
+            'total_singers' => number_format($total_singers),
             'new_singers' => $new_singers,
-            'total_comments' => $total_comments,
+            'total_comments' => number_format($total_comments),
             'pending_comments' => $pending_comments,
-            'today_total_pays' => $today_total_pays,
-            'yesterday_total_pays' => $yesterday_total_pays,
-            'week_total_pays' => $week_total_pays
+            'today_total_pays' => number_format($today_total_pays),
+            'yesterday_total_pays' => number_format($yesterday_total_pays),
+            'week_total_pays' => number_format($week_total_pays)
         ];
 
         $arr = [
