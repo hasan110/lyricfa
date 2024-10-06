@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Music;
 use App\Models\Singer;
 use App\Models\Text;
+use App\Models\View;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -273,7 +275,9 @@ class MusicController extends Controller
 
     public function getNMusicList(Request $request)
     {
-        $musics = Music::orderBy('views', 'DESC')->take(20)->get();
+        $views = View::selectRaw('viewable_id , COUNT(*) AS cnt')->where('viewable_type',Music::class)->where('created_at', '>' , Carbon::now()->subWeek()->format("Y-m-d H:i:s"))->groupBy("viewable_id")->orderBy("cnt","desc")->limit(24)->get();
+        $most_viewed_ids = array_column($views->toArray(),'viewable_id');
+        $musics = Music::whereIn('id' , $most_viewed_ids)->orderByRaw('FIELD(id, '.implode(',' , $most_viewed_ids).')')->get();
 
         $arr = [];
         foreach ($musics as $music) {

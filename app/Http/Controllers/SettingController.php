@@ -38,7 +38,7 @@ class SettingController extends Controller
         $recent_musics = Music::orderBy('id', 'DESC')->take(40)->whereStatus(1)->get();
         $shuffled_recent_musics = $recent_musics->shuffle()->take(20);
 
-        $views = View::selectRaw('viewable_id , COUNT(*) AS cnt')->where('viewable_type',Music::class)->where('created_at', '>' , Carbon::now()->subWeek()->format("Y-m-d H:i:s"))->groupBy("viewable_id")->orderBy("cnt","desc")->limit(20)->get();
+        $views = View::selectRaw('viewable_id , COUNT(*) AS cnt')->where('viewable_type',Music::class)->where('created_at', '>' , Carbon::now()->subWeek()->format("Y-m-d H:i:s"))->groupBy("viewable_id")->orderBy("cnt","desc")->limit(24)->get();
         $most_viewed_ids = array_column($views->toArray(),'viewable_id');
         $most_viewed_musics = Music::whereIn('id' , $most_viewed_ids)->orderByRaw('FIELD(id, '.implode(',' , $most_viewed_ids).')')->get();
 
@@ -56,7 +56,7 @@ class SettingController extends Controller
         }
 
         $albums = Album::orderBy('id', 'DESC')->take(10)->get();
-        $films = Film::orderBy('id', "DESC")->whereIn('type', [1, 2])->get();
+        $films = Film::orderBy('id', "DESC")->whereIn('type', [1, 2])->where('status' , 1)->take(20)->get();
 
         $data = [
             'sliders' => $sliders,

@@ -14,6 +14,9 @@ class Music extends Model
         'is_user_request' => 'integer',
         'status' => 'integer',
         'degree' => 'integer',
+        'views' => 'integer',
+        'start_demo' => 'integer',
+        'end_demo' => 'integer',
     ];
 
     public function text(){
