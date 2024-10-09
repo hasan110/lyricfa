@@ -18,7 +18,7 @@ class FilmController extends Controller
         $films = $films->where(function ($query) use ($search_key) {
             $query->where('english_name', 'like', '%' . $search_key . '%')
                 ->orWhere('persian_name', 'like', '%' . $search_key . '%');
-        })->paginate(25);
+        })->paginate(24);
 
         return response()->json([
             'data' => $films,
@@ -86,12 +86,11 @@ class FilmController extends Controller
         ], $message);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "گرفتن اطلاعات شکست خورد"
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $films = Film::orderBy('id', "ASC")->where('parent', $request->id)->whereIn('type', [3, 4])->where('status' , 1)->get();

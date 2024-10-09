@@ -23,12 +23,11 @@ class SettingController extends Controller
             $result[$setting->key] = $setting->value;
         }
 
-        $response = [
+        return response()->json([
             'data' => $result,
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد"
-        ];
-        return response()->json($response);
+        ]);
     }
 
     public function editSetting(Request $request)
@@ -44,12 +43,11 @@ class SettingController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " ویرایش تنظیمات آهنگ شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $setting = Setting::whereIn('key', ['app_version_code','app_version_name','maintenance_mode'])->get();
@@ -61,12 +59,10 @@ class SettingController extends Controller
             }
         }
 
-        $arr = [
+        return response()->json([
             'data' => null,
             'errors' => null,
             'message' => "تنظیمات با موفقیت به روز شد.",
-        ];
-
-        return response()->json($arr);
+        ]);
     }
 }

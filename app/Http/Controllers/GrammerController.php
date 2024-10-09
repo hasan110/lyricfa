@@ -15,7 +15,7 @@ class GrammerController extends Controller
 {
     function grammerList()
     {
-        $list = Grammer::orderBy('priority')->paginate(25);
+        $list = Grammer::orderBy('priority')->paginate(24);
 
         return response()->json([
             'data' => $list,

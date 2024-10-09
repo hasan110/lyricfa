@@ -14,11 +14,6 @@ use Morilog\Jalali\Jalalian;
 
 class UserController extends Controller
 {
-    public static function getUserById($id)
-    {
-        return User::where('id', $id)->first();
-    }
-
     public function usersList(Request $request)
     {
         $users = User::query();
@@ -81,33 +76,31 @@ class UserController extends Controller
             $user->persian_created_at = Jalalian::forge($user->created_at)->format('%Y-%m-%d H:i');
         }
 
-        $response = [
+        return response()->json([
             'data' => $users,
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response, 200);
+        ]);
     }
 
 
     public function singleUser(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'id.required' => 'شناسه کاربر الزامی است',
             'id.numeric' => 'شناسه کاربر باید عدد باشد'
         );
 
         $validator = Validator::make($request->all(), [
             'id' => 'required|numeric'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " گرفتن اطلاعات کاربر شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $user = User::where('id',  $request->id)->first();
@@ -128,12 +121,11 @@ class UserController extends Controller
             $user->days_remain = $diff->days;
         }
 
-        $response = [
+        return response()->json([
             'data' => $user,
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response, 200);
+        ]);
     }
 
     public static function getListUsersTokenNotifications(){

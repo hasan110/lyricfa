@@ -101,12 +101,11 @@ class PlayListMusicController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "افزودن پلی لیست شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         if($request->musics){
@@ -154,12 +153,11 @@ class PlayListMusicController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "حذف آهنگ موفقیت آمیز نبود",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $check = (new PlayListHelper())->checkMusicExistsInPlayList($request->playlist_id , $request->music_id);

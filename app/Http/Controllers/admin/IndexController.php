@@ -46,11 +46,10 @@ class IndexController extends Controller
             'week_total_pays' => number_format($week_total_pays)
         ];
 
-        $arr = [
+        return response()->json([
             'data' => $statistics,
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($arr);
+        ]);
     }
 }

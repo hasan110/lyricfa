@@ -14,12 +14,11 @@ class FilmTextController extends Controller
         $id_film = $request->id_film;
         $films = FilmText::where('film_id', '=', $id_film)->orderBy("id")->get();
 
-        $arr = [
+        return response()->json([
             'data' => $films,
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($arr);
+        ]);
     }
 
     private function getStartTime(string $request)
@@ -47,7 +46,7 @@ class FilmTextController extends Controller
 
     public function insertListTexts(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'film_id.required' => 'film_id نمی تواند خالی باشد',
             'film_id.numeric' => 'film_id باید فقط شامل عدد باشد',
             'texts.required' => 'texts نمی تواند خالی باشد',
@@ -60,15 +59,14 @@ class FilmTextController extends Controller
             'texts.*.text_english' => 'required',
             'texts.*.start_time' => 'required',
             'texts.*.end_time' => 'required',
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "افزودن متن ها شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $filmId = $request->film_id;
@@ -93,20 +91,18 @@ class FilmTextController extends Controller
                 $text->save();
             }
 
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "متن ها با موفقیت اضافه شدند",
-            ];
-            return response()->json($arr, 200);
+            ]);
 
         } else {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "در ابتدا فیلم را اضافه کنید",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
     }
 
@@ -128,12 +124,11 @@ class FilmTextController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "افزودن متن ها شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $filmId = $request->film_id;
@@ -142,12 +137,11 @@ class FilmTextController extends Controller
         if ($isFilmExist) {
 
             if (!$this->deleteListTexts($request)) {
-                $arr = [
+                return response()->json([
                     'data' => null,
                     'errors' => null,
                     'message' => "حذف  متن ها جهت افزودن متن جدید شکست خورد",
-                ];
-                return response()->json($arr, 400);
+                ], 400);
             }
 
             foreach ($request->texts as $item) {
@@ -167,20 +161,18 @@ class FilmTextController extends Controller
                 $text->save();
             }
 
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "متن ها با موفقیت اضافه شدند",
-            ];
-            return response()->json($arr, 200);
+            ]);
 
         } else {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "در ابتدا فیلم را اضافه کنید",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
     }
 

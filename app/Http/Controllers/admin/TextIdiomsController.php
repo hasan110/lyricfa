@@ -14,47 +14,44 @@ class TextIdiomsController extends Controller
     {
 
 
-        $messsages = array(
+        $messages = array(
             'id_text.required' => 'id_text نمی تواند خالی باشد',
             'id_text.numeric' => 'id_text باید عدد باشد'
         );
 
         $validator = Validator::make($request->all(), [
             'id_text' => 'required|numeric'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " شکست در وارد کردن اطلاعات",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $idioms = TextIdioms::orderBy('id', 'ASC')->
         where('id_text', "$request->id_text")->get();
-
 
         $idiomsDetails = array();
         foreach ($idioms as $item) {
             $item->details = IdiomController::getIdiomById($item->id_idiom);
             $idiomsDetails[] = $item;
         }
-        $response = [
+
+        return response()->json([
             'data' => $idiomsDetails,
-            'errors' => [
-            ],
+            'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response, 200);
+        ]);
     }
 
 
     public function createTextIdiom(Request $request)
     {
 
-        $messsages = array(
+        $messages = array(
             'id_text.required' => 'id_text نمی تواند خالی باشد',
             'id_text.numeric' => 'id_text باید عدد باشد',
             'id_idiom.required' => 'id_idiom نمی تواند خالی باشد',
@@ -64,15 +61,14 @@ class TextIdiomsController extends Controller
         $validator = Validator::make($request->all(), [
             'id_text' => 'required|numeric',
             'id_idiom' => 'required|numeric'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " شکست در وارد کردن اطلاعات",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
 
@@ -83,45 +79,41 @@ class TextIdiomsController extends Controller
             $idiomText->description = $request->description;
         $idiomText->save();
 
-        $arr = [
+        return response()->json([
             'data' => $idiomText,
             'errors' => null,
             'message' => "اصطلاح با موفقیت به متن اضافه شد"
-        ];
-        return response()->json($arr, 200);
+        ]);
     }
 
     public function deleteTextIdiom(Request $request)
     {
 
-        $messsages = array(
+        $messages = array(
             'id.required' => 'شناسه کامنت الزامی است',
             'id.numeric' => 'شناسه کامنت باید شامل عدد باشد'
         );
 
         $validator = Validator::make($request->all(), [
             'id' => 'required|numeric'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "  حذف کامنت  شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $name = $this->idiomTextIsExist($request);
 
-        if (!isset($name)) { // array use count
-            $arr = [
+        if (!isset($name)) {
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "چنین اصطلاحی وجود ندارد جهت حذف",
-            ];
-
-            return response()->json($arr, 400);
+            ], 400);
         }
 
 
@@ -129,14 +121,11 @@ class TextIdiomsController extends Controller
         $idiom->id = (int)$name->id;
         $idiom->delete();
 
-        $arr = [
+        return response()->json([
             'data' => null,
             'errors' => null,
             'message' => "حذف اصطلاح متن موفقیت آمیز بود",
-        ];
-
-        return response()->json($arr, 200);
-
+        ]);
     }
 
     public function idiomTextIsExist(Request $request)

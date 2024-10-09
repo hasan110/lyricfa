@@ -15,7 +15,7 @@ class AlbumController extends Controller
         )->orderBy('id', 'DESC')->
         where('english_name', 'LIKE', "%{$request->search_text}%")->
         orWhere('persian_name', 'LIKE', "%{$request->search_text}%")->
-        paginate(25);
+        paginate(24);
 
         return response()->json([
             'data' => $albums,

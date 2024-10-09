@@ -152,13 +152,11 @@ class IdiomController extends Controller
         $all_idioms = $all_idioms->sortBy(fn ($item, $key) => strlen($item['phrase']));
         $all_idioms = $all_idioms->sortByDesc('rate');
 
-        $response = [
+        return response()->json([
             'data' => array_values($all_idioms->take(30)->toArray()),
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-
-        return response()->json($response);
+        ]);
     }
 
     public function getWordIdioms(Request $request)
@@ -264,6 +262,7 @@ class IdiomController extends Controller
                 'message' => "اصطلاح یافت نشد",
             ];
         }
+
         return response()->json($response);
     }
 }

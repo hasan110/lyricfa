@@ -107,21 +107,20 @@ class MapController extends Controller
 
     public function getMap(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'id.required' => 'شناسه مپ نمی تواند خالی باشد'
         );
 
         $validator = Validator::make($request->all(), [
             'id' => 'required'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "دریافت اطلاعات مپ شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $get = Map::find($request->id);
@@ -155,12 +154,11 @@ class MapController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "افزودن مپ لغت با مشکل اعتبارسنجی مواجه شد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $map = new Map();
@@ -174,13 +172,11 @@ class MapController extends Controller
             $map->map_reasons()->sync($request->map_reasons);
         }
 
-        $arr = [
+        return response()->json([
             'data' => $map,
             'errors' => null,
             'message' => "مپ لغت با موفقیت اضافه شد"
-        ];
-
-        return response()->json($arr);
+        ]);
     }
 
     public function updateMap(Request $request)
@@ -200,12 +196,11 @@ class MapController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "ویرایش مپ لغت با مشکل اعتبارسنجی مواجه شد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $map = Map::find($request->id);
@@ -226,13 +221,11 @@ class MapController extends Controller
             $map->map_reasons()->sync($request->map_reasons);
         }
 
-        $arr = [
+        return response()->json([
             'data' => $map,
             'errors' => null,
             'message' => "مپ لغت با موفقیت ویرایش شد"
-        ];
-
-        return response()->json($arr);
+        ]);
     }
 
     public function createMapReason(Request $request)
@@ -253,12 +246,11 @@ class MapController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "افزودن علت مپ شدن با مشکل اعتبارسنجی مواجه شد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $map_reason = new MapReason();
@@ -268,13 +260,11 @@ class MapController extends Controller
         $map_reason->description = $request->description;
         $map_reason->save();
 
-        $arr = [
+        return response()->json([
             'data' => $map_reason,
             'errors' => null,
             'message' => "علت مپ شدن با موفقیت اضافه شد"
-        ];
-
-        return response()->json($arr);
+        ]);
     }
 
     public function updateMapReason(Request $request)
@@ -294,12 +284,11 @@ class MapController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "ویرایش علت مپ شدن با مشکل اعتبارسنجی مواجه شد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $map_reason = MapReason::find($request->id);
@@ -308,13 +297,11 @@ class MapController extends Controller
         $map_reason->description = $request->description;
         $map_reason->save();
 
-        $arr = [
+        return response()->json([
             'data' => $map_reason,
             'errors' => null,
             'message' => "علت مپ شدن با موفقیت ویرایش شد"
-        ];
-
-        return response()->json($arr);
+        ]);
     }
 
     public function removeMapReason(Request $request)
@@ -328,12 +315,11 @@ class MapController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "حذف علت مپ با مشکل اعتبارسنجی مواجه شد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $map_reason = MapReason::find($request->id);
@@ -346,13 +332,11 @@ class MapController extends Controller
         }
         $map_reason->delete();
 
-        $arr = [
+        return response()->json([
             'data' => null,
             'errors' => null,
             'message' => "حذف علت مپ با موفقیت انجام شد"
-        ];
-
-        return response()->json($arr);
+        ]);
     }
 
     public function groupEditWordMapReason(Request $request)
@@ -370,12 +354,11 @@ class MapController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "ویرایش علت مپ شدن با مشکل اعتبارسنجی مواجه شد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         foreach ($request->maps as $map_id)
@@ -389,13 +372,11 @@ class MapController extends Controller
             ]);
         }
 
-        $arr = [
-            'data' => $map,
+        return response()->json([
+            'data' => null,
             'errors' => null,
             'message' => "ویرایش علت مپ لغت با موفقیت انجام شد"
-        ];
-
-        return response()->json($arr);
+        ]);
     }
 
 
@@ -420,12 +401,11 @@ class MapController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "افزودن لغت با مشکل اعتبارسنجی مواجه شد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $word = Word::with('word_definitions')->find($request->id);
@@ -492,32 +472,29 @@ class MapController extends Controller
             }
         }
 
-        $arr = [
+        return response()->json([
             'data' => $word,
             'errors' => null,
             'message' => "لغت با موفقیت اضافه شد"
-        ];
-
-        return response()->json($arr, 200);
+        ]);
     }
 
     public function getGrammer(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'id.required' => 'شناسه لغت نمی تواند خالی باشد'
         );
 
         $validator = Validator::make($request->all(), [
             'id' => 'required'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "دریافت اطلاعات لغت شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $get = Word::with('word_definitions')->find($request->id);
@@ -533,12 +510,11 @@ class MapController extends Controller
             $get['english_definitions'] = $english_word->english_word_definitions;
         }
 
-        $arr = [
+        return response()->json([
             'data' => $get,
             'errors' => null,
             'message' => " گرفتن اطلاعات موفقیت آمیز بود",
-        ];
-        return response()->json($arr, 200);
+        ]);
     }
 
     public function removeGrammer(Request $request)
@@ -568,11 +544,10 @@ class MapController extends Controller
             $english_word->delete();
         }
 
-        $arr = [
+        return response()->json([
             'data' => null,
             'errors' => null,
             'message' => " تمامی اطلاعات این لغت با موفقیت حذف شد.",
-        ];
-        return response()->json($arr);
+        ]);
     }
 }

@@ -16,7 +16,7 @@ class MusicController extends Controller
 {
     public function getNRequestedMusic(Request $request)
     {
-        $musics = Music::where('is_user_request', 1)->take(24)->inRandomOrder()->get();
+        $musics = Music::where('is_user_request', 1)->where("status", 1)->take(24)->inRandomOrder()->get();
 
         $data = (new MusicHelper())->prepareMusicsTemplate($musics);
 
@@ -32,7 +32,7 @@ class MusicController extends Controller
         $search_key = $request->search_text;
         $per_page = 24;
 
-        $musics = Music::orderBy('id', "DESC")->where('is_user_request', 1);
+        $musics = Music::orderBy('id', "DESC")->where('is_user_request', 1)->where("status", 1);
         $musics = $musics->where(function ($query) use ($search_key) {
             $query->where('name', 'like', '%' . $search_key . '%')
                 ->orWhere('persian_name', 'like', '%' . $search_key . '%');
@@ -60,6 +60,7 @@ class MusicController extends Controller
         $per_page = 24;
 
         $musics = Music::orderBy('views', 'DESC')->
+            where("status", 1)->
             where('name', 'LIKE', "%{$search_text}%")->
             orWhere('persian_name', 'LIKE', "%{$search_text}%")->
             orWhere('id', $search_text)
@@ -120,7 +121,7 @@ class MusicController extends Controller
             $musics = $musics->where('degree', $difficulty);
         }
 
-        $musics = $musics->orderBy($sort , $order_by)->paginate(24);
+        $musics = $musics->orderBy($sort , $order_by)->where("status", 1)->paginate(24);
 
         $list = (new MusicHelper())->prepareMusicsTemplate($musics);
         $last_page = $musics->lastPage();
@@ -142,7 +143,7 @@ class MusicController extends Controller
         $views = View::selectRaw('viewable_id , COUNT(*) AS cnt')->where('viewable_type',Music::class)->where('created_at', '>' , Carbon::now()->subWeek()->format("Y-m-d H:i:s"))->groupBy("viewable_id")->orderBy("cnt","desc")->limit(24)->get();
         $most_viewed_ids = array_column($views->toArray(),'viewable_id');
         if (!empty($most_viewed_ids)) {
-            $musics = Music::whereIn('id' , $most_viewed_ids)->orderByRaw('FIELD(id, '.implode(',' , $most_viewed_ids).')')->get();
+            $musics = Music::whereIn('id' , $most_viewed_ids)->orderByRaw('FIELD(id, '.implode(',' , $most_viewed_ids).')')->where("status", 1)->get();
         } else {
             $musics = Music::where('status' , 1)->orderBy('views', 'desc')->limit(24)->get();
         }
@@ -158,7 +159,7 @@ class MusicController extends Controller
 
     public function getLastMusicList(Request $request)
     {
-        $musics = Music::orderBy('published_at', 'DESC')->
+        $musics = Music::orderBy('published_at', 'DESC')->where("status", 1)->
             where('name', 'LIKE', "%{$request->search_text}%")->
             orWhere('persian_name', 'LIKE', "%{$request->search_text}%")->
             orWhere('id', $request->search_text)
@@ -168,7 +169,7 @@ class MusicController extends Controller
         $last_page = $musics->lastPage();
         $total = $musics->total();
 
-        $response = [
+        return response()->json([
             'data' => [
                 'data' => $list,
                 'last_page' => $last_page,
@@ -176,27 +177,20 @@ class MusicController extends Controller
             ],
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
+        ]);
     }
 
     public function getNLastMusicList(Request $request)
     {
-        $musics = Music::orderBy('published_at', 'DESC')->take(20)->get();
+        $musics = Music::orderBy('published_at', 'DESC')->where("status", 1)->take(20)->get();
 
         $list = (new MusicHelper())->prepareMusicsTemplate($musics);
 
-        $response = [
+        return response()->json([
             'data' => $list,
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
-    }
-
-    public static function getMusicById($id)
-    {
-        return Music::where('id', $id)->first();
+        ]);
     }
 
     public function getMusicCompleteInfo(Request $request)
@@ -211,12 +205,11 @@ class MusicController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "گرفتن اطلاعات آهنگ شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $music = Music::where('id', $request->id)->first();
@@ -249,7 +242,7 @@ class MusicController extends Controller
     {
         $search_key = $request->search_text;
         $hard = $request->hard;
-        $musics = Music::orderBy('id', "DESC")->where('degree', $hard);
+        $musics = Music::orderBy('id', "DESC")->where('degree', $hard)->where("status", 1);
         $musics = $musics->where(function ($query) use ($search_key) {
             $query->where('name', 'like', '%' . $search_key . '%')
                 ->orWhere('persian_name', 'like', '%' . $search_key . '%');
@@ -273,7 +266,7 @@ class MusicController extends Controller
     public function getMusicWithTextPaginate(Request $request)
     {
         $word = $request->word;
-        $musics = Music::with(['text' => function ($query) use ($word) {
+        $musics = Music::where("status", 1)->with(['text' => function ($query) use ($word) {
             $query->where('text_english', 'LIKE', "%{$word}%");
         },
         ])->whereHas('text', function ($query) use ($word) {
@@ -356,12 +349,11 @@ class MusicController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "گرفتن لیست آهنگ های خواننده شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $singer = Singer::where('id', $request->id_singer)->first();
@@ -373,7 +365,7 @@ class MusicController extends Controller
             ], 400);
         }
 
-        $musics = $singer->musics()->orderBy('views', 'DESC')->paginate(24);
+        $musics = $singer->musics()->where("status", 1)->orderBy('views', 'DESC')->paginate(24);
         $list = (new MusicHelper())->prepareMusicsTemplate($musics);
         $last_page = $musics->lastPage();
         $total = $musics->total();
@@ -408,7 +400,7 @@ class MusicController extends Controller
             ], 400);
         }
 
-        $musics = Music::where('album_id', $request->id_album)->get();
+        $musics = Music::where('album_id', $request->id_album)->where("status", 1)->get();
 
         $list = (new MusicHelper())->prepareMusicsTemplate($musics);
 
@@ -448,7 +440,7 @@ class MusicController extends Controller
         }
 
         $limit = $request->input('limit', 200);
-        $musics = $singer->musics()->orderBy('views', 'DESC')->limit($limit)->get();
+        $musics = $singer->musics()->where("status", 1)->orderBy('views', 'DESC')->limit($limit)->get();
         $list = (new MusicHelper())->prepareMusicsTemplate($musics);
 
         return response()->json([

@@ -54,12 +54,11 @@ class SingerController extends Controller
             $item->num_musics = $item->musics()->count();
         }
 
-        $response = [
+        return response()->json([
             'data' => $list,
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
+        ]);
     }
 
     public function singersCreate(Request $request)
@@ -80,12 +79,11 @@ class SingerController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " افزودن خواننده شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $singer = new Singer();
@@ -98,12 +96,11 @@ class SingerController extends Controller
             $this->uploadFileById($request->image, "singers", $singer->id);
         }
 
-        $arr = [
+        return response()->json([
             'data' => $singer,
             'errors' => null,
             'message' => "موزیک با موفقیت اضافه شد"
-        ];
-        return response()->json($arr);
+        ]);
     }
 
     public function singersUpdate(Request $request)
@@ -127,24 +124,21 @@ class SingerController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " افزودن خواننده شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $singer = $this->getSingerById($request->id);
         if (!$singer) {
 
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "این خواننده وجود ندارد برای به روز رسانی"
-            ];
-
-            return response()->json($arr);
+            ]);
         }
         $singer->english_name = $request->english_name;
         $singer->persian_name = $request->persian_name;
@@ -155,13 +149,11 @@ class SingerController extends Controller
             $this->uploadFileById($request->image, "singers", $singer->id);
         }
 
-        $arr = [
+        return response()->json([
             'data' => $singer,
             'errors' => null,
             'message' => "خواننده با موفقیت به روز رسانی شد"
-        ];
-
-        return response()->json($arr);
+        ]);
     }
 
     public static function getSingerById($id)
@@ -181,21 +173,19 @@ class SingerController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " گرفتن اطلاعات خواننده خواننده شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $get_singer= Singer::where('id', $request->id)->first();
 
-        $arr = [
+        return response()->json([
             'data' => $get_singer,
             'errors' => null,
             'message' => " گرفتن اطلاعات موفقیت آمیز بود",
-        ];
-        return response()->json($arr, 200);
+        ]);
     }
 }

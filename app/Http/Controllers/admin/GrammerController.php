@@ -129,12 +129,11 @@ class GrammerController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "افزودن گرامر با مشکل اعتبارسنجی مواجه شد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $grammer = new Grammer();
@@ -184,13 +183,11 @@ class GrammerController extends Controller
             }
         }
 
-        $arr = [
+        return response()->json([
             'data' => $grammer,
             'errors' => null,
             'message' => "گرامر با موفقیت اضافه شد"
-        ];
-
-        return response()->json($arr);
+        ]);
     }
 
     public function createGrammerRule(Request $request)
@@ -267,13 +264,11 @@ class GrammerController extends Controller
             $grammer_rule->rule_group()->attach($request->sub_rules);
         }
 
-        $arr = [
+        return response()->json([
             'data' => $grammer_rule,
             'errors' => null,
             'message' => "قانون گرامر با موفقیت اضافه شد"
-        ];
-
-        return response()->json($arr);
+        ]);
     }
 
     public function updateGrammerRule(Request $request)
@@ -343,13 +338,11 @@ class GrammerController extends Controller
             $grammer_rule->rule_group()->sync($request->sub_rules);
         }
 
-        $arr = [
+        return response()->json([
             'data' => $grammer_rule,
             'errors' => null,
             'message' => "قانون گرامر با موفقیت ویرایش شد"
-        ];
-
-        return response()->json($arr);
+        ]);
     }
 
     public function removeGrammerRule(Request $request)
@@ -365,12 +358,11 @@ class GrammerController extends Controller
 
         $item->delete();
 
-        $arr = [
+        return response()->json([
             'data' => null,
             'errors' => null,
             'message' => " تمامی اطلاعات این قانون با موفقیت حذف شد.",
-        ];
-        return response()->json($arr);
+        ]);
     }
 
     public function updateGrammer(Request $request)
@@ -411,12 +403,11 @@ class GrammerController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "ویرایش گرامر با مشکل اعتبارسنجی مواجه شد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $grammer = Grammer::with('grammer_explanations')->find($request->id);
@@ -477,32 +468,29 @@ class GrammerController extends Controller
             }
         }
 
-        $arr = [
+        return response()->json([
             'data' => $grammer,
             'errors' => null,
             'message' => "گرامر با موفقیت ویرایش شد"
-        ];
-
-        return response()->json($arr);
+        ]);
     }
 
     public function getGrammer(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'id.required' => 'شناسه گرامر نمی تواند خالی باشد'
         );
 
         $validator = Validator::make($request->all(), [
             'id' => 'required'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "دریافت اطلاعات گرامر شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $get = Grammer::with(['grammer_sections' => function ($query) {
@@ -530,12 +518,11 @@ class GrammerController extends Controller
         }
         $get['rules'] = $rules;
 
-        $arr = [
+        return response()->json([
             'data' => $get,
             'errors' => null,
             'message' => " گرفتن اطلاعات موفقیت آمیز بود",
-        ];
-        return response()->json($arr);
+        ]);
     }
 
     public function removeGrammer(Request $request)
@@ -551,11 +538,10 @@ class GrammerController extends Controller
 
         $grammer->delete();
 
-        $arr = [
+        return response()->json([
             'data' => null,
             'errors' => null,
             'message' => " تمامی اطلاعات این گرامر با موفقیت حذف شد.",
-        ];
-        return response()->json($arr);
+        ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\UserHelper;
 use App\Models\Report;
 use App\Models\User;
 use Carbon\Carbon;
@@ -28,15 +29,14 @@ class ReportController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " شکست در وارد کردن اطلاعات",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
-        $user = UserController::getUserById($request->user_id);
+        $user = (new UserHelper())->getUserById($request->user_id);
         $daysSubscription = $request->title;
         $expired = Carbon::parse($user->expired_at);
         if ($expired > Carbon::now()) {
@@ -45,7 +45,6 @@ class ReportController extends Controller
             $user->expired_at = Carbon::now()->addDays($daysSubscription);
         }
 
-        unset($user['days_remain']);
         $user->save();
 
         $report = new Report();
@@ -58,12 +57,11 @@ class ReportController extends Controller
         $report->type = 1;
         $report->save();
 
-        $arr = [
+        return response()->json([
             'data' => null,
             'errors' => null,
             'message' => " اکانت کاربر با موفقیت شارژ شد",
-        ];
-        return response()->json($arr);
+        ]);
     }
 
     public function reportsAdminList(Request $request)
@@ -72,16 +70,15 @@ class ReportController extends Controller
 
         foreach ($list as $item) {
             unset($item['ref_id'],$item['val_money'],$item['id_zarin']);
-            $item->user = UserController::getUserById($item->user_id);
+            $item->user = (new UserHelper())->getUserById($item->user_id);
             $item->persian_created_at = Jalalian::forge($item->created_at)->format('%Y-%m-%d H:i');
         }
 
-        $response = [
+        return response()->json([
             'data' => $list,
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
+        ]);
     }
 
     public function reportsUserList(Request $request)
@@ -104,17 +101,16 @@ class ReportController extends Controller
 
         foreach ($list as $item) {
             unset($item['title'],$item['description']);
-            $item->user = UserController::getUserById($item->user_id);
+            $item->user = (new UserHelper())->getUserById($item->user_id);
             $item->persian_created_at = Jalalian::forge($item->created_at)->format('%Y-%m-%d H:i');
         }
 
-        $response = [
+        return response()->json([
             'data' => $list,
             'errors' => [
             ],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
+        ]);
     }
 
     public function addGroupSubscription(Request $request)
@@ -143,11 +139,10 @@ class ReportController extends Controller
             'expired_at' => $new_date->format('Y-m-d H:i:s')
         ]);
 
-        $arr = [
+        return response()->json([
             'data' => null,
             'errors' => null,
             'message' => " تمدید اشتراک کاربران با موفقیت انجام شد",
-        ];
-        return response()->json($arr);
+        ]);
     }
 }

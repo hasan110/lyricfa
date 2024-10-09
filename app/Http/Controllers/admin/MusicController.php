@@ -63,12 +63,11 @@ class MusicController extends Controller
             $music->num_comment = (new CommentHelper())->getMusicCommentsCount($music->id);
         }
 
-        $response = [
+        return response()->json([
             'data' => $musics,
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
+        ]);
     }
 
     public function musicsCreate(Request $request)
@@ -107,12 +106,11 @@ class MusicController extends Controller
         ], $message);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " افزودن آهنگ شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $music = new Music();
@@ -143,13 +141,11 @@ class MusicController extends Controller
             $music->singers()->attach(explode(',', $request->singers));
         }
 
-        $arr = [
+        return response()->json([
             'data' => $music,
             'errors' => null,
             'message' => "موزیک با موفقیت اضافه شد"
-        ];
-
-        return response()->json($arr);
+        ]);
     }
 
 
@@ -190,12 +186,11 @@ class MusicController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " افزودن آهنگ شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $music = Music::where('id', $request->id)->first();

@@ -27,31 +27,28 @@ class CommentMusicController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "  ویرایش کامنت شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $admin = AdminController::getAdminByToken($request->header("ApiToken"));
         if(!$admin){
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "  ادمین وجود ندارد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
         $comment = $this->getCommentById($request->id);
         if(!$comment){
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "  کامنت وجود ندارد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         if($request->status === 1){
@@ -62,25 +59,22 @@ class CommentMusicController extends Controller
             $comment->delete();
         }
 
-        $arr = [
+        return response()->json([
             'data' => null,
             'errors' => null,
             'message' => "تغییر وضعیت کامنت موفقیت آمیز بود",
-        ];
-        return response()->json($arr, 200);
+        ]);
     }
 
     public function getMusicCommentsNotConfirmed(Request $request)
     {
-        $response = Comment::where("status", 0)->with('commentable')->get();
+        $data = Comment::where("status", 0)->with('commentable')->get();
 
-        $arr = [
-            'data' => $response,
+        return response()->json([
+            'data' => $data,
             'errors' => null,
             'message' => "دریافت لیست کامنت موفقیت آمیز بود",
-        ];
-
-        return response()->json($arr, 200);
+        ]);
     }
 
     public function getCommentById($id)

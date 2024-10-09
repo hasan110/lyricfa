@@ -21,12 +21,11 @@ class CommentMusicController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "  دریافت لیست کامنت شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $music = Music::where('id', $request->music_id)->first();

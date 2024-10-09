@@ -33,19 +33,20 @@ class ScoreMusicController extends Controller
 
         $scoreMusic = ScoreMusic::where('music_id', $request->music_id)->where('user_id', $user->id);
         if ($scoreMusic->count() == 0) {
-            $arr = [
+            $response = [
                 'data' => 0.0,
                 'errors' => [],
                 'message' => "  کاربر تا کنون امتیاز نداده است",
             ];
         } else {
-            $arr = [
+            $response = [
                 'data' => (float) $scoreMusic->avg('score'),
                 'errors' => [],
                 'message' => "  کاربر امتیاز داده است",
             ];
         }
-        return response()->json($arr);
+
+        return response()->json($response);
     }
 
     public function addMusicScore(Request $request)

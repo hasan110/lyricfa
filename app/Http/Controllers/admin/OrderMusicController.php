@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\UserHelper;
 use App\Models\OrderMusic;
 use App\Services\Notification;
 use Carbon\Carbon;
@@ -28,12 +29,11 @@ class OrderMusicController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "  ویرایش سفارش آهنگ شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
 
@@ -41,7 +41,7 @@ class OrderMusicController extends Controller
         if(isset($order)){
             $order->condition_order = $request->condition_order;
             $order->save();
-            $user = UserController::getUserById($order->user_id);
+            $user = (new UserHelper())->getUserById($order->user_id);
             try {
                 if ($request->notification_title && $request->notification_text && ($user && $user->fcm_refresh_token !== '')) {
 
@@ -58,20 +58,17 @@ class OrderMusicController extends Controller
                 Log::error($error);
             }
 
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "سفارش آهنگ شما با موفقیت به روز شد.",
-            ];
-
-            return response()->json($arr, 200);
+            ]);
         }else {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "خطا در به روز رسانی.",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
     }
 
@@ -98,12 +95,11 @@ class OrderMusicController extends Controller
         $sortedResult = $orders->getCollection()->sortByDesc('rate')->values();
         $orders->setCollection($sortedResult);
 
-        $response = [
+        return response()->json([
             'data' => $orders,
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
+        ]);
     }
 
     /*
@@ -129,22 +125,20 @@ class OrderMusicController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "  ویرایش سفارش آهنگ شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $order =  OrderMusic::where('id', $request->id)->first();
-        $order->user = UserController::getUserById($order->user_id);
+        $order->user = (new UserHelper())->getUserById($order->user_id);
 
-        $response = [
+        return response()->json([
             'data' => $order,
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
+        ]);
     }
 }

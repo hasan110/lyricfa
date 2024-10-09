@@ -39,12 +39,11 @@ class WordController extends Controller
         }
         $list = $list->paginate(50);
 
-        $response = [
+        return response()->json([
             'data' => $list,
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response, 200);
+        ]);
     }
 
     public function createWord(Request $request)
@@ -67,12 +66,11 @@ class WordController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "افزودن لغت با مشکل اعتبارسنجی مواجه شد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $word = new Word();
@@ -119,13 +117,11 @@ class WordController extends Controller
             }
         }
 
-        $arr = [
+        return response()->json([
             'data' => $word,
             'errors' => null,
             'message' => "لغت با موفقیت اضافه شد"
-        ];
-
-        return response()->json($arr);
+        ]);
     }
 
 
@@ -150,12 +146,11 @@ class WordController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "افزودن لغت با مشکل اعتبارسنجی مواجه شد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $word = Word::with('word_definitions')->find($request->id);
@@ -224,32 +219,29 @@ class WordController extends Controller
             }
         }
 
-        $arr = [
+        return response()->json([
             'data' => $word,
             'errors' => null,
             'message' => "لغت با موفقیت اضافه شد"
-        ];
-
-        return response()->json($arr, 200);
+        ]);
     }
 
     public function getWord(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'id.required' => 'شناسه لغت نمی تواند خالی باشد'
         );
 
         $validator = Validator::make($request->all(), [
             'id' => 'required'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "دریافت اطلاعات لغت شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $get = Word::with('word_definitions')->find($request->id);
@@ -265,12 +257,11 @@ class WordController extends Controller
             $get['english_definitions'] = $english_word->english_word_definitions;
         }
 
-        $arr = [
+        return response()->json([
             'data' => $get,
             'errors' => null,
             'message' => " گرفتن اطلاعات موفقیت آمیز بود",
-        ];
-        return response()->json($arr, 200);
+        ]);
     }
 
     public function removeWord(Request $request)
@@ -300,12 +291,11 @@ class WordController extends Controller
             $english_word->delete();
         }
 
-        $arr = [
+        return response()->json([
             'data' => null,
             'errors' => null,
             'message' => " تمامی اطلاعات این لغت با موفقیت حذف شد.",
-        ];
-        return response()->json($arr);
+        ]);
     }
 
     public function getTypes(Request $request)

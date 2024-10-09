@@ -14,12 +14,11 @@ class SliderController extends Controller
     public function slidersList(Request $request)
     {
         $sliders = Slider::orderBy("id")->paginate(25);
-        $arr = [
+        return response()->json([
             'data' => $sliders,
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($arr);
+        ]);
     }
 
     public function sliderUpdate(Request $request)
@@ -47,24 +46,20 @@ class SliderController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " ویرایش اسلایدر شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $slider = $this->getSliderById($request->id);
         if (!$slider) {
-
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "این خواننده وجود ندارد برای به روز رسانی"
-            ];
-
-            return response()->json($arr, 400);
+            ], 400);
         }
         $slider->id_singer_music_album = $request->id_singer_music_album;
         $slider->type = $request->type;
@@ -79,18 +74,17 @@ class SliderController extends Controller
             $this->uploadFileById($request->banner, "sliders", $slider->id);
         }
 
-        $arr = [
+        return response()->json([
             'data' => $slider,
             'errors' => null,
             'message' => "اسلایدر موفقیت به روز رسانی شد"
-        ];
-        return response()->json($arr, 200);
+        ]);
     }
 
 
     public function sliderCreate(Request $request)
     {
-        $messsages = array(
+        $messages = array(
 
             'id_singer_music_album.required' => 'id_singer_music_album نمی تواند خالی باشد',
             'id_singer_music_album.numeric' => 'id_singer_music_album باید فقط شامل عدد باشد',
@@ -108,15 +102,14 @@ class SliderController extends Controller
             'type' => 'required|numeric',
             'show_it' => 'required',
             'banner' => 'required|file|mimes:jpg|dimensions:min_width=1024,min_height=575,max_width=1024,max_height=575'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " ایجاد اسلایدر شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $slider = new Slider();
@@ -134,52 +127,47 @@ class SliderController extends Controller
             $this->uploadFileById($request->banner, "sliders", $slider->id);
         }
 
-        $arr = [
+        return response()->json([
             'data' => $slider,
             'errors' => null,
             'message' => "اسلایدر موفقیت به روز رسانی شد"
-        ];
-        return response()->json($arr, 200);
+        ]);
     }
 
 
     public static function getSlider(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'id.required' => 'id نمی تواند خالی باشد',
             'id.numeric' => 'id باید فقط شامل عدد باشد',
         );
 
         $validator = Validator::make($request->all(), [
             'id' => 'required|numeric'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " گرفتن اطلاعات اسلایدر شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $get_slider= Slider::where('id', $request->id)->first();
         if (!$get_slider) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => " گرفتن اطلاعات اسلایدر شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
-        $arr = [
+        return response()->json([
             'data' => $get_slider,
             'errors' => null,
             'message' => " گرفتن اطلاعات موفقیت آمیز بود",
-        ];
-        return response()->json($arr, 200);
-
+        ]);
     }
 
     public static function getSliderById($id)
@@ -194,22 +182,21 @@ class SliderController extends Controller
 
     public function removeSlider(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'id.required' => 'شناسه کامنت الزامی است',
             'id.numeric' => 'شناسه کامنت باید شامل عدد باشد'
         );
 
         $validator = Validator::make($request->all(), [
             'id' => 'required|numeric'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "  حذف کامنت شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $slider = $this->getSliderById($request->id);
@@ -217,20 +204,18 @@ class SliderController extends Controller
             $slider->delete();
             $this->deleteFile('sliders/' . $slider->id . '.jpg');
         } else {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
-                'message' => "  این کامنت وجود ندارد",
-            ];
-            return response()->json($arr, 400);
+                'message' => "این کامنت وجود ندارد",
+            ], 400);
         }
 
-        $arr = [
+        return response()->json([
             'data' => null,
             'errors' => null,
             'message' => "حذف کامنت موفقیت آمیز بود",
-        ];
-        return response()->json($arr, 200);
+        ]);
     }
 
 

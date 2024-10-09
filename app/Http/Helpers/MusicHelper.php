@@ -6,10 +6,16 @@ use App\Http\Controllers\CommentMusicController;
 use App\Http\Controllers\LikeMusicController;
 use App\Http\Controllers\ScoreMusicController;
 use App\Http\Controllers\SingerController;
+use App\Models\Music;
 use App\Models\ScoreMusic;
 
 class MusicHelper extends Helper
 {
+    public function getMusicById($music_id)
+    {
+        return Music::where('id', $music_id)->first();
+    }
+
     public function prepareMusicsTemplate($musics , $user_id = null, $in_playlist_ids = []) :array
     {
         $musics_array = [];

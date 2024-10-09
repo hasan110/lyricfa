@@ -26,12 +26,11 @@ class SmsVerifyController extends Controller
 
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "بررسی کد فعال سازی شکست خورد"
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         if ($request->corridor === 'web-app') {

@@ -27,23 +27,21 @@ class AlbumController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " گرفتن اطلاعات آلبوم شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $album= Album::where('id', $request->id)->first();
         $album->singers = $album->singers()->pluck('id')->toArray();
 
-        $arr = [
+        return response()->json([
             'data' => $album,
             'errors' => null,
             'message' => " گرفتن اطلاعات موفقیت آمیز بود",
-        ];
-        return response()->json($arr);
+        ]);
     }
 
     public function albumsList(Request $request)
@@ -52,12 +50,11 @@ class AlbumController extends Controller
             where('english_name', 'LIKE', "%{$request->search_text}%")->
             orWhere('persian_name', 'LIKE', "%{$request->search_text}%")->paginate(50);
 
-        $response = [
+        return response()->json([
             'data' => $albums,
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
+        ]);
     }
 
 
@@ -81,22 +78,20 @@ class AlbumController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " به روز رسانی آلبوم شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $album = $this->getAlbumById($request->id);
         if (!$album) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "این آلبوم وجود ندارد برای به روز رسانی"
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $album->english_name = $request->album_name_english;
@@ -111,12 +106,11 @@ class AlbumController extends Controller
             $album->singers()->sync(explode(',', $request->singers));
         }
 
-        $arr = [
+        return response()->json([
             'data' => $album,
             'errors' => null,
             'message' => "آلبوم با موفقیت به روز رسانی شد"
-        ];
-        return response()->json($arr, 200);
+        ]);
     }
 
 
@@ -140,12 +134,11 @@ class AlbumController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " ایجاد آلبوم شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $album = new Album();
@@ -159,11 +152,10 @@ class AlbumController extends Controller
             $album->singers()->attach(explode(',', $request->singers));
         }
 
-        $arr = [
+        return response()->json([
             'data' => $album,
             'errors' => null,
             'message' => "آلبوم با موفقیت ایجاد شد"
-        ];
-        return response()->json($arr);
+        ]);
     }
 }

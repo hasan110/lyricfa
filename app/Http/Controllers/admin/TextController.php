@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\MusicController;
+use App\Http\Helpers\MusicHelper;
 use App\Http\Helpers\UserHelper;
 use App\Models\Text;
 use Illuminate\Http\Request;
@@ -15,12 +16,11 @@ class TextController extends Controller
     {
         $id_music = $request->id_music;
         $users = Text::where('id_music', '=', $id_music)->orderBy("id")->get();
-        $arr = [
+        return response()->json([
             'data' => $users,
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($arr, 200);
+        ]);
     }
 
     public function getTextIncludeWord(Request $request)
@@ -31,19 +31,18 @@ class TextController extends Controller
             $queryText = '%' . $word . '%'; //implode('%',str_split($word));
             return Text::query()->where('text_english', 'LIKE', "%{$queryText}%")->paginate(25);
         } else {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
-                'status' => 1000, // subscription end
+                'status' => 1000,
                 'message' => "اشتراک شما به پایان رسیده است لطفا اشتراک خود را تمدید کنید",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
     }
 
     public function textsCreate(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'music_id.required' => 'music_id نمی تواند خالی باشد',
             'music_id.numeric' => 'music_id باید فقط شامل عدد باشد',
             'texts.required' => 'texts نمی تواند خالی باشد',
@@ -58,19 +57,18 @@ class TextController extends Controller
             'texts.*.text_persian' => 'required',
             'texts.*.start_time' => 'required',
             'texts.*.end_time' => 'required',
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "افزودن متن ها شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $musicId = $request->music_id;
-        $isMusicExist = MusicController::getMusicById($musicId);
+        $isMusicExist = (new MusicHelper())->getMusicById($musicId);
 
         if ($isMusicExist) {
 
@@ -94,26 +92,24 @@ class TextController extends Controller
                 $text->save();
             }
 
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "متن ها با موفقیت اضافه شدند",
-            ];
-            return response()->json($arr, 200);
+            ]);
 
         } else {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "در ابتدا آهنگ را در لیست آهنگ ها اضافه کنید",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
     }
 
     public function textsUpdate(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'music_id.required' => 'music_id نمی تواند خالی باشد',
             'music_id.numeric' => 'music_id باید فقط شامل عدد باشد',
             'texts.required' => 'texts نمی تواند خالی باشد',
@@ -128,29 +124,27 @@ class TextController extends Controller
             'texts.*.text_persian' => 'required',
             'texts.*.start_time' => 'required',
             'texts.*.end_time' => 'required',
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "افزودن متن موزیک شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $musicId = $request->music_id;
-        $isMusicExist = MusicController::getMusicById($musicId);
+        $isMusicExist = (new MusicHelper())->getMusicById($musicId);
 
         if ($isMusicExist) {
 
             if (!$this->deleteListTexts($request)) {
-                $arr = [
+                return response()->json([
                     'data' => null,
                     'errors' => null,
                     'message' => "حذف  متن ها جهت افزودن متن جدید شکست خورد",
-                ];
-                return response()->json($arr, 400);
+                ], 400);
             }
 
             foreach ($request->texts as $index => $item) {
@@ -174,20 +168,18 @@ class TextController extends Controller
                 $text->save();
             }
 
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "متن ها با موفقیت اضافه شدند",
-            ];
-            return response()->json($arr, 200);
+            ]);
 
         } else {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "در ابتدا آهنگ را در لیست آهنگ ها اضافه کنید",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
     }
 
@@ -209,7 +201,7 @@ class TextController extends Controller
 
     public function uploadFileGetInfoAndSave(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'id.required' => 'شناسه ی آهنگ الزامی است',
             'id.numeric' => 'شناسه ی آهنگ باید عدد باشد',
             'lyrics.required' => 'فایل متنی الزامی می باشد',
@@ -221,15 +213,14 @@ class TextController extends Controller
         $validator = Validator::make($request->all(), [
             'id' => 'required|numeric',
             'lyrics' => 'required|file|max:512'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " افزودن متن شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
         if ($request->hasFile('lyrics')) {
             $this->uploadFileById($request->lyrics, "lyrics", $request->id);
@@ -289,22 +280,21 @@ class TextController extends Controller
 
     public function downloadMusicTextFile(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'id.required' => 'شناسه ی آهنگ الزامی است',
             'id.numeric' => 'شناسه ی آهنگ باید عدد باشد'
         );
 
         $validator = Validator::make($request->all(), [
             'id' => 'required|numeric'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => " افزودن متن شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $music_texts = Text::where('id_music',$request->id)->orderBy("id")->get();
@@ -337,7 +327,7 @@ class TextController extends Controller
 
     public function textsCreateForUpload($texts, $musicId)
     {
-        $isMusicExist = MusicController::getMusicById($musicId);
+        $isMusicExist = (new MusicHelper())->getMusicById($musicId);
 
         if ($isMusicExist) {
 
@@ -357,13 +347,11 @@ class TextController extends Controller
                 $text->save();
             }
 
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "متن ها با موفقیت اضافه شدند",
-            ];
-            return response()->json($arr, 200);
-
+            ]);
         }
     }
 

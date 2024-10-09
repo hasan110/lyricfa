@@ -82,12 +82,11 @@ class LikeMusicController extends Controller
         $like = $this->likeIsExistInListLikes($request);
 
         if (!isset($like)) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => " این آهنگ توسط این کاربر لایک نشده است",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $like->delete();

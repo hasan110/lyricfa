@@ -26,12 +26,11 @@ class SettingController extends Controller
             $result[$setting->key] = $setting->value;
         }
 
-        $response = [
+        return response()->json([
             'data' => $result,
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد"
-        ];
-        return response()->json($response);
+        ]);
     }
 
     public function getHomePageData()

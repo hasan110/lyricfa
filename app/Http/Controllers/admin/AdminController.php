@@ -26,12 +26,11 @@ class AdminController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "لاگین با شکست مواجه شد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $admin = $this->getAdmin($request->username, $request->password);
@@ -39,23 +38,19 @@ class AdminController extends Controller
             $admin->tokens()->delete();
             $token = $admin->createToken(config('app.name').'-admin');
             $admin->api_token = $token->plainTextToken;
-            $arr = [
+            return response()->json([
                 'data' => $admin,
                 'errors' => null,
                 'message' => "لاگین موفقیت آمیز بود",
-            ];
-            return response()->json($arr);
-
+            ]);
         }else{
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "چنین کاربری وجود ندارد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
     }
-
 
     public function getAdmin($username, $password){
         return Admin::where('username', $username)->where('password', $password)->first();
@@ -66,19 +61,18 @@ class AdminController extends Controller
         $token = $request->header('ApiToken');
         $admin = $this->getAdminByToken($token);
         if(!$admin){
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "خطا در دریافت اطلاعات ادمین ...",
-            ];
-            return response()->json($arr, 404);
+            ], 404);
         }
-        $arr = [
+
+        return response()->json([
             'data' => $admin,
             'errors' => null,
             'message' => "اطلاعات ادمین با موفقیت دریافت شد",
-        ];
-        return response()->json($arr);
+        ]);
     }
 
     public static function getAdminByToken($api_token)

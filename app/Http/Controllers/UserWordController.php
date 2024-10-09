@@ -18,7 +18,7 @@ class UserWordController extends Controller
 {
     function getUserWordsById(Request $request )
     {
-        $words = UserWord::where('user_id', $request->user_id)->paginate(25);
+        $words = UserWord::where('user_id', $request->user_id)->paginate(24);
 
         return response()->json([
             'data'=>$words,
@@ -33,7 +33,7 @@ class UserWordController extends Controller
 
         $words = UserWord::orderBy('updated_at', "ASC")->where('user_id', $user->id);
         if (isset($request->status)) {
-            $words = $words->where('status' , $request->status);
+            $words = $words->where('status' , $request->status)->limit(50);
         }
         $words = $words->get();
 

@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\admin\UserController;
-use App\Http\Controllers\SingerController;
 use App\Http\Helpers\SingerHelper;
+use App\Http\Helpers\UserHelper;
 use App\Models\Music;
 use App\Models\Notification;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -35,12 +33,11 @@ class NotificationController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "افزودن نوتیفیکیشن شکست خورد"
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $notification = new Notification();
@@ -80,12 +77,11 @@ class NotificationController extends Controller
 
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "ویرایش نوتیفیکیشن شکست خورد"
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $notification = $this->getNotificationById($request->id);
@@ -111,12 +107,11 @@ class NotificationController extends Controller
     {
         $notifications = Notification::where('title', 'LIKE', "%{$request->search_key}%")->orderBy("id", "DESC")->paginate(50);
 
-        $response = [
+        return response()->json([
             'data' => $notifications,
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
+        ]);
     }
 
     public function sendFCM(Request $request)
@@ -131,42 +126,38 @@ class NotificationController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "ارسال نوتیفیکیشن شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $notif = Notification::find($request->id);
 
         if($notif->type == "one"){
             if(!isset($request->user_id)){
-                $arr = [
+                return response()->json([
                     'data' => null,
                     'errors' => array("با توجه به اینکه نوتیفیکیشن تکی هست user_id ضروری هست"),
                     'message' => "ارسال نوتیفیکیشن شکست خورد",
-                ];
-                return response()->json($arr, 400);
+                ], 400);
             }else{
                 try{
-                    $user = UserController::getUserById($request->user_id);
+                    $user = (new UserHelper())->getUserById($request->user_id);
                     if($user->fcm_refresh_token == ""){
-                        $arr = [
+                        return response()->json([
                             'data' => null,
                             'errors' => array("این کاربر در Fcm ثبت نام نشده است"),
                             'message' => "ارسال نوتیفیکیشن شکست خورد",
-                        ];
-                        return response()->json($arr, 400);
+                        ], 400);
                     }
                 }catch (Exception $e){
-                    $arr = [
+                    return response()->json([
                         'data' => null,
                         'errors' => array("چنین کاربری وجود ندارد"),
                         'message' => "ارسال نوتیفیکیشن شکست خورد",
-                    ];
-                    return response()->json($arr, 400);
+                    ], 400);
                 }
             }
         }
@@ -181,10 +172,10 @@ class NotificationController extends Controller
                 ]);
             }
 
-        } else if($notif->type == "one" && isset(UserController::getUserById($request->user_id)->fcm_refresh_token) && UserController::getUserById($request->user_id)->fcm_refresh_token != ""){
+        } else if($notif->type == "one" && isset((new UserHelper())->getUserById($request->user_id)->fcm_refresh_token) && (new UserHelper())->getUserById($request->user_id)->fcm_refresh_token != ""){
 
             $notificationData = [
-                'token' => UserController::getUserById($request->user_id)->fcm_refresh_token,
+                'token' => (new UserHelper())->getUserById($request->user_id)->fcm_refresh_token,
                 'title' => $notif->title,
                 'body' => $notif->body,
                 'image' => 'https://dl.lyricfa.app/uploads/notifications/'.$notif->id.'.jpg'

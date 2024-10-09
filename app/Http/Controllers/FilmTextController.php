@@ -43,13 +43,12 @@ class FilmTextController extends Controller
             ]);
 
         } else {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'status' => 1000,
                 'message' => "اشتراک شما به پایان رسیده است لطفا اشتراک خود را تمدید کنید",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
     }
 
