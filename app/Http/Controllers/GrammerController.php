@@ -13,11 +13,8 @@ use Illuminate\Support\Facades\Validator;
 
 class GrammerController extends Controller
 {
-    function grammerList(Request $request)
+    function grammerList()
     {
-        $api_token = $request->header("ApiToken");
-        $user = UserController::getUserByToken($api_token);
-
         $list = Grammer::orderBy('priority')->paginate(25);
 
         return response()->json([
@@ -316,7 +313,8 @@ class GrammerController extends Controller
         return false;
     }
 
-    public function checkIfContains( $needle, $haystack ) {
+    public function checkIfContains($needle, $haystack)
+    {
         return preg_match( '#\b' . preg_quote( $needle, '#' ) . '\b#i', $haystack ) !== 0;
     }
 }

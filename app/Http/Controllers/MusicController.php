@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Helpers\MusicHelper;
+use App\Http\Helpers\UserHelper;
 use App\Models\Music;
 use App\Models\Singer;
 use App\Models\Text;
@@ -9,112 +11,74 @@ use App\Models\View;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 
 class MusicController extends Controller
 {
     public function getNRequestedMusic(Request $request)
     {
-        $musics = Music::where('is_user_request', 1)->take(20)->inRandomOrder()->get();
-        $arr = [];
-        foreach ($musics as $music) {
+        $musics = Music::where('is_user_request', 1)->take(24)->inRandomOrder()->get();
 
-            $singer = SingerController::getSingerById($music->id);
-            $num_like = LikeMusicController::getNumberMusicLike($music->id);
-            $num_comment = CommentMusicController::getNumberMusicComment($music->id);
+        $data = (new MusicHelper())->prepareMusicsTemplate($musics);
 
-            $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-
-            $data = [
-                'music' => $music,
-                'singers' => $singer,
-                'num_like' => $num_like,
-                'num_comment' => $num_comment,
-                'user_like_it' => 0,
-                'average_score' => $average_score
-            ];
-
-            $arr[] = $data;
-        }
-
-        $response = [
-            'data' => $arr,
+        return response()->json([
+            'data' => $data,
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
+        ]);
     }
 
     public function getRequestedMusic(Request $request)
     {
         $search_key = $request->search_text;
+        $per_page = 24;
+
         $musics = Music::orderBy('id', "DESC")->where('is_user_request', 1);
         $musics = $musics->where(function ($query) use ($search_key) {
             $query->where('name', 'like', '%' . $search_key . '%')
                 ->orWhere('persian_name', 'like', '%' . $search_key . '%');
-        })->paginate(25);
+        })->paginate($per_page);
 
-        foreach ($musics as $music) {
-            $music->music = json_decode(json_encode($music));
+        $list = (new MusicHelper())->prepareMusicsTemplate($musics);
+        $last_page = $musics->lastPage();
+        $total = $musics->total();
 
-            $singer = SingerController::getSingerById($music->id);
-            $num_like = LikeMusicController::getNumberMusicLike($music->id);
-            $num_comment = CommentMusicController::getNumberMusicComment($music->id);
-            $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-            $music->average_score = $average_score;
-            $music->singers = $singer;
-            $music->num_like = $num_like;
-            $music->num_comment = $num_comment;
-
-            unset($music['id'], $music['name'], $music['persian_name'], $music['album'],
-                $music['degree'], $music['size'], $music['interest'],
-                $music['counter'], $music['mvideo'], $music['synchvideo'], $music['views'],
-                $music['type_video'], $music['start_demo'], $music['end_demo']);
-        }
-
-        $response = [
-            'data' => $musics,
-            'errors' => [
+        return response()->json([
+            'data' => [
+                'data' => $list,
+                'last_page' => $last_page,
+                'per_page' => $per_page,
+                'total' => $total,
             ],
+            'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response, 200);
+        ]);
     }
 
     public function getMusicList(Request $request)
     {
+        $search_text = $request->input('search_text');
+        $per_page = 24;
 
         $musics = Music::orderBy('views', 'DESC')->
-        where('name', 'LIKE', "%{$request->search_text}%")->
-        orWhere('persian_name', 'LIKE', "%{$request->search_text}%")->
-            orWhere('id', $request->search_text)->
-        paginate(25);
+            where('name', 'LIKE', "%{$search_text}%")->
+            orWhere('persian_name', 'LIKE', "%{$search_text}%")->
+            orWhere('id', $search_text)
+        ->paginate($per_page);
 
-        foreach ($musics as $music) {
-            $music->music = json_decode(json_encode($music));
+        $list = (new MusicHelper())->prepareMusicsTemplate($musics);
+        $last_page = $musics->lastPage();
+        $total = $musics->total();
 
-            $singer = SingerController::getSingerById($music->id);
-            $num_like = LikeMusicController::getNumberMusicLike($music->id);
-            $num_comment = CommentMusicController::getNumberMusicComment($music->id);
-            $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-            $music->average_score = $average_score;
-            $music->singers = $singer;
-            $music->num_like = $num_like;
-            $music->num_comment = $num_comment;
-
-            unset($music['id'], $music['name'], $music['persian_name'], $music['album'],
-                $music['degree'], $music['size'], $music['interest'],
-                $music['counter'], $music['mvideo'], $music['synchvideo'], $music['views'],
-                $music['type_video'], $music['start_demo'], $music['end_demo']);
-        }
-
-        $response = [
-            'data' => $musics,
-            'errors' => [
+        return response()->json([
+            'data' => [
+                'data' => $list,
+                'last_page' => $last_page,
+                'per_page' => $per_page,
+                'total' => $total,
             ],
+            'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response, 200);
+        ]);
     }
 
     public function getMusics(Request $request)
@@ -158,26 +122,9 @@ class MusicController extends Controller
 
         $musics = $musics->orderBy($sort , $order_by)->paginate(24);
 
-        $list = [];
+        $list = (new MusicHelper())->prepareMusicsTemplate($musics);
         $last_page = $musics->lastPage();
         $total = $musics->total();
-        foreach ($musics as $music) {
-            $singer = SingerController::getSingerById($music->id);
-            $num_like = LikeMusicController::getNumberMusicLike($music->id);
-            $num_comment = CommentMusicController::getNumberMusicComment($music->id);
-            $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-
-            $list[] = [
-                'music' => $music,
-                'singers' => $singer,
-                'num_like' => $num_like,
-                'readable_like' => $this->getReadableNumber(intval($num_like)),
-                'readable_views' => $this->getReadableNumber(intval($music->views)),
-                'num_comment' => $num_comment,
-                'user_like_it' => 0,
-                'average_score' => +number_format($average_score,1)
-            ];
-        }
 
         return response()->json([
             'data' => [
@@ -190,257 +137,43 @@ class MusicController extends Controller
         ]);
     }
 
-    public function getMusicSingersSearchList(Request $request)
-    {
-        $api_token = $request->header("ApiToken");
-        $user = UserController::getUserByToken($api_token);
-        $user_id = $user->id;
-
-        $messages = array(
-            'search_text.required' => 'متن جستجو الزامی است'
-        );
-
-        $validator = Validator::make($request->all(), [
-            'search_text' => 'required',
-        ], $messages);
-
-        if ($validator->fails()) {
-            $arr = [
-                'data' => null,
-                'errors' => $validator->errors(),
-                'message' => "جستجو شکست خورد"
-            ];
-            return response()->json($arr, 400);
-        }
-
-        if ($user_id) {
-            $musics = Music::orderBy('views', 'DESC')->
-            where('name', 'LIKE', "%{$request->search_text}%")->
-            orWhere('persian_name', 'LIKE', "%{$request->search_text}%")->
-            paginate(25);
-
-            foreach ($musics as $music) {
-                $music->music = json_decode(json_encode($music));
-
-                $singer = SingerController::getSingerById($music->id);
-                $num_like = LikeMusicController::getNumberMusicLike($music->id);
-                $num_comment = CommentMusicController::getNumberMusicComment($music->id);
-                $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-                $music->average_score = $average_score;
-                $music->singers = $singer;
-                $music->num_like = $num_like;
-                $music->num_comment = $num_comment;
-
-                unset($music['id'], $music['name'], $music['persian_name'], $music['album'],
-                    $music['degree'], $music['size'], $music['interest'],
-                    $music['counter'], $music['mvideo'], $music['synchvideo'], $music['views'],
-                    $music['type_video'], $music['start_demo'], $music['end_demo']);
-            }
-
-            $singers = Singer::orderBy('id', 'DESC')->
-            where('english_name', 'LIKE', "%{$request->search_text}%")->
-            orWhere('persian_name', 'LIKE', "%{$request->search_text}%")->
-            paginate(25);
-
-            foreach ($singers as $singer) {
-                $singer->singer = json_decode(json_encode($singer));
-
-                $num_like = LikeSingerController::getNumberSingerLike($singer->id);
-                $num_comment = CommentSingerController::getNumberSingerComment($singer->id);
-
-                $singer->num_like = $num_like;
-                $singer->num_comment = $num_comment;
-                $singer->user_like_it = LikeSingerController::isUserLike($singer->id, $user_id);
-
-                unset($singer['id'], $singer['english_name'], $singer['persian_name']);
-            }
-
-            $response = [
-                'singers' => $singers,
-                'musics' => $musics,
-                'errors' => [],
-                'message' => "اطلاعات با موفقیت گرفته شد",
-            ];
-            return response()->json($response);
-        } else {
-            $response = [
-                'data' => null,
-                'errors' => [
-                ],
-                'message' => "مشکل در احراز هویت",
-            ];
-            return response()->json($response, 401);
-        }
-    }
-
     public function getNMusicList(Request $request)
     {
         $views = View::selectRaw('viewable_id , COUNT(*) AS cnt')->where('viewable_type',Music::class)->where('created_at', '>' , Carbon::now()->subWeek()->format("Y-m-d H:i:s"))->groupBy("viewable_id")->orderBy("cnt","desc")->limit(24)->get();
         $most_viewed_ids = array_column($views->toArray(),'viewable_id');
-        $musics = Music::whereIn('id' , $most_viewed_ids)->orderByRaw('FIELD(id, '.implode(',' , $most_viewed_ids).')')->get();
-
-        $arr = [];
-        foreach ($musics as $music) {
-            $singer = SingerController::getSingerById($music->id);
-            $num_like = LikeMusicController::getNumberMusicLike($music->id);
-            $num_comment = CommentMusicController::getNumberMusicComment($music->id);
-            $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-            $data = [
-                'music' => $music,
-                'singers' => $singer,
-                'num_like' => $num_like,
-                'num_comment' => $num_comment,
-                'user_like_it' => 0,
-                'average_score' => $average_score
-            ];
-            $arr[] = $data;
+        if (!empty($most_viewed_ids)) {
+            $musics = Music::whereIn('id' , $most_viewed_ids)->orderByRaw('FIELD(id, '.implode(',' , $most_viewed_ids).')')->get();
+        } else {
+            $musics = Music::where('status' , 1)->orderBy('views', 'desc')->limit(24)->get();
         }
 
-        $response = [
-            'data' => $arr,
+        $list = (new MusicHelper())->prepareMusicsTemplate($musics);
+
+        return response()->json([
+            'data' => $list,
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
-    }
-
-    public function getListMusicByIds($listMusics)
-    {
-        $musics = [];
-        foreach ($listMusics as $item) {
-            $musics[] = Music::where('id', $item)->first();
-        }
-        foreach ($musics as $music) {
-            $music->music = json_decode(json_encode($music));
-
-            $singer = SingerController::getSingerById($music->id);
-            $num_like = LikeMusicController::getNumberMusicLike($music->id);
-            $num_comment = CommentMusicController::getNumberMusicComment($music->id);
-            $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-            $music->singers = $singer;
-            $music->num_like = $num_like;
-            $music->num_comment = $num_comment;
-            $music->user_like_it = 0;
-            $music->average_score = $average_score;
-            $music->readable_like = $this->getReadableNumber(intval($num_like));
-            $music->readable_views = $this->getReadableNumber(intval($music->views));
-
-            unset($music['id'], $music['name'], $music['persian_name'], $music['album'],
-                $music['degree'], $music['size'], $music['interest'],
-                $music['counter'], $music['mvideo'], $music['synchvideo'], $music['views'],
-                $music['type_video'], $music['start_demo'], $music['end_demo']);
-        }
-
-        $response = [
-            'data' => $musics,
-            'errors' => [],
-            'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
-    }
-
-    public static function getListMusicByIdsOnlyMusics($listMusics)
-    {
-        $musics = [];
-        foreach ($listMusics as $item) {
-            $musics[] = Music::where('id', $item)->first();
-        }
-        foreach ($musics as $music) {
-            $music->music = json_decode(json_encode($music));
-
-            $singer = SingerController::getSingerById($music->id);
-            $num_like = LikeMusicController::getNumberMusicLike($music->id);
-            $num_comment = CommentMusicController::getNumberMusicComment($music->id);
-
-            $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-
-
-            $music->singers = $singer;
-            $music->num_like = $num_like;
-            $music->num_comment = $num_comment;
-            $music->user_like_it = 0;
-            $music->average_score = $average_score;
-
-            unset($music['id'], $music['name'], $music['persian_name'], $music['album'],
-                $music['degree'], $music['size'], $music['interest'],
-                $music['counter'], $music['mvideo'], $music['synchvideo'], $music['views'],
-                $music['type_video'], $music['start_demo'], $music['end_demo']);
-        }
-
-        $response = [
-            'data' => $musics,
-            'errors' => [
-            ],
-            'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return $musics;
-    }
-
-    public static function getAllMusicWithPlayList($listMusics, $search_text)
-    {
-        $musics = Music::orderBy('id', 'ASC')->where('name', 'LIKE', "%{$search_text}%")->orWhere('persian_name', 'LIKE', "%{$search_text}%")->paginate(25);
-
-        foreach ($musics as $music) {
-            $music->music = json_decode(json_encode($music));
-
-            $singer = SingerController::getSingerById($music->id);
-            $num_like = LikeMusicController::getNumberMusicLike($music->id);
-            $num_comment = CommentMusicController::getNumberMusicComment($music->id);
-
-            $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-
-            $music->singers = $singer;
-            $music->num_like = $num_like;
-            $music->num_comment = $num_comment;
-            $music->user_like_it = 0;
-            $music->average_score = $average_score;
-            if (in_array($music->id, $listMusics)) {
-                $music->in_playlist = 1;
-            } else {
-                $music->in_playlist = 0;
-            }
-
-            unset($music['id'], $music['name'], $music['persian_name'], $music['album'],
-                $music['degree'], $music['size'], $music['interest'],
-                $music['counter'], $music['mvideo'], $music['synchvideo'], $music['views'],
-                $music['type_video'], $music['start_demo'], $music['end_demo']);
-        }
-
-        $response = [
-            'data' => $musics,
-            'errors' => [],
-            'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
+        ]);
     }
 
     public function getLastMusicList(Request $request)
     {
         $musics = Music::orderBy('published_at', 'DESC')->
-        where('name', 'LIKE', "%{$request->search_text}%")->
-        orWhere('persian_name', 'LIKE', "%{$request->search_text}%")->
-            orWhere('id', $request->search_text)->paginate(25);
+            where('name', 'LIKE', "%{$request->search_text}%")->
+            orWhere('persian_name', 'LIKE', "%{$request->search_text}%")->
+            orWhere('id', $request->search_text)
+        ->paginate(24);
 
-        foreach ($musics as $music) {
-            $music->music = json_decode(json_encode($music));
-            $singer = SingerController::getSingerById($music->id);
-            $num_like = LikeMusicController::getNumberMusicLike($music->id);
-            $num_comment = CommentMusicController::getNumberMusicComment($music->id);
-            $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-            $music->singers = $singer;
-            $music->num_like = $num_like;
-            $music->num_comment = $num_comment;
-            $music->user_like_it = 0;
-            $music->average_score = $average_score;
-
-            unset($music['id'], $music['name'], $music['persian_name'], $music['album'],
-                $music['degree'], $music['size'], $music['interest'],
-                $music['counter'], $music['mvideo'], $music['synchvideo'], $music['views'],
-                $music['type_video'], $music['start_demo'], $music['end_demo']);
-        }
+        $list = (new MusicHelper())->prepareMusicsTemplate($musics);
+        $last_page = $musics->lastPage();
+        $total = $musics->total();
 
         $response = [
-            'data' => $musics,
+            'data' => [
+                'data' => $list,
+                'last_page' => $last_page,
+                'total' => $total,
+            ],
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
         ];
@@ -450,25 +183,11 @@ class MusicController extends Controller
     public function getNLastMusicList(Request $request)
     {
         $musics = Music::orderBy('published_at', 'DESC')->take(20)->get();
-        $arr = [];
-        foreach ($musics as $music) {
-            $singer = SingerController::getSingerById($music->id);
-            $num_like = LikeMusicController::getNumberMusicLike($music->id);
-            $num_comment = CommentMusicController::getNumberMusicComment($music->id);
-            $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-            $data = [
-                'music' => $music,
-                'singers' => $singer,
-                'num_like' => $num_like,
-                'num_comment' => $num_comment,
-                'user_like_it' => 0,
-                'average_score' => $average_score
-            ];
-            $arr[] = $data;
-        }
+
+        $list = (new MusicHelper())->prepareMusicsTemplate($musics);
 
         $response = [
-            'data' => $arr,
+            'data' => $list,
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
         ];
@@ -500,48 +219,30 @@ class MusicController extends Controller
             return response()->json($arr, 400);
         }
 
-        $id = $request->id;
-        $music = $this->getMusicById($id);
-
-        $singer = SingerController::getSingerById($music->id);
-
-        $api_token = $request->header("ApiToken");
-
-        $user_id = UserController::getUserByToken($api_token)->id;
-
-        $num_like = LikeMusicController::getNumberMusicLike($id);
-
-        $num_comment = CommentMusicController::getNumberMusicComment($id);
-
-        $user_like_it = LikeMusicController::isUserLike($id, $user_id);
-
-        $average_score = ScoreMusicController::getAverageMusicScore($id);
-
-        $texts = [];
-        if (UserController::isUserSubscriptionValid($request)) {
-            $texts = Text::where('id_music', '=', $id)->orderBy("id")->get();
+        $music = Music::where('id', $request->id)->first();
+        if (!$music) {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => "گرفتن اطلاعات آهنگ شکست خورد",
+            ], 400);
         }
 
-        $data = [
-            'music' => $music,
-            'texts' => $texts,
-            'singers' => $singer,
-            'num_like' => $num_like,
-            'readable_like' => $this->getReadableNumber(intval($num_like)),
-            'num_comment' => $num_comment,
-            'readable_comment' => $this->getReadableNumber(intval($num_comment)),
-            'user_like_it' => $user_like_it,
-            'average_score' => +number_format($average_score,1)
-        ];
+        $user = (new UserHelper())->getUserByToken($request->header("ApiToken"));
 
-        $arr = [
+        $texts = [];
+        if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken"))) {
+            $texts = Text::where('id_music', '=', $request->id)->orderBy("id")->get();
+        }
+
+        $data = (new MusicHelper())->musicTemplate($music, $user->id);
+        $data['texts'] = $texts;
+
+        return response()->json([
             'data' => $data,
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-
-        return response()->json($arr, 200);
-
+        ]);
     }
 
     public function getMusicWithHardest(Request $request)
@@ -552,31 +253,21 @@ class MusicController extends Controller
         $musics = $musics->where(function ($query) use ($search_key) {
             $query->where('name', 'like', '%' . $search_key . '%')
                 ->orWhere('persian_name', 'like', '%' . $search_key . '%');
-        })->paginate(25);
+        })->paginate(24);
 
-        foreach ($musics as $music) {
-            $music->music = json_decode(json_encode($music));
-            $singer = SingerController::getSingerById($music->id);
-            $num_like = LikeMusicController::getNumberMusicLike($music->id);
-            $num_comment = CommentMusicController::getNumberMusicComment($music->id);
-            $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-            $music->average_score = $average_score;
-            $music->singers = $singer;
-            $music->num_like = $num_like;
-            $music->num_comment = $num_comment;
+        $list = (new MusicHelper())->prepareMusicsTemplate($musics);
+        $last_page = $musics->lastPage();
+        $total = $musics->total();
 
-            unset($music['id'], $music['name'], $music['persian_name'], $music['album'],
-                $music['degree'], $music['size'], $music['interest'],
-                $music['counter'], $music['mvideo'], $music['synchvideo'], $music['views'],
-                $music['type_video'], $music['start_demo'], $music['end_demo']);
-        }
-
-        $response = [
-            'data' => $musics,
+        return response()->json([
+            'data' => [
+                'data' => $list,
+                'last_page' => $last_page,
+                'total' => $total,
+            ],
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
+        ]);
     }
 
     public function getMusicWithTextPaginate(Request $request)
@@ -587,34 +278,26 @@ class MusicController extends Controller
         },
         ])->whereHas('text', function ($query) use ($word) {
             $query->where('text_english', 'LIKE', "%{$word}%");
-        })->paginate(25);
+        })->paginate(24);
 
+        $list = [];
         foreach ($musics as $music) {
-            $music->music = json_decode(json_encode($music));
-
-            $singer = SingerController::getSingerById($music->id);
-            $num_like = LikeMusicController::getNumberMusicLike($music->id);
-            $num_comment = CommentMusicController::getNumberMusicComment($music->id);
-            $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-            $music->average_score = $average_score;
-            $music->singers = $singer;
-            $music->num_like = $num_like;
-            $music->num_comment = $num_comment;
-            $music->readable_like = $this->getReadableNumber(intval($num_like));
-            $music->readable_views = $this->getReadableNumber(intval($music->views));
-
-            unset($music['id'], $music['name'], $music['persian_name'], $music['album'],
-                $music['degree'], $music['size'], $music['interest'],
-                $music['counter'], $music['mvideo'], $music['synchvideo'], $music['views'],
-                $music['type_video'], $music['start_demo'], $music['end_demo'], $music['text']);
+            $data = (new MusicHelper())->musicTemplate($music);
+            $data['text'] = $music['text'];
+            $list[] = $data;
         }
+        $last_page = $musics->lastPage();
+        $total = $musics->total();
 
-        $response = [
-            'data' => $musics,
+        return response()->json([
+            'data' => [
+                'data' => $list,
+                'last_page' => $last_page,
+                'total' => $total,
+            ],
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
+        ]);
     }
 
     public function addMusicViewOne(Request $request)
@@ -629,29 +312,36 @@ class MusicController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "افزودن ویو شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
-        $music = $this->getMusicById($request->id);
+        $music = Music::where('id', $request->id)->first();
+        if (!$music) {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => "گرفتن اطلاعات آهنگ شکست خورد",
+            ], 400);
+        }
+
         $music->views = $music->views + 1;
         $music->save();
 
-        $user_id = UserController::getUserByToken($request->header("ApiToken"))->id;
+        $user = (new UserHelper())->getUserByToken($request->header("ApiToken"));
+
         $music->views()->create([
-            'user_id' => $user_id,
+            'user_id' => $user->id,
         ]);
 
-        $response = [
+        return response()->json([
             'data' => null,
             'errors' => [],
             'message' => "ویو با موفقیت اضافه شد",
-        ];
-        return response()->json($response);
+        ]);
     }
 
     public function getSingerMusics(Request $request)
@@ -682,35 +372,21 @@ class MusicController extends Controller
                 'message' => "خواننده یافت نشد.",
             ], 400);
         }
-        $musics = $singer->musics()->orderBy('views', 'DESC')->paginate(25);
 
-        foreach ($musics as $music) {
-            $music->music = json_decode(json_encode($music));
+        $musics = $singer->musics()->orderBy('views', 'DESC')->paginate(24);
+        $list = (new MusicHelper())->prepareMusicsTemplate($musics);
+        $last_page = $musics->lastPage();
+        $total = $musics->total();
 
-            $singer = SingerController::getSingerById($music->id);
-            $num_like = LikeMusicController::getNumberMusicLike($music->id);
-            $num_comment = CommentMusicController::getNumberMusicComment($music->id);
-            $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-            $music->average_score = $average_score;
-            $music->singers = $singer;
-            $music->num_like = $num_like;
-            $music->num_comment = $num_comment;
-            $music->readable_like = $this->getReadableNumber(intval($num_like));
-            $music->readable_views = $this->getReadableNumber(intval($music->views));
-            $music->readable_comment = $this->getReadableNumber(intval($num_comment));
-
-            unset($music['id'], $music['name'], $music['persian_name'], $music['album'],
-                $music['degree'], $music['size'], $music['interest'],
-                $music['counter'], $music['mvideo'], $music['synchvideo'], $music['views'],
-                $music['type_video'], $music['start_demo'], $music['end_demo']);
-        }
-
-        $response = [
-            'data' => $musics,
+        return response()->json([
+            'data' => [
+                'data' => $list,
+                'last_page' => $last_page,
+                'total' => $total,
+            ],
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
+        ]);
     }
 
     public function getAlbumMusics(Request $request)
@@ -725,43 +401,22 @@ class MusicController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "گرفتن لیست آهنگ های آلبوم شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $musics = Music::where('album_id', $request->id_album)->get();
 
-        foreach ($musics as $music) {
-            $music->music = json_decode(json_encode($music));
+        $list = (new MusicHelper())->prepareMusicsTemplate($musics);
 
-            $singer = SingerController::getSingerById($music->id);
-            $num_like = LikeMusicController::getNumberMusicLike($music->id);
-            $num_comment = CommentMusicController::getNumberMusicComment($music->id);
-            $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-            $music->average_score = $average_score;
-            $music->singers = $singer;
-            $music->num_like = $num_like;
-            $music->num_comment = $num_comment;
-            $music->readable_like = $this->getReadableNumber(intval($num_like));
-            $music->readable_views = $this->getReadableNumber(intval($music->views));
-            $music->readable_comment = $this->getReadableNumber(intval($num_comment));
-
-            unset($music['id'], $music['name'], $music['persian_name'], $music['album'],
-                $music['degree'], $music['size'], $music['interest'],
-                $music['counter'], $music['mvideo'], $music['synchvideo'], $music['views'],
-                $music['type_video'], $music['start_demo'], $music['end_demo']);
-        }
-
-        $response = [
-            'data' => $musics,
+        return response()->json([
+            'data' => $list,
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
+        ]);
     }
 
     public function getSingerMusicsNoPaging(Request $request)
@@ -776,12 +431,11 @@ class MusicController extends Controller
         ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "گرفتن لیست آهنگ های خواننده شکست خورد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $singer = Singer::where('id', $request->id_singer)->first();
@@ -795,32 +449,12 @@ class MusicController extends Controller
 
         $limit = $request->input('limit', 200);
         $musics = $singer->musics()->orderBy('views', 'DESC')->limit($limit)->get();
+        $list = (new MusicHelper())->prepareMusicsTemplate($musics);
 
-        foreach ($musics as $music) {
-            $music->music = json_decode(json_encode($music));
-
-            $singer = SingerController::getSingerById($music->id);
-            $num_like = LikeMusicController::getNumberMusicLike($music->id);
-            $num_comment = CommentMusicController::getNumberMusicComment($music->id);
-            $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-            $music->average_score = +number_format($average_score,1);
-            $music->singers = $singer;
-            $music->num_like = $num_like;
-            $music->readable_like = $this->getReadableNumber(intval($num_like));
-            $music->num_comment = $num_comment;
-            $music->readable_comment = $this->getReadableNumber(intval($num_comment));
-
-            unset($music['id'], $music['name'], $music['persian_name'], $music['album'],
-                $music['degree'], $music['size'], $music['interest'],
-                $music['counter'], $music['mvideo'], $music['synchvideo'], $music['views'],
-                $music['type_video'], $music['start_demo'], $music['end_demo']);
-        }
-
-        $response = [
-            'data' => $musics,
+        return response()->json([
+            'data' => $list,
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
+        ]);
     }
 }

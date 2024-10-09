@@ -6,6 +6,7 @@ use App\Http\Controllers\CommentMusicController;
 use App\Http\Controllers\CommentSingerController;
 use App\Http\Controllers\LikeMusicController;
 use App\Http\Controllers\LikeSingerController;
+use App\Http\Helpers\SingerHelper;
 use App\Models\Music;
 use App\Models\Singer;
 use Illuminate\Http\Request;
@@ -49,7 +50,7 @@ class SingerController extends Controller
         }
 
         foreach ($list as $item) {
-            $item->num_like = LikeSingerController::getNumberSingerLike($item->id);
+            $item->num_like = (new SingerHelper())->singerLikesCount($item->id);
             $item->num_musics = $item->musics()->count();
         }
 

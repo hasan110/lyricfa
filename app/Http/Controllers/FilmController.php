@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Helpers\UserHelper;
 use App\Models\Film;
 use App\Models\FilmText;
 use Illuminate\Http\Request;
@@ -60,7 +61,7 @@ class FilmController extends Controller
         $film['items_count'] = $films->count();
         $film['texts'] = [];
 
-        if (UserController::isUserSubscriptionValid($request) && $request->with_text) {
+        if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken")) && $request->with_text) {
             $id_film = $request->id;
             $texts = FilmText::where('film_id', '=', $id_film)->orderBy("id")->get();
             $film['texts'] = $texts;
@@ -100,12 +101,5 @@ class FilmController extends Controller
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
         ]);
-    }
-
-    public static function getFilmById($id)
-    {
-        $film = Film::where('id', $id)->first();
-
-        return $film;
     }
 }

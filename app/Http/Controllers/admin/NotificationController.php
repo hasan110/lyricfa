@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\SingerController;
+use App\Http\Helpers\SingerHelper;
 use App\Models\Music;
 use App\Models\Notification;
 use Carbon\Carbon;
@@ -219,7 +220,7 @@ class NotificationController extends Controller
 
                 $musics = Music::whereBetween('id', [$from, $to])->get();
                 foreach ($musics as $music) {
-                    $singers = SingerController::getSingerById($music->id);
+                    $singers = (new SingerHelper())->getMusicSingers($music->id);
                     $singer_names = [];
                     foreach ($singers as $singer) {
                         $singer_names[] = $singer->english_name;
@@ -238,7 +239,7 @@ class NotificationController extends Controller
                     throw new Exception('موزیک یافت نشد');
                 }
 
-                $singers = SingerController::getSingerById($music->id);
+                $singers = (new SingerHelper())->getMusicSingers($music->id);
                 $singer_names = [];
                 foreach ($singers as $singer) {
                     $singer_names[] = $singer->english_name;

@@ -2,165 +2,103 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Helpers\MusicHelper;
+use App\Http\Helpers\PlayListHelper;
+use App\Models\Music;
 use App\Models\PlayListMusic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class PlayListMusicController extends Controller
 {
-
-    public function insertMusicPlayList(Request $request)
-    {
-
-        $messsages = array(
-            'user_id.required' => 'شناسه کاربر الزامی است',
-            'user_id.numeric' => 'شناسه کاربر باید شامل عدد باشد',
-
-            'music_id.required' => 'شناسه آهنگ الزامی است',
-            'music_id.numeric' => 'شناسه آهنگ باید شامل عدد باشد',
-
-        );
-
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|numeric',
-            'music_id' => 'required|numeric',
-        ], $messsages);
-
-        if ($validator->fails()) {
-            $arr = [
-                'data' => null,
-                'errors' => $validator->errors(),
-                'message' => "افزودن پلی لیست شکست خورد",
-            ];
-            return response()->json($arr, 400);
-        }
-
-        $name = $this->userMusicExistInPlayList($request);
-
-        if (isset($name)) { // array use count
-            $arr = [
-                'data' => $name,
-                'errors' => [
-                ],
-                'message' => "این آهنگ قبلا در این لیست پخش اضافه شده",
-            ];
-
-            return response()->json($arr, 400);
-        }
-
-        $playList = new PlayListMusic;
-        $playList->user_id = (int) $request->user_id;
-        $playList->music_id = (int) $request->music_id;
-        $playList->save();
-
-        $arr = [
-            'data' => $playList,
-            'errors' => [
-            ],
-            'message' => "لیست پخش با موفقیت اضافه شد",
-        ];
-        return response()->json($arr, 200);
-    }
-
     public function getAllMusicWithPlayList(Request $request)
     {
-
-        $messsages = array(
+        $messages = array(
             'playlist_id.required' => 'شناسه کاربر الزامی است',
             'playlist_id.numeric' => 'شناسه کاربر باید شامل عدد باشد',
         );
 
         $validator = Validator::make($request->all(), [
             'playlist_id' => 'required|numeric',
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => null,
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
-        $listMusic = [];
+        $playlist_music_ids = PlayListMusic::where('playlist_id', $request->playlist_id)->pluck('music_id')->toArray();
 
-        $musics = PlayListMusic::where('playlist_id', $request->playlist_id)->get();
-        foreach ($musics as $item) {
-            $listMusic[] = $item->music_id;
-        }
+        $musics = Music::where('status' , 1)->where('name', 'LIKE', "%{$request->search_text}%")->orWhere('persian_name', 'LIKE', "%{$request->search_text}%")->orderBy('id', 'ASC')->paginate(24);
 
-        return MusicController::getAllMusicWithPlayList($listMusic, $request->search_text);
+        $list = (new MusicHelper())->prepareMusicsTemplate($musics, null, $playlist_music_ids);
+        $last_page = $musics->lastPage();
+        $total = $musics->total();
+
+        return response()->json([
+            'data' => [
+                'data' => $list,
+                'last_page' => $last_page,
+                'total' => $total,
+            ],
+            'errors' => [],
+            'message' => "اطلاعات با موفقیت گرفته شد",
+        ]);
     }
 
     public function getMusicPlayListUser(Request $request)
     {
-
-        $messsages = array(
+        $messages = array(
             'playlist_id.required' => 'شناسه کاربر الزامی است',
             'playlist_id.numeric' => 'شناسه کاربر باید شامل عدد باشد',
         );
 
         $validator = Validator::make($request->all(), [
             'playlist_id' => 'required|numeric',
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => null,
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
-        $listMusic = [];
+        $music_ids = [];
 
-        $musics = PlayListMusic::where('playlist_id', $request->playlist_id)->get();
-        foreach ($musics as $item) {
-            $listMusic[] = $item->music_id;
+        $playlist_musics = PlayListMusic::where('playlist_id', $request->playlist_id)->get();
+        foreach ($playlist_musics as $item) {
+            $music_ids[] = $item->music_id;
         }
 
-        return (new MusicController())->getListMusicByIds($listMusic);
-    }
+        $musics = Music::where('status' , 1)->whereIn('id', $music_ids)->get();
+        $list = (new MusicHelper())->prepareMusicsTemplate($musics);
 
-    public static function getRandom4Music($playListId){
-        $listMusic = [];
-        $musics = PlayListMusic::where('playlist_id', $playListId)->take(4)->get();
-        foreach ($musics as $item) {
-                $listMusic[] = $item->music_id;
-        }
-
-        return MusicController::getListMusicByIdsOnlyMusics($listMusic);
-    }
-
-    public function userMusicExistInPlayList(Request $request)
-    {
-        return PlayListMusic::where('music_id', $request->music_id)->where('user_id', $request->user_id)->first();
-    }
-
-    public function userMusicExistInPlayList2($playlist_id, $music_id)
-    {
-        return PlayListMusic::where('music_id', $music_id)->where('playlist_id', $playlist_id)->first();
+        return response()->json([
+            'data' => $list,
+            'errors' => [],
+            'message' => "اطلاعات با موفقیت گرفته شد",
+        ]);
     }
 
     public function insertMusicsPlayList(Request $request)
     {
-
-        $messsages = array(
+        $messages = array(
             'playlist_id.required' => 'شناسه پلی لیست الزامی است',
             'playlist_id.numeric' => 'شناسه پلی لیست باید شامل عدد باشد',
-
             'musics.array' => 'لیست آهنگ باید آرایه ای از شناسه ی آهنگ ها باشد',
             'remove_musics.array' => 'لیست آهنگ های حذفی باید آرایه ای از شناسه ی آهنگ ها باشد',
-
         );
 
         $validator = Validator::make($request->all(), [
             'playlist_id' => 'required|numeric',
             'musics' => 'array',
             'remove_musics' => 'array',
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
             $arr = [
@@ -171,56 +109,49 @@ class PlayListMusicController extends Controller
             return response()->json($arr, 400);
         }
 
-         $playList = new PlayListMusic;
         if($request->musics){
             foreach ($request->musics as $item) {
-                $name = $this->userMusicExistInPlayList2($request->playlist_id, $item);
+                $check = (new PlayListHelper())->checkMusicExistsInPlayList($request->playlist_id, $item);
 
-                if (!$name) {
-                    $playList = PlayListMusic::create([
+                if (!$check) {
+                    PlayListMusic::create([
                         'playlist_id' => (int) $request->playlist_id,
                         'music_id' => (int) $item,
                     ]);
                 }
-
             }
         }
-
 
         if($request->remove_musics){
             foreach ($request->remove_musics as $item) {
-                $name = $this->userMusicExistInPlayList2($request->playlist_id, $item);
+                $playlist_music = (new PlayListHelper())->checkMusicExistsInPlayList($request->playlist_id, $item);
 
-                if (isset($name)) {
-                    $name->delete();
-                } else {}
+                if (isset($playlist_music)) {
+                    $playlist_music->delete();
+                }
             }
         }
 
-        $arr = [
+        return response()->json([
             'data' => null,
-            'errors' => [
-            ],
-            'message' => "لیست پخش با موفقیت اضافه شد",
-        ];
-        return response()->json($arr, 200);
+            'errors' => [],
+            'message' => "عملیات با موفقیت انجام شد",
+        ]);
     }
 
     public function removeMusicFromPlayList(Request $request){
 
-        $messsages = array(
+        $messages = array(
             'playlist_id.required' => 'شناسه پلی لیست الزامی است',
             'playlist_id.numeric' => 'شناسه پلی لیست باید شامل عدد باشد',
-
             'music_id.required' => 'شناسه آهنگ الزامی است',
             'music_id.numeric' => 'شناسه آهنگ لیست باید شامل عدد باشد',
-
         );
 
         $validator = Validator::make($request->all(), [
             'playlist_id' => 'required|numeric',
             'music_id' => 'required|numeric'
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
             $arr = [
@@ -231,39 +162,20 @@ class PlayListMusicController extends Controller
             return response()->json($arr, 400);
         }
 
-        $music = $this->musicIsExistInPlayList($request);
-        if($music!= null){
-         $music->delete();
-            $arr = [
+        $check = (new PlayListHelper())->checkMusicExistsInPlayList($request->playlist_id , $request->music_id);
+        if ($check != null) {
+            $check->delete();
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "حذف موفقیت آمیز بود",
-            ];
-            return response()->json($arr, 200);
-        }else{
-            $arr = [
+            ]);
+        } else {
+            return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
                 'message' => "چنین آهنگی در لیست وجود ندارد",
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
     }
-
-
-    public function musicIsExistInPlayList(Request $request)
-    {
-
-
-        $api_token = $request->header("ApiToken");
-
-        $user = UserController::getUserByToken($api_token);
-        if ($user) {
-            return PlayListMusic::where('music_id', $request->music_id)->where('playlist_id', $request->playlist_id)->first();
-        } else {
-            return null;
-        }
-
-    }
-
 }

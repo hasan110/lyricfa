@@ -12,62 +12,9 @@ use Illuminate\Support\Facades\Validator;
 
 class IdiomController extends Controller
 {
-    public function getIdiomsWord(Request $request)
-    {
-        $word = $request->word;
-        $get_idioms = Idiom::where('base', $word)->get();
-
-        if (!$get_idioms) {
-            $arr = [
-                'data' => null,
-                'errors' => [
-                ],
-                'message' => "هیچ کلمه ای پیدا نشد",
-            ];
-            return response()->json($arr);
-        } else {
-            $arr = [
-                'data' => $get_idioms,
-                'errors' => [
-                ],
-                'message' => "اطلاعات با موفقیت گرفته شد",
-            ];
-            return response()->json($arr);
-        }
-    }
-
-    public static function getIdiomById(int $id)
-    {
-        $idiom =  Idiom::where('id', $id)->first();
-        $rooms = json_decode($idiom->definition, true);
-        $idiom->parse = $rooms;
-        return $idiom;
-    }
-
-    public function searchIdiom(Request $request)
-    {
-        $idioms = Idiom::orderBy('id', 'DESC')->
-        where('phrase', 'LIKE', "%{$request->search_text}%")->
-        orWhere('definition', 'LIKE', "%{$request->search_text}%")->
-        paginate(25);
-
-        foreach ($idioms as $index => $item) {
-            $rooms = json_decode($item->definition, true);
-
-            $idioms[$index]->parse = $rooms;
-        }
-
-        $response = [
-            'data' => $idioms,
-            'errors' => [],
-            'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($response);
-    }
-
     public function getWordIdiomsByRate(Request $request)
     {
-        $messsages = array(
+        $messages = array(
             'word.required' => 'کلمه الزامی است.',
             'phrase.required' => 'عبارت الزامی است'
         );
@@ -75,7 +22,7 @@ class IdiomController extends Controller
         $validator = Validator::make($request->all(), [
             'word' => 'required',
             'phrase' => 'required',
-        ], $messsages);
+        ], $messages);
 
         if ($validator->fails()) {
             return response()->json([
@@ -116,7 +63,6 @@ class IdiomController extends Controller
             $word_base_idioms = [];
         }
 
-        // $all_idioms = $word_idioms->merge($word_base_idioms);
         $word_index = array_search($word , $seprated_words);
 
         $words_before_main_word = array_slice($seprated_words , 0 , $word_index);
@@ -232,6 +178,7 @@ class IdiomController extends Controller
                 'message' => "خطا در اعتبار سنجی رخ داد.",
             ], 400);
         }
+
         $word = $request->word;
         $lower_word = strtolower($request->word);
 
@@ -274,16 +221,14 @@ class IdiomController extends Controller
             $base_word_data = null;
         }
 
-        $response = [
+        return response()->json([
             'data' => [
                 'word' => $word_data,
                 'base_word' => $base_word_data,
             ],
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-
-        return response()->json($response, 200);
+        ]);
     }
 
     public function getIdiomData(Request $request)
@@ -303,23 +248,22 @@ class IdiomController extends Controller
                 'message' => "خطا در اعتبار سنجی رخ داد.",
             ], 400);
         }
-        $idiom = $request->idiom;
 
-        $get_idiom = Idiom::with('idiom_definitions')->where('phrase' , $idiom)->first();
-        if($get_idiom){
+        $get_idiom = Idiom::with('idiom_definitions')->where('phrase' , $request->idiom)->first();
+
+        if ($get_idiom){
             $response = [
                 'data' => $get_idiom,
                 'errors' => [],
                 'message' => "اطلاعات با موفقیت گرفته شد",
             ];
-            return response()->json($response);
-        }else{
+        } else {
             $response = [
                 'data' => null,
                 'errors' => [],
                 'message' => "اصطلاح یافت نشد",
             ];
-            return response()->json($response);
         }
+        return response()->json($response);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Http\Controllers\UserController;
+use App\Http\Helpers\UserHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
@@ -87,7 +87,8 @@ class Payment extends Model
         if ($payment->type == self::PAYMENT_TYPE_SUBSCRIPTION) {
             $subscription = Subscription::find($payment->paymentable_id);
             if ($subscription) {
-                UserController::addSubscription($payment->user_id, $subscription->id);
+                $user = (new UserHelper())->getUserById($payment->user_id);
+                (new UserHelper())->setUserSubscription($user, $subscription->id);
 
                 $report = new Report();
                 $report->user_id = $payment->user_id;

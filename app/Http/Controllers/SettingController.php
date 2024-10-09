@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Helpers\MusicHelper;
+use App\Http\Helpers\SingerHelper;
 use App\Models\Album;
 use App\Models\Film;
 use App\Models\Music;
@@ -45,12 +47,12 @@ class SettingController extends Controller
         $singers = Singer::take(20)->inRandomOrder()->get();
         $singer_list = [];
         foreach ($singers as $singer) {
-            $num_like = LikeSingerController::getNumberSingerLike($singer->id);
+            $num_like = (new SingerHelper())->singerLikesCount($singer->id);
             $singer_list[] = [
                 'singer' => $singer,
                 'num_like' => $num_like,
                 'readable_like' => $this->getReadableNumber(intval($num_like)),
-                'num_comment' => CommentSingerController::getNumberSingerComment($singer->id),
+                'num_comment' => 0,
                 'user_like_it' => 0
             ];
         }
@@ -60,8 +62,8 @@ class SettingController extends Controller
 
         $data = [
             'sliders' => $sliders,
-            'recent_musics' => $this->prepareMusicsTemplate($shuffled_recent_musics),
-            'most_viewed_musics' => $this->prepareMusicsTemplate($most_viewed_musics),
+            'recent_musics' => (new MusicHelper())->prepareMusicsTemplate($shuffled_recent_musics),
+            'most_viewed_musics' => (new MusicHelper())->prepareMusicsTemplate($most_viewed_musics),
             'singers' => $singer_list,
             'albums' => $albums,
             'films' => $films,
@@ -71,28 +73,5 @@ class SettingController extends Controller
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
         ]);
-    }
-
-    public function prepareMusicsTemplate($musics) :array
-    {
-        $musics_array = [];
-        foreach ($musics as $music) {
-            $singer = SingerController::getSingerById($music->id);
-            $num_like = LikeMusicController::getNumberMusicLike($music->id);
-            $num_comment = CommentMusicController::getNumberMusicComment($music->id);
-            $average_score = ScoreMusicController::getAverageMusicScore($music->id);
-            $data = [
-                'music' => $music,
-                'singers' => $singer,
-                'num_like' => $num_like,
-                'readable_like' => $this->getReadableNumber(intval($num_like)),
-                'num_comment' => $num_comment,
-                'user_like_it' => 0,
-                'average_score' => +number_format($average_score,1)
-            ];
-            $musics_array[] = $data;
-        }
-
-        return $musics_array;
     }
 }

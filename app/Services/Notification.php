@@ -10,11 +10,12 @@ use Illuminate\Support\Facades\Storage;
 
 class Notification
 {
-    public static function send(string $type , array $data)
+    public static function send(string $type , array $data): bool
     {
         switch ($type){
             case 'google_notification':
 
+                ob_start();
                 if(!isset($data['token'])) return false;
                 $url = env('GOOGLEAPIS_URL');
                 $apiKey = self::getFCMToken();
@@ -42,13 +43,11 @@ class Notification
 
                 curl_exec($ch);
                 curl_close($ch);
-
+                ob_clean();
                 return true;
             default:
                 return false;
         }
-
-        return false;
     }
 
     public static function getFCMToken()
@@ -71,6 +70,7 @@ class Notification
         } catch (Exception $e) {
             return null;
         }
+
         Setting::setItem('google_fcm_access_token', $token['access_token']);
         Setting::setItem('google_fcm_expires_at', Carbon::now()->addSeconds(3500));
         return $token['access_token'];

@@ -2,18 +2,15 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\Http\Controllers\CommentMusicController;
-use App\Http\Controllers\LikeMusicController;
-use App\Http\Controllers\ScoreMusicController;
-use App\Http\Controllers\SingerController;
-use App\Http\Controllers\UserController;
+use App\Http\Helpers\CommentHelper;
+use App\Http\Helpers\LikeHelper;
+use App\Http\Helpers\SingerHelper;
 use App\Models\Admin;
 use App\Models\Music;
 use App\Models\Singer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Str;
 
 class MusicController extends Controller
 {
@@ -61,9 +58,9 @@ class MusicController extends Controller
         $musics = $musics->paginate(50);
 
         foreach ($musics as $music) {
-            $music->singers = \App\Http\Controllers\SingerController::getSingerById($music->id);
-            $music->num_like = LikeMusicController::getNumberMusicLike($music->id);
-            $music->num_comment = CommentMusicController::getNumberMusicComment($music->id);
+            $music->singers = (new SingerHelper())->getMusicSingers($music->id);
+            $music->num_like = (new LikeHelper())->getMusicLikesCount($music->id);
+            $music->num_comment = (new CommentHelper())->getMusicCommentsCount($music->id);
         }
 
         $response = [
@@ -201,14 +198,13 @@ class MusicController extends Controller
             return response()->json($arr, 400);
         }
 
-        $music = $this->getMusicById($request->id);
+        $music = Music::where('id', $request->id)->first();
         if(!$music){
-            $arr = [
+            return response()->json([
                 'data' => null,
                 'errors' => null,
                 'message' => "این موزیک وجود ندارد برای به روز رسانی"
-            ];
-            return response()->json($arr, 400);
+            ], 400);
         }
 
         $music->name = $request->english_title;
@@ -236,15 +232,11 @@ class MusicController extends Controller
             $music->singers()->sync(explode(',', $request->singers));
         }
 
-        $arr = [
+        return response()->json([
             'data' => $music,
             'errors' => null,
             'message' => "موزیک با موفقیت اضافه شد"
-        ];
-
-        return response()->json($arr);
-
-
+        ]);
     }
 
     public static function getMusicById($id)
@@ -255,35 +247,21 @@ class MusicController extends Controller
     public function getMusicCompleteInfo(Request $request)
     {
         $id = $request->id;
-        $music = $this->getMusicById($id);
-        $singer = SingerController::getSingerById($music->id);
-        $api_token = $request->header("ApiToken");
-        $user_id = AdminController::getAdminByToken($api_token)->id;
-        $num_like = LikeMusicController::getNumberMusicLike($id);
-        $num_comment = CommentMusicController::getNumberMusicComment($id);
-        $user_like_it = LikeMusicController::isUserLike($id, $user_id);
-        $average_score = ScoreMusicController::getAverageMusicScore($id);
+        $music = Music::where('id', $id)->first();
+        $singer = (new SingerHelper())->getMusicSingers($id);
 
         $singers = [];
-        foreach ($singer as $item){
+        foreach ($singer as $item) {
             $singers[] = $item->id;
         }
 
-        $data = [
-            'music' => $music,
-            'singers' => $singers,
-            'num_like' => $num_like,
-            'num_comment' => $num_comment,
-            'user_like_it' => $user_like_it,
-            'average_score' => $average_score,
-            'music_url' => "musics/" . $music->id . ".mp3"
-        ];
-
-        $arr = [
-            'data' => $data,
+        return response()->json([
+            'data' => [
+                'music' => $music,
+                'singers' => $singers
+            ],
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ];
-        return response()->json($arr);
+        ]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Helpers\UserHelper;
 use App\Models\Payment;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
@@ -37,8 +38,7 @@ class PaymentController extends Controller
             ], 400);
         }
 
-        $api_token = $request->header("ApiToken");
-        $user = UserController::getUserByToken($api_token);
+        $user = (new UserHelper())->getUserByToken($request->header("ApiToken"));
 
         try {
             $url = Payment::doPayment($user, Payment::PAYMENT_TYPE_SUBSCRIPTION,$subscription->id, $subscription->amount, $callback_url);

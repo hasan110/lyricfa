@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 use App\Models\Notification;
 
 class NotificationSend extends Command
@@ -36,8 +35,7 @@ class NotificationSend extends Command
     /**
      * Execute the console command.
      *
-     * @param  \App\Support\DripEmailer  $drip
-     * @return mixed
+     * @return string
      */
     public function handle()
     {
@@ -45,17 +43,17 @@ class NotificationSend extends Command
 
         foreach($items as $item)
         {
-            $notif = Notification::find($item->notification_id);
-            if(!$notif || $notif->type !== 'all'){
+            $notify = Notification::find($item->notification_id);
+            if(!$notify || $notify->type !== 'all'){
                 DB::table('notification_queue')->where('id' , $item->id)->delete();
                 continue;
             }
 
             $notificationData = [
                 'token' => $item->token,
-                'title' => $notif->title,
-                'body' => $notif->body,
-                'image' => 'https://dl.lyricfa.app/uploads/notifications/'.$notif->id.'.jpg'
+                'title' => $notify->title,
+                'body' => $notify->body,
+                'image' => 'https://dl.lyricfa.app/uploads/notifications/'.$notify->id.'.jpg'
             ];
 
             \App\Services\Notification::send('google_notification' , $notificationData);

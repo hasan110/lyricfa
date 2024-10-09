@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\MusicController;
-use App\Http\Controllers\UserController;
+use App\Http\Helpers\UserHelper;
 use App\Models\Text;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -25,7 +25,7 @@ class TextController extends Controller
 
     public function getTextIncludeWord(Request $request)
     {
-        if (UserController::isUserSubscriptionValid()) {
+        if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken"))) {
 
             $word = $request->word;
             $queryText = '%' . $word . '%'; //implode('%',str_split($word));

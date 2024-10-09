@@ -7,28 +7,26 @@ use Illuminate\Http\Request;
 
 class MerchentZarinPalController extends Controller
 {
-    public function getMerchentId(Request $request){
+    public function getMerchentId()
+    {
         $merchant = [];
         foreach (Setting::where('key', 'like', '%zarinpal%')->get() as $setting) {
             $merchant[$setting->title] = $setting->value;
         }
 
-        if(!empty($merchant)){
-            $response = [
+        if (!empty($merchant)) {
+            return response()->json([
                 'data' => $merchant,
                 'errors' => [],
                 'message' => "مرچنت با موفقیت گرفته شد"
-            ];
-            return response()->json($response);
-        }else{
-            $response = [
+            ]);
+        } else {
+            return response()->json([
                 'data' => null,
                 'errors' => [
                 ],
                 'message' => "مرچنت آیدی وجود ندارد"
-            ];
-            return response()->json($response, 400);
-
+            ], 400);
         }
     }
 
