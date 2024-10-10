@@ -312,18 +312,24 @@ export default {
                 texts:list,
             })
                 .then( () => {
-                    let route_name;
-                    if (this.type === 'music') {
-                        route_name = 'edit_music_text';
-                    } else {
-                        route_name = 'edit_movie_text';
-                    }
-                    this.$router.push({
-                        name:route_name,
-                        params:{
-                            id:this.id
-                        }
-                    });
+                    // let route_name;
+                    // if (this.type === 'music') {
+                    //     route_name = 'edit_music_text';
+                    // } else {
+                    //     route_name = 'edit_movie_text';
+                    // }
+                    // this.$router.push({
+                    //     name:route_name,
+                    //     params:{
+                    //         id:this.id
+                    //     }
+                    // });
+                    this.$fire({
+                        title: "موفق",
+                        text: 'عملیات با موفقیت انجام شد',
+                        type: "success",
+                        timer: 2000
+                    })
                 })
                 .catch( err => {
                     this.edit_loading = false;
