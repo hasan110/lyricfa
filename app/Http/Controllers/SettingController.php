@@ -13,10 +13,8 @@ use App\Models\Slider;
 use App\Models\View;
 use Carbon\Carbon;
 
-
 class SettingController extends Controller
 {
-
     public function getSetting()
     {
         $settings = Setting::query()->where('is_public' , '=' ,1)->get();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\IdiomHelper;
 use App\Models\Idiom;
 use App\Models\IdiomDefinition;
 use App\Models\IdiomDefinitionExample;
@@ -169,6 +170,7 @@ class IdiomController extends Controller
 
         $idiom = new Idiom();
         $idiom->phrase = $request->phrase;
+        $idiom->phrase_base = (new IdiomHelper())->convertPhraseToBase($request->phrase);
         $idiom->base = $request->base;
         $idiom->type = $type;
         $idiom->save();
@@ -240,6 +242,7 @@ class IdiomController extends Controller
             ], 404);
         }
         $idiom->phrase = $request->phrase;
+        $idiom->phrase_base = (new IdiomHelper())->convertPhraseToBase($request->phrase);
         $idiom->base = $request->base;
         $idiom->type = $type;
         $idiom->save();

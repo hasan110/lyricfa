@@ -6,7 +6,6 @@ use App\Models\Idiom;
 use App\Models\Map;
 use App\Models\Word;
 use App\Models\WordEnEn;
-use App\Models\WordEnEnDefinition;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -46,57 +45,67 @@ class IdiomController extends Controller
         $word_base = Map::where('word' , $word)->first();
         if($word_base){
             $word_base = $word_base->ci_base;
-        }
-
-        $seprateds = preg_split("/[- ,?;_\"!.}{)(]+/" , $phrase);
-        $seprated_words = [];
-        foreach ($seprateds as $seprated){
-            if(strlen($seprated) > 0){
-                $seprated_words[] = $seprated;
+        } else {
+            $lowercase_word_base = Map::where('word' , strtolower($word))->first();
+            if($lowercase_word_base){
+                $word_base = $lowercase_word_base->ci_base;
+            } else {
+                $camelcase_word_base = Map::where('word' , ucfirst(strtolower($word)))->first();
+                if($camelcase_word_base){
+                    $word_base = $camelcase_word_base->ci_base;
+                }
             }
         }
 
-        $word_idioms = Idiom::with('idiom_definitions')->where('phrase' , 'regexp' , '\\b'.$word.'\\b')->get();
+        $separateds = preg_split("/[- ,?;_\"!.}{)(]+/" , $phrase);
+        $separated_words = [];
+        foreach ($separateds as $separated){
+            if(strlen($separated) > 0){
+                $separated_words[] = strtolower($separated);
+            }
+        }
+
+        $word_idioms = Idiom::with('idiom_definitions')->where('phrase_base' , 'regexp' , '\\b'.strtolower($word).'\\b')->get();
         if($word_base){
-            $word_base_idioms = Idiom::with('idiom_definitions')->where('phrase' , 'regexp' , '\\b'.$word_base.'\\b')->get();
+            $word_base_idioms = Idiom::with('idiom_definitions')->where('phrase_base' , 'regexp' , '\\b'.strtolower($word_base).'\\b')->get();
         }else{
             $word_base_idioms = [];
         }
 
-        $word_index = array_search($word , $seprated_words);
+        $word_index = array_search(strtolower($word) , $separated_words);
 
-        $words_before_main_word = array_slice($seprated_words , 0 , $word_index);
-        $words_after_main_word = array_slice($seprated_words , $word_index + 1 , count($seprated_words) - $word_index);
+        $words_before_main_word = array_slice($separated_words , 0 , $word_index);
+        $words_after_main_word = array_slice($separated_words , $word_index + 1 , count($separated_words) - $word_index);
 
         foreach ($words_before_main_word as $before_word){
             $before_word_base = Map::where('word' , $before_word)->first();
             if($before_word_base){
                 if (!in_array($before_word_base->ci_base , $words_before_main_word))
-                    $words_before_main_word[] = $before_word_base->ci_base;
+                    $words_before_main_word[] = strtolower($before_word_base->ci_base);
             }
         }
         foreach ($words_after_main_word as $after_word){
             $after_word_base = Map::where('word' , $after_word)->first();
             if($after_word_base){
                 if (!in_array($after_word_base->ci_base , $words_after_main_word))
-                    $words_after_main_word[] = $after_word_base->ci_base;
+                    $words_after_main_word[] = strtolower($after_word_base->ci_base);
             }
         }
 
         foreach ($word_idioms as $key => $word_idiom)
         {
             $word_idiom->rate = 0;
-            $seprated_phrase = preg_split("/[- ,?;_\"!.}{)(]+/" , $word_idiom->phrase);
-            $phrase_seprated_words = [];
-            foreach ($seprated_phrase as $seprated){
-                if(strlen($seprated) > 0 && !in_array($seprated , $phrase_seprated_words)){
-                    $phrase_seprated_words[] = $seprated;
+            $separated_phrase = preg_split("/[- ,?;_\"!.}{)(]+/" , $word_idiom->phrase_base);
+            $phrase_separated_words = [];
+            foreach ($separated_phrase as $separated){
+                if(strlen($separated) > 0 && !in_array($separated , $phrase_separated_words)){
+                    $phrase_separated_words[] = $separated;
                 }
             }
 
-            $main_word_index = array_search($word , $phrase_seprated_words);
-            $words_before = array_slice($phrase_seprated_words , 0 , $main_word_index);
-            $words_after = array_slice($phrase_seprated_words , $main_word_index + 1 , count($phrase_seprated_words) - $main_word_index);
+            $main_word_index = array_search(strtolower($word) , $phrase_separated_words);
+            $words_before = array_slice($phrase_separated_words , 0 , $main_word_index);
+            $words_after = array_slice($phrase_separated_words , $main_word_index + 1 , count($phrase_separated_words) - $main_word_index);
 
             foreach ($words_before as $before_item){
                 if(in_array($before_item , $words_before_main_word)){
@@ -118,17 +127,17 @@ class IdiomController extends Controller
         foreach ($word_base_idioms as $key => $word_base_idiom)
         {
             $word_base_idiom->rate = 0;
-            $base_seprated_phrase = preg_split("/[- ,?;_\"!.}{)(]+/" , $word_base_idiom->phrase);
-            $base_phrase_seprated_words = [];
-            foreach ($base_seprated_phrase as $base_seprated){
-                if(strlen($base_seprated) > 0 && !in_array($base_seprated , $base_phrase_seprated_words)){
-                    $base_phrase_seprated_words[] = $base_seprated;
+            $base_separated_phrase = preg_split("/[- ,?;_\"!.}{)(]+/" , $word_base_idiom->phrase_base);
+            $base_phrase_separated_words = [];
+            foreach ($base_separated_phrase as $base_separated){
+                if(strlen($base_separated) > 0 && !in_array($base_separated , $base_phrase_separated_words)){
+                    $base_phrase_separated_words[] = $base_separated;
                 }
             }
 
-            $base_main_word_index = array_search($word_base , $base_phrase_seprated_words);
-            $base_words_before = array_slice($base_phrase_seprated_words , 0 , $base_main_word_index);
-            $base_words_after = array_slice($base_phrase_seprated_words , $base_main_word_index + 1 , count($base_phrase_seprated_words) - $base_main_word_index);
+            $base_main_word_index = array_search(strtolower($word_base) , $base_phrase_separated_words);
+            $base_words_before = array_slice($base_phrase_separated_words , 0 , $base_main_word_index);
+            $base_words_after = array_slice($base_phrase_separated_words , $base_main_word_index + 1 , count($base_phrase_separated_words) - $base_main_word_index);
 
             foreach ($base_words_before as $base_before_item){
                 if(in_array($base_before_item , $words_before_main_word)){
@@ -187,8 +196,8 @@ class IdiomController extends Controller
             $lower_word_base = strtolower($word_base);
         }
 
-        $get_word = Word::where('english_word' , $word)->orWhere('english_word' , $lower_word)->first();
-        $get_en_word = WordENEN::where('ci_word' , $word)->orWhere('ci_word' , $lower_word)->first();
+        $get_word = Word::where('english_word' , $word)->orWhere('english_word' , $lower_word)->orWhere('english_word' , ucfirst($lower_word))->first();
+        $get_en_word = WordENEN::where('ci_word' , $word)->orWhere('ci_word' , $lower_word)->orWhere('ci_word' , ucfirst($lower_word))->first();
         if($get_word)
         {
             $word_data = [
