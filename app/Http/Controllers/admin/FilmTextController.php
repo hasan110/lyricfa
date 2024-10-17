@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\admin;
 
+use App\Http\Helpers\FilmHelper;
 use App\Models\FilmText;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -19,29 +20,6 @@ class FilmTextController extends Controller
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
         ]);
-    }
-
-    private function getStartTime(string $request)
-    {
-       $hour = (int) substr($request, 0, 2);
-       $min = (int)  substr($request , 3, 2 );
-       $second = (int)  substr($request, 6, 2);
-       $milli =(int)  substr($request, 9, 3);
-
-       $compute = $milli + ($second * 1000) + ($min * 60 * 1000) + ($hour * 60 * 60 * 1000);
-       return $compute;
-    }
-
-    private function getEndTime(string $request)
-    {
-        $hour = (int)  substr($request, 17, 2);
-        $min = (int) substr($request , 20, 2 );
-        $second =(int)  substr($request, 23, 2);
-        $milli = (int) substr($request, 26, 3);
-
-        $compute = $milli + ($second * 1000) + ($min * 60 * 1000) + ($hour * 60 * 60 * 1000);
-
-        return $compute;
     }
 
     public function insertListTexts(Request $request)
@@ -245,8 +223,8 @@ class FilmTextController extends Controller
                 foreach ($value as $key => $data) {
                     if ($key === 0) continue;
                     if ($key === 1) {
-                        $object["start_time"] = $this->getStartTime($data);
-                        $object["end_time"] = $this->getEndTime($data);
+                        $object["start_time"] = (new FilmHelper())->getStartTime($data);
+                        $object["end_time"] = (new FilmHelper())->getEndTime($data);
                     } else  {
                         $object["text_english"] .= strip_tags($data).PHP_EOL;
                     }
@@ -281,8 +259,8 @@ class FilmTextController extends Controller
                 foreach ($block as $block_key => $item) {
                     if ($block_key === 0) continue;
                     if ($block_key === 1) {
-                         $object["start_time"] = $this->getStartTime($item);
-                         $object["end_time"] = $this->getEndTime($item);
+                         $object["start_time"] = (new FilmHelper())->getStartTime($item);
+                         $object["end_time"] = (new FilmHelper())->getEndTime($item);
                         continue;
                     }
                     $array = str_split($item);

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Helpers\FilmHelper;
 use App\Http\Helpers\UserHelper;
 use App\Models\Film;
 use App\Models\FilmText;
+use App\Models\ReplaceRule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -133,6 +135,115 @@ class FilmTextController extends Controller
 
         return response()->json([
             'data' => $result,
+            'errors' => null,
+            'message' => "اطلاعات با موفقیت گرفته شد",
+        ]);
+    }
+
+    public function proccessText(Request $request)
+    {
+        $messages = array(
+            'subtitle_file.required' => 'فایل زیرنویس وارد نشده است.',
+            'subtitle_file.file' => 'زیرنویس باید بصورت فایل باشد.',
+            'subtitle_file.mimetypes' => 'نوع فایل زیرنویس باید srt باشد',
+            'subtitle_file.max' => 'حجم فایل باید زیر یک مگابایت باشد',
+        );
+
+        $validator = Validator::make($request->all(), [
+            'subtitle_file' => 'required|file|max:1000'
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => null,
+                'errors' => $validator->errors(),
+                'message' => "پردازش زیر نویس به مشکل خورد",
+            ], 422);
+        }
+
+        $mime_file = $request->file('subtitle_file')->getClientMimeType();
+        $ext_file = $request->file('subtitle_file')->getClientOriginalExtension();
+        if (!in_array($mime_file , ['application/x-subrip','application/octet-stream']) || $ext_file !== 'srt') {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => "فایل انتخاب شده معتبر نیست؛ لطفا فایل srt (زیرنویس) انتخاب نمایید",
+            ], 400);
+        }
+
+        $mainList = array();
+        $random_id = rand(10000 , 99999);
+        $this->uploadFileById($request->file('subtitle_file'), "film_texts", $random_id);
+
+        $contents = file_get_contents('https://dl.lyricfa.app/uploads/film_texts/' . $random_id . '.srt');
+        $content = explode(PHP_EOL, $contents);
+
+        $replace_rules = ReplaceRule::where('apply_on' , 'english_text')->orderBy('priority')->get();
+
+        $separated_blocks = [];
+        $new_block = [];
+        foreach ($content as $block) {
+            if (strlen(trim($block)) === 0) {
+                $separated_blocks[] = $new_block;
+                $new_block = [];
+                continue;
+            }
+            $new_block[] = $block;
+        }
+
+        $english_characters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+        $persian_characters = ['آ','ا','ب','پ','ت','ث','ج','چ','ح','خ','د','ذ','ر','ز','ژ','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ک','گ','ل','م','ن','و','ه','ی'];
+
+        foreach ($separated_blocks as $block) {
+            $object = array(
+                "text_english" => "",
+                "text_persian" => "",
+                "start_time" => "",
+                "end_time" => "",
+            );
+            foreach ($block as $block_key => $item) {
+                if ($block_key === 0) continue;
+                if ($block_key === 1) {
+                    $object["start_time"] = (new FilmHelper())->getStartTime($item);
+                    $object["end_time"] = (new FilmHelper())->getEndTime($item);
+                    continue;
+                }
+                $array = str_split($item);
+
+                $english_count = 0;
+                $persian_count = 0;
+                foreach($array as $letter) {
+                    if (in_array($letter , $english_characters)) {
+                        $english_count++;
+                    } else if (in_array($letter , $persian_characters)) {
+                        $persian_count++;
+                    }
+                }
+
+                if($english_count > $persian_count) {
+                    if (strlen($object["text_english"])) {
+                        $object["text_english"] = $object["text_english"] . "\n" . (new FilmHelper())->replaceText($item , $replace_rules);
+                    } else {
+                        $object["text_english"] = (new FilmHelper())->replaceText($item , $replace_rules);
+                    }
+                } else {
+                    if (strlen($object["text_persian"])) {
+                        $object["text_persian"] = $object["text_persian"] . "\n" . $item;
+                    } else {
+                        $object["text_persian"] = $item;
+                    }
+                }
+
+            }
+            if ($object["start_time"]) {
+                $mainList[] = $object;
+            }
+        }
+
+        $this->deleteFile('film_texts/' . $random_id . '.srt');
+
+        return response()->json([
+            'data' => $mainList,
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد",
         ]);

@@ -68,6 +68,7 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/get_text_film', [FilmTextController::class, 'getTextList']);
     Route::post('/get_film_texts', [FilmTextController::class, 'getFilmTexts']);
     Route::post('/get_times', [FilmTextController::class, 'getTimesForPagin']);
+    Route::post('/film/proccess-text', [FilmTextController::class, 'proccessText']);
 
     //comment music
     Route::post('/get_comment_music', [CommentMusicController::class, 'getMusicComment']);
