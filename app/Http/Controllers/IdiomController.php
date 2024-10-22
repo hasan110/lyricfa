@@ -189,7 +189,7 @@ class IdiomController extends Controller
         $word = $request->word;
         $lower_word = strtolower($request->word);
 
-        $word_base = Map::where('word' , $word)->first();
+        $word_base = Map::where('word' , $word)->orWhere('word' , $lower_word)->first();
         $lower_word_base = null;
         if($word_base){
             $word_base = $word_base->ci_base;

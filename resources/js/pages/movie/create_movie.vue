@@ -124,8 +124,33 @@
                                 label="توضیحات فیلم"
                             ></v-textarea>
                         </v-col>
-
                     </v-row>
+
+                    <v-row>
+                        <v-col cols="6" class="pb-0">
+                            <v-select
+                                label="زیرنویس فارسی ؟"
+                                :items="[{text: 'دارد',value: 1},{text: 'ندارد',value: 0}]"
+                                v-model="form_data.persian_subtitle"
+                                :error-messages="errors.persian_subtitle"
+                                item-text="text"
+                                item-value="value"
+                                outlined clearable dense
+                            ></v-select>
+                        </v-col>
+                        <v-col cols="6" class="pb-0">
+                            <v-select
+                                label="وضعیت"
+                                :items="[{text: 'فعال',value: 1},{text: 'غیر فعال',value: 0}]"
+                                v-model="form_data.status"
+                                :error-messages="errors.status"
+                                item-text="text"
+                                item-value="value"
+                                outlined clearable dense
+                            ></v-select>
+                        </v-col>
+                    </v-row>
+
                 </v-col>
             </v-row>
 
@@ -179,7 +204,7 @@ export default {
             },
             deep: true
         },
-        form_data: {
+        'form_data.type': {
             handler(){
                 if (this.form_data.type === 5) {
                     this.getSeries()
@@ -192,8 +217,7 @@ export default {
                     this.movie_list_filter.series_id = null;
                     this.getMovieList()
                 }
-            },
-            deep: true
+            }
         }
     },
     methods:{
@@ -210,6 +234,8 @@ export default {
             data.extension ? form.append('extension', data.extension) : '';
             data.priority ? form.append('priority', data.priority) : '';
             data.description ? form.append('description', data.description) : '';
+            form.append('persian_subtitle', data.persian_subtitle ? 1 : 0);
+            form.append('status', data.status ? 1 : 0);
 
             this.$http.post(`movies/create` , form)
                 .then(res => {

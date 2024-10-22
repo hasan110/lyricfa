@@ -175,19 +175,6 @@ export default {
     data: () => ({
         form_data:{},
         word_types:[],
-        english_words_type:[
-            {text:"article" , value:"article"},
-            {text:"prefix" , value:"prefix"},
-            {text:"adverb" , value:"adverb"},
-            {text:"adjective" , value:"adjective"},
-            {text:"interjection" , value:"interjection"},
-            {text:"preposition" , value:"preposition"},
-            {text:"verb" , value:"verb"},
-            {text:"conjunction" , value:"conjunction"},
-            {text:"pronoun" , value:"pronoun"},
-            {text:"abbreviation" , value:"abbreviation"},
-            {text:"suffix" , value:"suffix"}
-        ],
         errors:{},
         loading: false,
     }),

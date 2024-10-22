@@ -70,6 +70,7 @@
                             <th>#</th>
                             <th>فیلم</th>
                             <th>نوع</th>
+                            <th>وضعیت</th>
                             <th>عملیات</th>
                         </tr>
                         </thead>
@@ -101,6 +102,14 @@
                                 </template>
                                 <template v-if="item.type == 2">
                                     سریال
+                                </template>
+                            </td>
+                            <td>
+                                <template v-if="parseInt(item.status) === 1">
+                                    <v-badge color="success" content="فعال"></v-badge>
+                                </template>
+                                <template v-else>
+                                    <v-badge color="warning" content="غیر فعال"></v-badge>
                                 </template>
                             </td>
                             <td>

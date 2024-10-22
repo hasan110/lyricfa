@@ -330,6 +330,8 @@ export default {
                         type: "success",
                         timer: 2000
                     })
+                    this.list = []
+                    this.getList()
                 })
                 .catch( err => {
                     this.edit_loading = false;

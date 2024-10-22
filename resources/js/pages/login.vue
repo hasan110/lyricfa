@@ -13,6 +13,7 @@
                                     v-model="form_data.username"
                                     prepend-icon="mdi-account"
                                     label="نام کاربری"
+                                    @keyup.enter="login()"
                                 ></v-text-field>
                                 <div v-if="errors.username">
                                     <small class="red--text">{{errors.username[0]}}</small>
@@ -22,6 +23,7 @@
                                     prepend-icon="mdi-lock"
                                     label="رمز عبور"
                                     type="password"
+                                    @keyup.enter="login()"
                                 ></v-text-field>
                                 <div v-if="errors.password">
                                     <small class="red--text">{{errors.password[0]}}</small>

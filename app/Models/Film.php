@@ -9,8 +9,10 @@ class Film extends Model
 {
     use HasFactory;
     protected $table = 'films';
-    
+
     protected $casts = [
-        'type'=>'integer'    
+        'type'=>'integer',
+        'persian_subtitle'=>'integer',
+        'status'=>'integer',
     ];
 }

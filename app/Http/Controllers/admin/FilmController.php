@@ -117,6 +117,8 @@ class FilmController extends Controller
         $film->parent = $request->parent;
         $film->extension = $request->extension;
         $film->description = $request->description;
+        $film->persian_subtitle = $request->persian_subtitle ? 1 : 0;
+        $film->status = $request->status ? 1 : 0;
         if (in_array($request->type, [3,4,5])) {
             $film->priority = $request->priority;
         } else {
@@ -193,6 +195,8 @@ class FilmController extends Controller
         $film->parent = $request->parent;
         $film->extension = $request->extension;
         $film->description = $request->description;
+        $film->persian_subtitle = $request->persian_subtitle ? 1 : 0;
+        $film->status = $request->status ? 1 : 0;
         if (in_array($request->type, [3,4,5])) {
             $film->priority = $request->priority;
         } else {
