@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Helpers\Helper;
 use App\Http\Helpers\MusicHelper;
 use App\Http\Helpers\SingerHelper;
 use App\Models\Album;
@@ -48,7 +49,7 @@ class SettingController extends Controller
             $singer_list[] = [
                 'singer' => $singer,
                 'num_like' => $num_like,
-                'readable_like' => $this->getReadableNumber(intval($num_like)),
+                'readable_like' => (new Helper())->readableNumber(intval($num_like)),
                 'num_comment' => 0,
                 'user_like_it' => 0
             ];

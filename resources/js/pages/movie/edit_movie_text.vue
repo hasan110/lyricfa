@@ -230,7 +230,7 @@
                 </v-icon>
             </div>
             <video v-if="movie.id" height="100%" width="100%" ref="vid" controls>
-                <source :src="'https://dl.lyricfa.app/uploads/films/'+movie.id+'.'+movie.extension" type="video/mp4" />
+                <source :src="movie.film_source" type="video/mp4" />
             </video>
         </div>
     </div>

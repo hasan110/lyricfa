@@ -191,12 +191,10 @@ class FilmTextController extends Controller
             ], 400);
         }
 
-        if ($request->hasFile('lyrics')) {
-            $this->uploadFileById($request->lyrics, "film_texts", $request->id);
-        }
+        $upload_path = $this->uploadFile($request->lyrics, "film_texts");
         $just_english = $request->has('just_english') && intval($request->just_english);
 
-        $contents = file_get_contents('https://dl.lyricfa.app/uploads/film_texts/' . $request->id . '.srt');
+        $contents = file_get_contents(config('app.files_base_path').$upload_path);
 
         $content = explode(PHP_EOL, $contents);
 
@@ -295,6 +293,8 @@ class FilmTextController extends Controller
                 }
             }
         }
+
+        $this->deleteFile($upload_path);
 
         $request->film_id = $request->id;
         $this->deleteListTexts($request);

@@ -222,11 +222,10 @@ class TextController extends Controller
                 'message' => " افزودن متن شکست خورد",
             ], 400);
         }
-        if ($request->hasFile('lyrics')) {
-            $this->uploadFileById($request->lyrics, "lyrics", $request->id);
-        }
 
-        $contents = file_get_contents('https://dl.lyricfa.app/uploads/lyrics/' . $request->id . '.srt');
+        $upload_path =  $this->uploadFile($request->lyrics, "lyrics");
+
+        $contents = file_get_contents(config('app.files_base_path').$upload_path);
 
         $name = explode(PHP_EOL, $contents);
 
@@ -269,6 +268,8 @@ class TextController extends Controller
                     break;
             }
         }
+
+        $this->deleteFile($upload_path);
 
         $request->music_id = $request->id;
         $this->deleteListTexts($request);

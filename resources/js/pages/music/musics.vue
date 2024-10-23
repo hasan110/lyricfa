@@ -95,10 +95,11 @@
                             <td>
                                 <div class="d-flex align-center">
 
-                                    <div class="d-flex">
-                                        <template v-if="checkIfImageExists(Url + 'musics_banner/'+item.id+'.jpg')">
-                                            <img :src="Url + 'musics_banner/'+item.id+'.jpg'" class="item-profile m-1">
-                                        </template>
+                                    <div v-if="item.music_poster" class="d-flex ml-4">
+                                        <img :src="item.music_poster" class="item-profile m-1" alt="music poster">
+                                    </div>
+                                    <div v-else class="d-flex ml-4">
+                                        <img src="/assets/img/user.jpg" class="item-profile rounded-circle m-1" alt="music poster alt">
                                     </div>
 
                                     <div class="d-flex flex-column">
@@ -135,7 +136,7 @@
                                 <v-tooltip top>
                                     <template v-slot:activator="{ on, attrs }">
                                         <v-btn color="primary" x-small fab v-bind="attrs" v-on="on">
-                                            <a target="_blank" :href="Url + 'musics/128/' + item.id + '.mp3'" download>
+                                            <a target="_blank" :href="item.music_source" download>
                                                 <v-icon>mdi-download</v-icon>
                                             </a>
                                         </v-btn>

@@ -7,6 +7,7 @@ use App\Http\Controllers\CommentSingerController;
 use App\Http\Controllers\LikeMusicController;
 use App\Http\Controllers\LikeSingerController;
 use App\Http\Helpers\SingerHelper;
+use App\Models\File;
 use App\Models\Music;
 use App\Models\Singer;
 use Illuminate\Http\Request;
@@ -93,7 +94,7 @@ class SingerController extends Controller
         $singer->save();
 
         if ($request->hasFile('image')) {
-            $this->uploadFileById($request->image, "singers", $singer->id);
+            File::createFile($request->image, $singer, Singer::POSTER_FILE_TYPE);
         }
 
         return response()->json([
@@ -146,7 +147,7 @@ class SingerController extends Controller
         $singer->save();
 
         if ($request->hasFile('image')) {
-            $this->uploadFileById($request->image, "singers", $singer->id);
+            File::createFile($request->image, $singer, Singer::POSTER_FILE_TYPE);
         }
 
         return response()->json([

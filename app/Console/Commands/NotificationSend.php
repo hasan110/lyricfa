@@ -53,7 +53,7 @@ class NotificationSend extends Command
                 'token' => $item->token,
                 'title' => $notify->title,
                 'body' => $notify->body,
-                'image' => 'https://dl.lyricfa.app/uploads/notifications/'.$notify->id.'.jpg'
+                'image' => $notify->notification_image
             ];
 
             \App\Services\Notification::send('google_notification' , $notificationData);

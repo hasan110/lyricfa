@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\SingerController;
 use App\Models\Album;
+use App\Models\File;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
@@ -99,7 +100,7 @@ class AlbumController extends Controller
         $album->save();
 
         if ($request->hasFile('image_url')) {
-            $this->uploadFileById($request->image_url, "albums", $album->id);
+            File::createFile($request->image_url, $album, Album::POSTER_FILE_TYPE);
         }
 
         if ($request->singers) {
@@ -146,7 +147,7 @@ class AlbumController extends Controller
         $album->persian_name = $request->album_name_persian;
         $album->save();
         if ($request->hasFile('image_url')) {
-            $this->uploadFileById($request->image_url, "albums", $album->id);
+            File::createFile($request->image_url, $album, Album::POSTER_FILE_TYPE);
         }
         if ($request->singers) {
             $album->singers()->attach(explode(',', $request->singers));

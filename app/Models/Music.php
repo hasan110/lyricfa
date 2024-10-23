@@ -9,6 +9,10 @@ class Music extends Model
 {
     use HasFactory;
     protected $table = 'musics';
+    protected $appends = [self::POSTER_FILE_TYPE,self::SOURCE_FILE_TYPE];
+
+    public const POSTER_FILE_TYPE = 'music_poster';
+    public const SOURCE_FILE_TYPE = 'music_source';
 
     protected $casts = [
         'is_user_request' => 'integer',
@@ -18,6 +22,24 @@ class Music extends Model
         'start_demo' => 'integer',
         'end_demo' => 'integer',
     ];
+
+    public function getMusicPosterAttribute()
+    {
+        $path = File::getFileUploadPath($this->files, self::POSTER_FILE_TYPE);
+        if ($path) {
+            return config('app.files_base_path') . $path;
+        }
+        return null;
+    }
+
+    public function getMusicSourceAttribute()
+    {
+        $path = File::getFileUploadPath($this->files, self::SOURCE_FILE_TYPE);
+        if ($path) {
+            return config('app.files_base_path') . $path;
+        }
+        return null;
+    }
 
     public function text(){
         return $this->hasMany(Text::class, 'id_Music');
@@ -41,5 +63,10 @@ class Music extends Model
     public function views()
     {
         return $this->morphMany(View::class, 'viewable', 'viewable_type', 'viewable_id');
+    }
+
+    public function files()
+    {
+        return $this->morphMany(File::class, 'fileable', 'fileable_type', 'fileable_id');
     }
 }

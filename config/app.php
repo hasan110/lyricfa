@@ -43,6 +43,8 @@ return [
 
     'deployed' => (bool) env('DEPLOYED', false),
 
+    'files_base_path' => env('FILES_BASE_PATH', 'https://dl.lyricfa.app/'),
+
     /*
     |--------------------------------------------------------------------------
     | Application URL

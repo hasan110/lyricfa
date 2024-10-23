@@ -66,9 +66,9 @@
                         <thead>
                         <tr>
                             <th>#</th>
-                            <th>نام</th>
                             <th>شماره تلفن</th>
                             <th>اشتراک</th>
+                            <th>ثبت نام از</th>
                             <th>تاریخ ثبت نام</th>
                             <th>جزییات</th>
                         </tr>
@@ -87,9 +87,16 @@
                             :class="[item.has_subscription ? 'bg-star' : '']"
                         >
                             <td>{{ item.id }}</td>
-                            <td>{{ item.full_name }}</td>
                             <td>{{ item.phone_number }}</td>
                             <td><div v-html="item.expire"></div></td>
+                            <td>
+                                <span style="color: blue" v-if="item.corridor === 'app'">
+                                    اپلیکیشن
+                                </span>
+                                <span style="color: #6200ed" class="text-primary" v-else-if="item.corridor === 'web-app'">
+                                    وب اپ
+                                </span>
+                            </td>
                             <td>{{ item.persian_created_at }}</td>
                             <td>
                                 <v-btn fab small color="teal" dens>

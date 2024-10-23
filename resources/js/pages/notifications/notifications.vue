@@ -88,8 +88,17 @@
                             :key="item.id"
                         >
                             <td>{{ item.id }}</td>
-                            <td>{{item.title}}</td>
-                            <td class="two-line-box">{{item.body}}</td>
+                            <td>
+                                <div class="d-flex align-center">
+                                    <div v-if="item.notification_image" class="d-flex ml-4 py-1">
+                                        <img :src="item.notification_image" class="rounded m-1" width="40" alt="notification image">
+                                    </div>
+                                    <div class="d-flex flex-column">
+                                        <span>{{item.title}}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="two-line-box" :title="item.body">{{item.body}}</td>
                             <td>
                                 <template v-if="item.type === 'all'">گروهی</template>
                                 <template v-else>تکی</template>

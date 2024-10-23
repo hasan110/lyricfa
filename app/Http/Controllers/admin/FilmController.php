@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\File;
 use App\Models\Film;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -89,11 +90,13 @@ class FilmController extends Controller
             'poster.mimes' => 'نوع پوستر باید jpg باشد',
             'poster.dimensions' => 'پوستر باید 750 در 1000 باشد',
             'priority.required_if' => 'شماره قسمت الزامی است',
+            'film_source_upload_path.required' => 'مسیر آپلود فیلم الزامی است',
         );
 
         $validator = Validator::make($request->all(), [
             'english_name' => 'required',
             'persian_name' => 'required',
+            'film_source_upload_path' => 'required',
             'type' => 'required|numeric',
             'parent' => 'required|numeric',
             'extension' => 'required',
@@ -126,11 +129,18 @@ class FilmController extends Controller
         }
         $film->save();
 
-        if ($request->hasFile('film')) {
-            $this->uploadFileById($request->film,"films", $film->id);
-        }
+        // if ($request->hasFile('film')) {
+        //     File::createFile($request->film, $film, Film::SOURCE_FILE_TYPE);
+        // }
+
+        $film->files()->create([
+            'type'=>Film::SOURCE_FILE_TYPE,
+            'upload_path'=>$request->film_source_upload_path,
+            'name'=>basename($request->film_source_upload_path)
+        ]);
+
         if ($request->hasFile('poster')) {
-            $this->uploadFileById($request->poster,"films_banner", $film->id);
+            File::createFile($request->poster, $film, Film::POSTER_FILE_TYPE);
         }
 
         return response()->json([
@@ -205,11 +215,11 @@ class FilmController extends Controller
         $film->save();
 
         if ($request->hasFile('film')) {
-            $this->uploadFileById($request->film,"films", $film->id);
+            File::createFile($request->film, $film, Film::SOURCE_FILE_TYPE);
         }
 
         if ($request->hasFile('poster')) {
-            $this->uploadFileById($request->poster,"films_banner", $film->id);
+            File::createFile($request->poster, $film, Film::POSTER_FILE_TYPE);
         }
 
         return response()->json([

@@ -10,44 +10,35 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    public function uploadFileById($file , $path , $id) : bool
+    public function uploadFile($file , $path) : string
     {
-        if(config('app.deployed')){
-            $path_upload = 'uploads/'. $path;
-            $file_name = $id . '.' .$file->getClientOriginalExtension();
-            $image_path = $path_upload .'/'. $file_name;
-            Storage::disk('ftp')->put($image_path, fopen($file, 'r+'));
-            return $path .'/'. $file_name;
-        }else{
+        $file_name = time() . '-' . Str::random(8) . '.' .$file->getClientOriginalExtension();
+
+        if (config('app.deployed')) {
+            Storage::disk('ftp')->put('uploads/'. $path .'/'. $file_name, fopen($file, 'r+'));
+        } else {
             $file_path = public_path().'/uploads/'.$path;
             File::ensureDirectoryExists($file_path);
-            $file_name = $id . '.' .$file->getClientOriginalExtension();
             $file->move($file_path , $file_name);
-            return true;
         }
-    }
-    public function deleteFile($path)
-    {
-        if(config('app.deployed')){
-            Storage::disk('ftp')->delete('uploads/'.$path);
-        }else{
-            File::delete(public_path().'/uploads/'.$path);
-        }
-        return true;
+
+        return 'uploads/'.$path .'/'. $file_name;
     }
 
-    public function validateData($request , $rules)
+    public function deleteFile($path): bool
     {
-        $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
-            return Response::error(null , null , $validator->errors() , 422);
+        if(config('app.deployed')){
+            Storage::disk('ftp')->delete($path);
+        }else{
+            File::delete(public_path().'/'.$path);
         }
-        return false;
+        return true;
     }
 
     public function Homogenization($text)
@@ -79,20 +70,5 @@ class Controller extends BaseController
         $text = str_replace("۷", "7", $text);
         $text = str_replace("۸", "8", $text);
         return str_replace("۹", "9", $text);
-    }
-
-    public function getReadableNumber(int $num)
-    {
-        switch (true) {
-            case ($num >= 1000 && $num <= 9999):
-                return number_format($num / 1000 , 1) . 'k';
-            case ($num >= 10000 && $num <= 999999):
-                return number_format($num / 1000 , 0) . 'k';
-            case ($num >= 1000000 && $num <= 100000000):
-                return number_format($num / 1000000 , 1) . 'm';
-            case ($num < 1000):
-            default:
-                return $num;
-        }
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use App\Http\Helpers\SingerHelper;
 use App\Http\Helpers\UserHelper;
+use App\Models\File;
 use App\Models\Music;
 use App\Models\Notification;
 use Exception;
@@ -48,7 +49,7 @@ class NotificationController extends Controller
         $notification->save();
 
         if ($request->hasFile('image')) {
-            $this->uploadFileById($request->image,"notifications", $notification->id);
+            File::createFile($request->image, $notification, Notification::IMAGE_FILE_TYPE);
         }
 
         return $notification;
@@ -92,7 +93,7 @@ class NotificationController extends Controller
         $notification->save();
 
         if ($request->hasFile('image')) {
-            $this->uploadFileById($request->image,"notifications", $notification->id);
+            File::createFile($request->image, $notification, Notification::IMAGE_FILE_TYPE);
         }
 
         return $notification;
@@ -178,7 +179,7 @@ class NotificationController extends Controller
                 'token' => (new UserHelper())->getUserById($request->user_id)->fcm_refresh_token,
                 'title' => $notif->title,
                 'body' => $notif->body,
-                'image' => 'https://dl.lyricfa.app/uploads/notifications/'.$notif->id.'.jpg'
+                'image' => $notif->notification_image
             ];
 
             \App\Services\Notification::send('google_notification' , $notificationData);

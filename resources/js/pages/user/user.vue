@@ -13,20 +13,27 @@
 
         <v-container fluid>
             <v-row>
-                <v-col xs="12" sm="6" md="4" lg="4">
+                <v-col xs="12" sm="6" md="6" lg="6">
                     <v-card class=""
-                            max-width="100%"
-                            color="#8B50FF"
-                            dark
-                            hover
+                        max-width="100%"
+                        color="#8B50FF"
+                        dark
+                        hover
                     >
 
-                        <v-card-title>
-                            {{user.phone_number}}
+                        <v-card-title class="ltr-dir justify-center">
+                            +{{user.prefix_code}}{{user.phone_number}}
                         </v-card-title>
 
                         <v-card-subtitle>
                             {{user.fullname}}
+                        </v-card-subtitle>
+                        <v-card-title>
+                             ثبت نام از:
+                            {{ user.corridor }}
+                        </v-card-title>
+                        <v-card-subtitle>
+                            کد معرفی به دیگران: {{user.code_introduce}}
                         </v-card-subtitle>
 
                         <v-card-title>
@@ -46,39 +53,10 @@
                             </v-btn>
 
                         </v-card-title>
-
-                        <!-- <v-card-actions>
-                          <v-btn text>SHARE</v-btn>
-
-                          <v-btn
-                            text
-                          >
-                            Explore
-                          </v-btn>
-
-                          <v-spacer></v-spacer>
-
-                          <v-btn
-                            icon
-                            @click="show = !show"
-                          >
-                            <v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                          </v-btn>
-                        </v-card-actions>
-
-                        <v-expand-transition>
-                          <div v-show="show">
-                            <v-divider></v-divider>
-
-                            <v-card-text>
-                              Army Knowledge Online provides web-based enterprise information services to the United States Army, joint, and Department of Defense customers.
-                            </v-card-text>
-                          </div>
-                        </v-expand-transition> -->
                     </v-card>
                 </v-col>
 
-                <v-col xs="12" sm="6" md="8" lg="8">
+                <v-col xs="12" sm="6" md="6" lg="8">
                     <v-row>
                         <v-col cols="12">
                             <v-text-field
@@ -118,7 +96,7 @@
             <v-row>
 
                 <v-col cols="12">
-                    <h2>اشتراک های خریده شده توسط کاربر</h2>
+                    <h3>اشتراک های خریده شده توسط کاربر</h3>
                 </v-col>
 
                 <v-col cols="12">

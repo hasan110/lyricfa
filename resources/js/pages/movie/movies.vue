@@ -89,7 +89,9 @@
                             <td>{{ item.id }}</td>
                             <td>
                                 <div class="d-flex align-center">
-
+                                    <div v-if="item.film_poster" class="d-flex ml-4 py-1">
+                                        <img :src="item.film_poster" class="rounded m-1" width="40" alt="film poster">
+                                    </div>
                                     <div class="d-flex flex-column">
                                         <span>{{item.english_name}}</span>
                                         <span>{{item.persian_name}}</span>
@@ -180,7 +182,9 @@
                             <td>{{ item.id }}</td>
                             <td>
                                 <div class="d-flex align-center">
-
+                                    <div v-if="item.film_poster" class="d-flex ml-4 py-1">
+                                        <img :src="item.film_poster" class="rounded m-1" width="40" alt="film poster">
+                                    </div>
                                     <div class="d-flex flex-column">
                                         <span>{{item.english_name}}</span>
                                         <span>{{item.persian_name}}</span>
@@ -254,7 +258,9 @@
                             <td>{{ item.id }}</td>
                             <td>
                                 <div class="d-flex align-center">
-
+                                    <div v-if="item.film_poster" class="d-flex ml-4 py-1">
+                                        <img :src="item.film_poster" class="rounded m-1" width="40" alt="film poster">
+                                    </div>
                                     <div class="d-flex flex-column">
                                         <span>{{item.english_name}}</span>
                                         <span>{{item.persian_name}}</span>

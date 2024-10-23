@@ -6,6 +6,7 @@ use App\Http\Helpers\CommentHelper;
 use App\Http\Helpers\LikeHelper;
 use App\Http\Helpers\SingerHelper;
 use App\Models\Admin;
+use App\Models\File;
 use App\Models\Music;
 use App\Models\Singer;
 use Illuminate\Http\Request;
@@ -130,11 +131,11 @@ class MusicController extends Controller
         $music->save();
 
         if ($request->hasFile('music')) {
-            $this->uploadFileById($request->music,"musics/128", $music->id);
+            File::createFile($request->music , $music, Music::SOURCE_FILE_TYPE);
         }
 
         if ($request->hasFile('image')) {
-            $this->uploadFileById($request->image,"musics_banner", $music->id);
+            File::createFile($request->image , $music, Music::POSTER_FILE_TYPE);
         }
 
         if ($request->singers) {
@@ -216,11 +217,11 @@ class MusicController extends Controller
         $music->save();
 
         if ($request->hasFile('music')) {
-            $this->uploadFileById($request->music,"musics/128", $music->id);
+            File::createFile($request->music, $music, Music::SOURCE_FILE_TYPE);
         }
 
         if ($request->hasFile('image')) {
-            $this->uploadFileById($request->image,"musics_banner", $music->id);
+            File::createFile($request->image, $music, Music::POSTER_FILE_TYPE);
         }
 
         if ($request->singers) {

@@ -172,10 +172,9 @@ class FilmTextController extends Controller
         }
 
         $mainList = array();
-        $random_id = rand(10000 , 99999);
-        $this->uploadFileById($request->file('subtitle_file'), "film_texts", $random_id);
+        $upload_path = $this->uploadFile($request->file('subtitle_file'), "film_texts");
 
-        $contents = file_get_contents('https://dl.lyricfa.app/uploads/film_texts/' . $random_id . '.srt');
+        $contents = file_get_contents(config('app.files_base_path').$upload_path);
         $content = explode(PHP_EOL, $contents);
 
         $replace_rules = ReplaceRule::where('apply_on' , 'english_text')->orderBy('priority')->get();
@@ -240,7 +239,7 @@ class FilmTextController extends Controller
             }
         }
 
-        $this->deleteFile('film_texts/' . $random_id . '.srt');
+        $this->deleteFile($upload_path);
 
         return response()->json([
             'data' => $mainList,

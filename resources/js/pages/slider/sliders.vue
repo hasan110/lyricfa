@@ -89,7 +89,7 @@
                             <td>{{ item.id }}</td>
                             <td>
                                 <div v-if="item.banner" class="d-flex align-center">
-                                    <img :src="Url + item.banner" style="width:60px;height:auto">
+                                    <img :src="item.slider_banner" style="width:60px;height:auto">
                                 </div>
                             </td>
                             <td>

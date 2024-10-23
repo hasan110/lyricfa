@@ -151,6 +151,17 @@
                         </v-col>
                     </v-row>
 
+                    <v-row>
+                        <v-col cols="12" class="pb-0">
+                            <v-text-field
+                                label="مسیر کامل آپلود فیلم"
+                                v-model="form_data.film_source_upload_path"
+                                :error-messages="errors.film_source_upload_path"
+                                outlined dense
+                            ></v-text-field>
+                        </v-col>
+                    </v-row>
+
                 </v-col>
             </v-row>
 
@@ -234,6 +245,7 @@ export default {
             data.extension ? form.append('extension', data.extension) : '';
             data.priority ? form.append('priority', data.priority) : '';
             data.description ? form.append('description', data.description) : '';
+            data.film_source_upload_path ? form.append('film_source_upload_path', data.film_source_upload_path) : '';
             form.append('persian_subtitle', data.persian_subtitle ? 1 : 0);
             form.append('status', data.status ? 1 : 0);
 

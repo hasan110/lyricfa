@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\File;
 use App\Models\Singer;
 use App\Models\Slider;
 use App\Models\Text;
@@ -71,7 +72,7 @@ class SliderController extends Controller
         $slider->save();
 
         if ($request->hasFile('banner')) {
-            $this->uploadFileById($request->banner, "sliders", $slider->id);
+            File::createFile($request->banner, $slider, Slider::BANNER_FILE_TYPE);
         }
 
         return response()->json([
@@ -124,7 +125,7 @@ class SliderController extends Controller
         $slider->banner = "sliders/" . $slider->id . '.jpg';
         $slider->save();
         if ($request->hasFile('banner')) {
-            $this->uploadFileById($request->banner, "sliders", $slider->id);
+            File::createFile($request->banner, $slider, Slider::BANNER_FILE_TYPE);
         }
 
         return response()->json([

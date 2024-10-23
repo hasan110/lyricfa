@@ -91,7 +91,10 @@
                         >
                             <td>{{ item.id }}</td>
                             <td>
-                                <img :src="Url + 'albums/'+item.id+'.png'" class="item-profile">
+                                <div v-if="item.album_poster" class="d-flex">
+                                    <img :src="item.album_poster" class="item-profile" alt="album poster">
+                                </div>
+                                <span v-else>ندارد</span>
                             </td>
                             <td>
                                 <div class="d-flex flex-column">

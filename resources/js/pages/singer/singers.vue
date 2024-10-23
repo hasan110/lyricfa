@@ -92,22 +92,26 @@
                         >
                             <td>{{ item.id }}</td>
                             <td>
-                                <img :src="Url + 'singers/'+item.id+'.jpg?v='+Date.now()" class="item-profile">
-                                <td>
-                                    <div class="d-flex flex-column">
-                                        <span>{{item.english_name}}</span>
-                                        <span>{{item.persian_name}}</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="pa-2">لایک : {{ item.num_like }}</span>
-                                    <span class="pa-2">آهنگ ها : {{ item.num_musics }}</span>
-                                </td>
-                                <td>
-                                    <v-btn color="primary" dens @click="getSinger(item.id)">
-                                        ویرایش
-                                    </v-btn>
-                                </td>
+                                <div v-if="item.singer_poster" class="d-flex">
+                                    <img :src="item.singer_poster" class="item-profile rounded-circle" alt="singer poster">
+                                </div>
+                                <span v-else>ندارد</span>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span>{{item.english_name}}</span>
+                                    <span>{{item.persian_name}}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="pa-2">لایک : {{ item.num_like }}</span>
+                                <span class="pa-2">آهنگ ها : {{ item.num_musics }}</span>
+                            </td>
+                            <td>
+                                <v-btn color="primary" dens @click="getSinger(item.id)">
+                                    ویرایش
+                                </v-btn>
+                            </td>
                         </tr>
                         </tbody>
                     </template>
