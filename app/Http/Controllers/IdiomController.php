@@ -196,7 +196,13 @@ class IdiomController extends Controller
             $lower_word_base = strtolower($word_base);
         }
 
-        $get_word = Word::where('english_word' , $word)->orWhere('english_word' , $lower_word)->orWhere('english_word' , ucfirst($lower_word))->first();
+        $get_word = Word::where('english_word' , $word)->first();
+        if (!$get_word) {
+            $get_word = Word::where('english_word' , $lower_word)->first();
+            if (!$get_word) {
+                $get_word = Word::where('english_word' , ucfirst($lower_word))->first();;
+            }
+        }
         $get_en_word = WordENEN::where('ci_word' , $word)->orWhere('ci_word' , $lower_word)->orWhere('ci_word' , ucfirst($lower_word))->first();
         if($get_word)
         {
