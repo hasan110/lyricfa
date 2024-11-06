@@ -175,6 +175,7 @@ class FilmTextController extends Controller
         $upload_path = $this->uploadFile($request->file('subtitle_file'), "film_texts");
 
         $contents = file_get_contents(config('app.files_base_path').$upload_path);
+        $contents = strip_tags($contents);
         $content = explode(PHP_EOL, mb_convert_encoding($contents, 'UTF-8', 'UTF-8'));
 
         $replace_rules = ReplaceRule::where('apply_on' , 'english_text')->orderBy('priority')->get();

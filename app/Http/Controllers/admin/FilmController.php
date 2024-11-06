@@ -90,13 +90,13 @@ class FilmController extends Controller
             'poster.mimes' => 'نوع پوستر باید jpg باشد',
             'poster.dimensions' => 'پوستر باید 750 در 1000 باشد',
             'priority.required_if' => 'شماره قسمت الزامی است',
-            'film_source_upload_path.required' => 'مسیر آپلود فیلم الزامی است',
+            'film_source_upload_path.required_if' => 'مسیر آپلود فیلم الزامی است',
         );
 
         $validator = Validator::make($request->all(), [
             'english_name' => 'required',
             'persian_name' => 'required',
-            'film_source_upload_path' => 'required',
+            'film_source_upload_path' => 'required_if:type,1,4,5',
             'type' => 'required|numeric',
             'parent' => 'required|numeric',
             'extension' => 'required',
@@ -133,11 +133,13 @@ class FilmController extends Controller
         //     File::createFile($request->film, $film, Film::SOURCE_FILE_TYPE);
         // }
 
-        $film->files()->create([
-            'type'=>Film::SOURCE_FILE_TYPE,
-            'upload_path'=>$request->film_source_upload_path,
-            'name'=>basename($request->film_source_upload_path)
-        ]);
+        if ($request->film_source_upload_path) {
+            $film->files()->create([
+                'type'=>Film::SOURCE_FILE_TYPE,
+                'upload_path'=>$request->film_source_upload_path,
+                'name'=>basename($request->film_source_upload_path)
+            ]);
+        }
 
         if ($request->hasFile('poster')) {
             File::createFile($request->poster, $film, Film::POSTER_FILE_TYPE);
