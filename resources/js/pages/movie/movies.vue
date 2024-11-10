@@ -70,6 +70,7 @@
                             <th>#</th>
                             <th>فیلم</th>
                             <th>نوع</th>
+                            <th>سطح</th>
                             <th>وضعیت</th>
                             <th>عملیات</th>
                         </tr>
@@ -104,6 +105,14 @@
                                 </template>
                                 <template v-if="item.type == 2">
                                     سریال
+                                </template>
+                            </td>
+                            <td>
+                                <span v-if="item.level" :style="{color:levelColor(item.level)}">
+                                    {{item.level}}
+                                </span>
+                                <template v-else>
+                                    _
                                 </template>
                             </td>
                             <td>
@@ -147,7 +156,7 @@
 
         <v-dialog
             transition="dialog-top-transition"
-            max-width="550"
+            max-width="750"
             v-model="chlids_modal"
         >
             <v-card>
@@ -171,6 +180,8 @@
                             <th>#</th>
                             <th>عنوان</th>
                             <th>نوع</th>
+                            <th>سطح</th>
+                            <th>وضعیت</th>
                             <th>عملیات</th>
                         </tr>
                         </thead>
@@ -200,6 +211,22 @@
                                 </template>
                             </td>
                             <td>
+                                <span v-if="item.level" :style="{color:levelColor(item.level)}">
+                                    {{item.level}}
+                                </span>
+                                <template v-else>
+                                    _
+                                </template>
+                            </td>
+                            <td>
+                                <template v-if="parseInt(item.status) === 1">
+                                    <v-badge color="success" content="فعال"></v-badge>
+                                </template>
+                                <template v-else>
+                                    <v-badge color="warning" content="غیر فعال"></v-badge>
+                                </template>
+                            </td>
+                            <td>
                                 <v-btn color="primary" dens small>
                                     <router-link :to="{ name:'edit_movie' , params:{ id:item.id } }">
                                         ویرایش
@@ -224,7 +251,7 @@
 
         <v-dialog
             transition="dialog-top-transition"
-            max-width="550"
+            max-width="750"
             v-model="sub_chlids_modal"
         >
             <v-card>
@@ -247,6 +274,8 @@
                         <tr>
                             <th>#</th>
                             <th>عنوان</th>
+                            <th>سطح</th>
+                            <th>وضعیت</th>
                             <th>عملیات</th>
                         </tr>
                         </thead>
@@ -266,6 +295,22 @@
                                         <span>{{item.persian_name}}</span>
                                     </div>
                                 </div>
+                            </td>
+                            <td>
+                                <span v-if="item.level" :style="{color:levelColor(item.level)}">
+                                    {{item.level}}
+                                </span>
+                                <template v-else>
+                                    _
+                                </template>
+                            </td>
+                            <td>
+                                <template v-if="parseInt(item.status) === 1">
+                                    <v-badge color="success" content="فعال"></v-badge>
+                                </template>
+                                <template v-else>
+                                    <v-badge color="warning" content="غیر فعال"></v-badge>
+                                </template>
                             </td>
                             <td>
                                 <v-btn color="primary" dens small>

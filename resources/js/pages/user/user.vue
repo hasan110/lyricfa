@@ -13,18 +13,11 @@
 
         <v-container fluid>
             <v-row>
-                <v-col xs="12" sm="6" md="6" lg="6">
-                    <v-card class=""
-                        max-width="100%"
-                        color="#8B50FF"
-                        dark
-                        hover
-                    >
-
+                <v-col cols="12" sm="12" md="6" lg="4">
+                    <v-card max-width="100%" color="#8B50FF" dark>
                         <v-card-title class="ltr-dir justify-center">
                             +{{user.prefix_code}}{{user.phone_number}}
                         </v-card-title>
-
                         <v-card-subtitle>
                             {{user.fullname}}
                         </v-card-subtitle>
@@ -35,7 +28,6 @@
                         <v-card-subtitle>
                             کد معرفی به دیگران: {{user.code_introduce}}
                         </v-card-subtitle>
-
                         <v-card-title>
                             وضعیت اشتراک :
                             <template v-if="user.days_remain">
@@ -44,19 +36,29 @@
                             <template v-else>
                                 منقضی شده
                             </template>
-
                         </v-card-title>
                         <v-card-title>
-
                             <v-btn color="success" dens @click="create_notif_modal = true">
                                 ارسال نوتیفیکیشن
                             </v-btn>
-
                         </v-card-title>
                     </v-card>
                 </v-col>
+                <v-col cols="12" sm="12" md="6" lg="4">
+                    <v-card max-width="100%" color="#f1f1f1">
 
-                <v-col xs="12" sm="6" md="6" lg="8">
+                        <v-card-title class="justify-space-between">
+                            <div>سطح</div>
+                            <div>
+                                <span v-if="user.level" :style="{color: levelColor(user.level)}">
+                                    {{user.level}}
+                                </span>
+                                <span v-else>نامشخص</span>
+                            </div>
+                        </v-card-title>
+                    </v-card>
+                </v-col>
+                <v-col cols="12" sm="12" md="6" lg="4">
                     <v-row>
                         <v-col cols="12">
                             <v-text-field
@@ -86,19 +88,13 @@
                             </v-btn>
                         </v-col>
                     </v-row>
-                    <div>
-
-
-                    </div>
                 </v-col>
             </v-row>
 
             <v-row>
-
                 <v-col cols="12">
                     <h3>اشتراک های خریده شده توسط کاربر</h3>
                 </v-col>
-
                 <v-col cols="12">
                     <v-simple-table
                         fixed-header
@@ -141,8 +137,6 @@
             </v-row>
         </v-container>
 
-
-
         <v-dialog
             transition="dialog-top-transition"
             max-width="600"
@@ -153,13 +147,10 @@
                     color="accent"
                     dark
                 >ارسال نوتیفیکیشن</v-toolbar>
-                <v-card-text>
-
+                <v-card-text class="pa-2">
                     <v-container>
-
                         <v-row class="pt-3">
-
-                            <v-col cols="6" class="pb-0">
+                            <v-col cols="12" sm="12" md="6" class="pb-0">
                                 <v-text-field
                                     v-model="form_data_notif.title"
                                     outlined
@@ -168,8 +159,7 @@
                                     label="عنوان"
                                 ></v-text-field>
                             </v-col>
-
-                            <v-col cols="6" class="pb-0">
+                            <v-col cols="12" sm="12" md="6" class="pb-0">
                                 <v-file-input
                                     v-model="form_data_notif.image"
                                     outlined
@@ -180,13 +170,8 @@
                                     persistent-hint hint="فرمت تصویر باید jpg و سایز آن باید (200 تا 500) در (200 تا 500) باشد"
                                 ></v-file-input>
                             </v-col>
-
-
                         </v-row>
-
                         <v-row class="pt-3">
-
-
                             <v-col cols="12" class="pb-0">
                                 <v-textarea
                                     v-model="form_data_notif.body"
@@ -197,9 +182,7 @@
                                 ></v-textarea>
                             </v-col>
                         </v-row>
-
                     </v-container>
-
                 </v-card-text>
 
                 <v-card-actions class="justify-end">

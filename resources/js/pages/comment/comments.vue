@@ -213,6 +213,7 @@ export default {
         change_status_modal:false,
         fetch_loading:false,
         loading:false,
+        comment_status : 0
     }),
     watch:{
         current_page(){

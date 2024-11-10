@@ -75,6 +75,7 @@
                             <th>#</th>
                             <th>لغت پایه</th>
                             <th>اصطلاح</th>
+                            <th>سطح</th>
                             <th>نوع</th>
                             <th>عملیات</th>
                         </tr>
@@ -94,6 +95,13 @@
                             <td>{{ item.id }}</td>
                             <td>{{ item.base }}</td>
                             <td>{{ item.phrase }}</td>
+                            <td style="width: 60px;" class="en-font">
+                                <v-select
+                                    v-model="item.level" outlined
+                                    :items="levels" dense hide-details
+                                    @change="updateLevel(item.id, item.level)"
+                                ></v-select>
+                            </td>
                             <td>
                                 <template v-if="parseInt(item.type) === 1">عبارت دو بخشی</template>
                                 <template v-else-if="parseInt(item.type) === 2">کالوکیشن</template>
@@ -162,6 +170,9 @@ export default {
                 .catch( () => {
                     this.fetch_loading = false
                 });
+        },
+        updateLevel(id, level){
+            this.$http.post(`idioms/update_level?` , {id,level})
         },
         Search(e){
             if (e.keyCode === 13) {

@@ -9,64 +9,18 @@ use App\Models\IdiomDefinition;
 use App\Models\IdiomDefinitionExample;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Exception;
 
 class IdiomController extends Controller
 {
-    public function getIdiomsWord(Request $request)
-    {
-        $word = $request->word;
-        $get_idioms = Idiom::where('base', $word)->get();
-
-        if (!$get_idioms) {
-            return response()->json([
-                'data' => null,
-                'errors' => [],
-                'message' => "هیچ کلمه ای پیدا نشد",
-            ]);
-        } else {
-            return response()->json([
-                'data' => $get_idioms,
-                'errors' => [],
-                'message' => "اطلاعات با موفقیت گرفته شد",
-            ]);
-        }
-
-    }
-
-
-    public function searchIdiom(Request $request)
-    {
-        $idioms = Idiom::orderBy('id', 'DESC')->
-        where('phrase', 'LIKE', "%{$request->search_text}%")->
-        orWhere('definition', 'LIKE', "%{$request->search_text}%")->
-        paginate(25);
-
-
-        foreach ($idioms as $index => $item) {
-            $rooms = json_decode($item->definition, true);
-
-            $idioms[$index]->parse = $rooms;
-        }
-
-        return response()->json([
-            'data' => $idioms,
-            'errors' => [],
-            'message' => "اطلاعات با موفقیت گرفته شد",
-        ]);
-
-    }
-
     public static function getIdiomById(int $id)
     {
         $idiom =  Idiom::where('id', $id)->first();
 
-            $rooms = json_decode($idiom->definition, true);
+        $rooms = json_decode($idiom->definition, true);
 
-            $idiom->parse = $rooms;
-            return $idiom;
+        $idiom->parse = $rooms;
+        return $idiom;
     }
-
 
     public function idiomsList(Request $request)
     {
@@ -139,17 +93,22 @@ class IdiomController extends Controller
     {
         $messages = array(
             'base.required' => 'لغت پایه اصطلاح نمی تواند خالی باشد',
+            'level.required' => 'سطح باید انتخاب شود',
+            'level.in' => 'سطح باید یکی از موارد: A1, A2, B1, B2, C1, C2 باشد',
             'phrase.required' => 'متن اصطلاح نمی تواند خالی باشد',
             'phrase.unique' => 'این اصطلاح قبلا ثبت شده و تکراری است',
             'idiom_definitions.*.definition.filled' => 'معنی اصطلاح نمی تواند خالی باشد.',
+            'idiom_definitions.*.level.filled' => 'سطح معنی لغت نمی تواند خالی باشد.',
             'idiom_definitions.*.idiom_definition_examples.*.definition.filled' => 'معنی مثال اصطلاح نمی تواند خالی باشد.',
             'idiom_definitions.*.idiom_definition_examples.*.phrase.filled' => 'عبارت مثال اصطلاح نمی تواند خالی باشد.',
         );
 
         $validator = Validator::make($request->all(), [
             'phrase' => 'required|unique:idioms',
+            'level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'base' => 'required',
             'idiom_definitions.*.definition' => 'filled',
+            'idiom_definitions.*.level' => 'filled',
             'idiom_definitions.*.idiom_definition_examples.*.definition' => 'filled',
             'idiom_definitions.*.idiom_definition_examples.*.phrase' => 'filled',
         ], $messages);
@@ -170,6 +129,7 @@ class IdiomController extends Controller
 
         $idiom = new Idiom();
         $idiom->phrase = $request->phrase;
+        $idiom->level = $request->level;
         $idiom->phrase_base = (new IdiomHelper())->convertPhraseToBase($request->phrase);
         $idiom->base = $request->base;
         $idiom->type = $type;
@@ -180,6 +140,7 @@ class IdiomController extends Controller
             $idiom_definition = new IdiomDefinition();
             $idiom_definition->idiom_id = $idiom->id;
             $idiom_definition->definition = $definition['definition'];
+            $idiom_definition->level = $definition['level'];
             $idiom_definition->save();
 
             foreach ($definition['idiom_definition_examples'] as $definition_example)
@@ -204,8 +165,11 @@ class IdiomController extends Controller
         $messages = array(
             'id.required' => 'شناسه اصطلاح نمی تواند خالی باشد',
             'base.required' => 'لغت پایه اصطلاح نمی تواند خالی باشد',
+            'level.required' => 'سطح باید انتخاب شود',
+            'level.in' => 'سطح باید یکی از موارد: A1, A2, B1, B2, C1, C2 باشد',
             'phrase.required' => 'متن اصطلاح نمی تواند خالی باشد',
             'idiom_definitions.*.definition.filled' => 'معنی اصطلاح نمی تواند خالی باشد.',
+            'idiom_definitions.*.level.filled' => 'سطح معنی لغت نمی تواند خالی باشد.',
             'idiom_definitions.*.idiom_definition_examples.*.definition.filled' => 'معنی مثال اصطلاح نمی تواند خالی باشد.',
             'idiom_definitions.*.idiom_definition_examples.*.phrase.filled' => 'عبارت مثال اصطلاح نمی تواند خالی باشد.',
         );
@@ -213,8 +177,10 @@ class IdiomController extends Controller
         $validator = Validator::make($request->all(), [
             'id' => 'required',
             'phrase' => 'required',
+            'level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'base' => 'required',
             'idiom_definitions.*.definition' => 'filled',
+            'idiom_definitions.*.level' => 'filled',
             'idiom_definitions.*.idiom_definition_examples.*.definition' => 'filled',
             'idiom_definitions.*.idiom_definition_examples.*.phrase' => 'filled',
         ], $messages);
@@ -242,6 +208,7 @@ class IdiomController extends Controller
             ], 404);
         }
         $idiom->phrase = $request->phrase;
+        $idiom->level = $request->level;
         $idiom->phrase_base = (new IdiomHelper())->convertPhraseToBase($request->phrase);
         $idiom->base = $request->base;
         $idiom->type = $type;
@@ -260,6 +227,7 @@ class IdiomController extends Controller
             $idiom_definition = new IdiomDefinition();
             $idiom_definition->idiom_id = $idiom->id;
             $idiom_definition->definition = $definition['definition'];
+            $idiom_definition->level = $definition['level'];
             $idiom_definition->save();
 
             foreach ($definition['idiom_definition_examples'] as $definition_example)
@@ -271,6 +239,46 @@ class IdiomController extends Controller
                 $idiom_definition_example->save();
             }
         }
+
+        return response()->json([
+            'data' => $idiom,
+            'errors' => null,
+            'message' => "اصطلاح باموفقیت ویرایش شد"
+        ]);
+    }
+
+    public function updateIdiomLevel(Request $request)
+    {
+        $messages = array(
+            'id.required' => 'شناسه اصطلاح نمی تواند خالی باشد',
+            'level.required' => 'سطح باید انتخاب شود',
+            'level.in' => 'سطح باید یکی از موارد: A1, A2, B1, B2, C1, C2 باشد',
+        );
+
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+            'level' => 'required|in:A1,A2,B1,B2,C1,C2',
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => null,
+                'errors' => $validator->errors(),
+                'message' => "ویرایش اصطلاح با مشکل اعتبارسنجی مواجه شد",
+            ], 422);
+        }
+
+        $idiom = Idiom::with('idiom_definitions')->find($request->id);
+        if (!$idiom) {
+            return response()->json([
+                'data' => null,
+                'errors' => null,
+                'message' => " اصطلاح یافت نشد.",
+            ], 404);
+        }
+
+        $idiom->level = $request->level;
+        $idiom->save();
 
         return response()->json([
             'data' => $idiom,

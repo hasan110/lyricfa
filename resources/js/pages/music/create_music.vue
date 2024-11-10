@@ -17,6 +17,7 @@
                 <v-col cols="12" sm="6" class="pb-0">
                     <v-text-field
                         v-model="form_data.english_title"
+                        :error-messages="errors.english_title"
                         outlined
                         clearable
                         dense
@@ -26,6 +27,7 @@
                 <v-col cols="12" sm="6" class="pb-0">
                     <v-text-field
                         v-model="form_data.persian_title"
+                        :error-messages="errors.persian_title"
                         outlined
                         clearable
                         dense
@@ -45,7 +47,16 @@
                             item-text="english_name"
                             label="انتخاب خواننده (ها)"
                             :search-input.sync="singers_filter.search_key"
+                            :error-messages="errors.singers"
                         ></v-autocomplete>
+                    </v-col>
+                    <v-col cols="12" sm="6" class="pb-0">
+                        <v-select
+                            v-model="form_data.level"
+                            outlined :items="levels"
+                            dense label="سطح آهنگ"
+                            :error-messages="errors.level"
+                        ></v-select>
                     </v-col>
                 </v-row>
             </div>
@@ -66,12 +77,10 @@
                             <v-text-field
                                 v-model="form_data.date_publication"
                                 label="تاریخ انتشار"
-                                outlined
-                                dense
+                                :error-messages="errors.date_publication"
+                                outlined dense readonly
                                 prepend-icon="mdi-calendar"
-                                readonly
-                                v-bind="attrs"
-                                v-on="on"
+                                v-bind="attrs" v-on="on"
                             ></v-text-field>
                         </template>
                         <v-date-picker
@@ -85,6 +94,7 @@
                     <v-text-field
                         v-model="form_data.album_id"
                         outlined
+                        :error-messages="errors.album_id"
                         dense
                         label="شناسه آلبوم"
                     ></v-text-field>
@@ -102,6 +112,7 @@
                     درجه سختی
                     <v-radio-group
                         v-model="form_data.hardest_degree"
+                        :error-messages="errors.hardest_degree"
                         row
                     >
                         <v-radio
@@ -126,7 +137,7 @@
                     وضعیت
                     <v-radio-group
                         v-model="form_data.status"
-                        row
+                        :error-messages="errors.status" row
                     >
                         <v-radio
                             label="فعال"
@@ -149,9 +160,8 @@
             <v-row>
                 <v-col cols="12" sm="6" class="pb-0">
                     <v-file-input
-                        show-size
-                        dense
-                        outlined
+                        show-size dense outlined
+                        :error-messages="errors.image"
                         label="تصویر بنر"
                         v-model="form_data.image" persistent-hint
                         hint="فرمت تصویر باید jpg و سایز آن 300*300 باشد"
@@ -160,9 +170,8 @@
                 </v-col>
                 <v-col cols="12" sm="6" class="pb-0">
                     <v-file-input
-                        show-size
-                        dense
-                        outlined
+                        show-size dense outlined
+                        :error-messages="errors.music"
                         label="فایل موزیک"
                         v-model="form_data.music"
                         accept="audio/*"
@@ -178,16 +187,16 @@
                 <v-col cols="6" sm="3" class="pb-0">
                     <v-text-field
                         v-model="form_data.start_demo"
-                        outlined
-                        dense
+                        :error-messages="errors.start_demo"
+                        outlined dense
                         label="دموی آهنگ از"
                     ></v-text-field>
                 </v-col>
                 <v-col cols="6" sm="3" class="pb-0">
                     <v-text-field
                         v-model="form_data.end_demo"
-                        outlined
-                        dense
+                        :error-messages="errors.end_demo"
+                        outlined dense
                         label="دموی آهنگ تا"
                     ></v-text-field>
                 </v-col>
@@ -251,7 +260,8 @@ export default {
             this.errors.image = null
         },
         saveMusic(){
-            this.$store.commit('SHOW_APP_LOADING' , 2)
+            this.loading = true;
+            this.errors = {};
             const d = new FormData();
             const x = this.form_data;
 
@@ -265,6 +275,7 @@ export default {
             d.append('hardest_degree', parseInt(x.hardest_degree));
             x.image ? d.append('image', x.image) : '';
             x.music ? d.append('music', x.music) : '';
+            x.level ? d.append('level', x.level) : '';
             d.append('start_demo', x.start_demo);
             d.append('end_demo', x.end_demo);
 
@@ -285,19 +296,22 @@ export default {
                         type: "success",
                         timer: 5000
                     })
-                    this.$store.commit('SHOW_APP_LOADING' , 0)
+                    this.loading = false;
                     this.$router.push({name:'musics'})
 
                 })
                 .catch( err => {
-                    this.$store.commit('SHOW_APP_LOADING' , 0)
+                    this.loading = false;
                     const e = err.response.data
-                    this.$fire({
-                        title: "خطا",
-                        text: e.message,
-                        type: "error",
-                        timer: 5000
-                    })
+                    if(e.errors){ this.errors = e.errors }
+                    else if(e.message){
+                        this.$fire({
+                            title: "خطا",
+                            text: e.message,
+                            type: "error",
+                            timer: 5000
+                        })
+                    }
                 });
         }
     },

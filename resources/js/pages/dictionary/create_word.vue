@@ -31,19 +31,29 @@
                     <v-col cols="12" xs="12" sm="6" class="pb-0">
                         <v-text-field
                             v-model="form_data.pronunciation"
+                            :error-messages="errors.pronunciation"
                             outlined
                             clearable
                             dense
                             label="تلفظ"
                         ></v-text-field>
                     </v-col>
-                    <v-col cols="12" class="pb-0">
+                    <v-col cols="12" xs="12" sm="6" class="pb-0">
                         <v-select
                             v-model="form_data.word_type"
+                            :error-messages="errors.word_type"
                             outlined
                             :items="word_types"
                             dense multiple
                             label="نوع لغت"
+                        ></v-select>
+                    </v-col>
+                    <v-col cols="12" xs="12" sm="6" class="pb-0">
+                        <v-select
+                            v-model="form_data.level"
+                            outlined label="سطح"
+                            :error-messages="errors.level"
+                            :items="levels" dense
                         ></v-select>
                     </v-col>
                 </v-row>
@@ -62,15 +72,23 @@
                 <v-container>
                     <div v-for="(item , key) in form_data.definitions" :key="key">
                         <v-row>
-                            <v-col cols="12" xs="12" sm="12" class="pb-0">
+                            <v-col cols="12" sm="12" md="8" class="pb-0">
                                 <v-text-field
                                     v-model="item.definition"
                                     outlined clearable
-                                    append-outer-icon="mdi-delete"
-                                    @click:append-outer="removeDefinition(1 , key)"
                                     :error-messages="errors[`definitions.${key}.definition`] ? errors[`definitions.${key}.definition`] : null"
                                     dense :label="'معنی ' + (key + 1)"
                                 ></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="12" md="4" class="pb-0">
+                                <v-select
+                                    v-model="item.level" outlined
+                                    append-outer-icon="mdi-delete"
+                                    :items="levels"
+                                    @click:append-outer="removeDefinition(1 , key)"
+                                    :error-messages="errors[`definitions.${key}.level`] ? errors[`definitions.${key}.level`] : null"
+                                    dense :label="'سطح معنی ' + (key + 1)"
+                                ></v-select>
                             </v-col>
                         </v-row>
                         <div>
@@ -170,9 +188,11 @@ export default {
     data: () => ({
         form_data:{
             english_word:'',
+            level:'',
             definitions: [
                 {
                     definition:'',
+                    level:'',
                     definition_examples: []
                 }
             ],

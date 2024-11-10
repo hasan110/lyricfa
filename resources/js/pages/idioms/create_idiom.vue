@@ -36,7 +36,7 @@
                     </v-col>
                 </v-row>
                 <v-row>
-                    <v-col cols="12" xs="12" sm="12" class="pb-0">
+                    <v-col cols="12" sm="12" md="6" class="pb-0">
                         <v-select
                             :items="[
                                 {
@@ -76,6 +76,15 @@
                             dense label="نوع"
                         ></v-select>
                     </v-col>
+                    <v-col cols="12" sm="12" md="6" class="pb-0">
+                        <v-select
+                            :items="levels"
+                            v-model="form_data.level"
+                            outlined
+                            :error-messages="errors.level"
+                            dense label="سطح"
+                        ></v-select>
+                    </v-col>
                 </v-row>
                 <hr class="mt-3">
                 <div class="d-flex align-center justify-space-between pa-2">
@@ -92,15 +101,23 @@
                 <v-container>
                     <div v-for="(item , key) in form_data.idiom_definitions" :key="key">
                         <v-row>
-                            <v-col cols="12" xs="12" sm="12" class="pb-0">
+                            <v-col cols="12" sm="12" md="8" class="pb-0">
                                 <v-textarea
                                     v-model="item.definition"
                                     outlined clearable rows="3"
-                                    append-outer-icon="mdi-delete"
-                                    @click:append-outer="removeDefinition(key)"
                                     :error-messages="errors[`idiom_definitions.${key}.definition`] ? errors[`idiom_definitions.${key}.definition`] : null"
                                     dense :label="'معنی ' + (key + 1)"
                                 ></v-textarea>
+                            </v-col>
+                            <v-col cols="12" sm="12" md="4" class="pb-0">
+                                <v-select
+                                    :items="levels"
+                                    v-model="item.level" outlined
+                                    append-outer-icon="mdi-delete"
+                                    @click:append-outer="removeDefinition(key)"
+                                    :error-messages="errors[`idiom_definitions.${key}.level`] ? errors[`idiom_definitions.${key}.level`] : null"
+                                    dense :label="'سطح معنی ' + (key + 1)"
+                                ></v-select>
                             </v-col>
                         </v-row>
                         <div>
@@ -158,6 +175,7 @@ export default {
             idiom_definitions: [
                 {
                     definition:'',
+                    level:'',
                     idiom_definition_examples: []
                 }
             ]
@@ -174,7 +192,7 @@ export default {
             return true;
         },
         removeDefinition(definition_key){
-            if(this.form_data.idiom_definitions.length == 1){
+            if(this.form_data.idiom_definitions.length === 1){
                 alert('حداقل یک معنی باید تعریف شود');
                 return false;
             }

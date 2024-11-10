@@ -96,7 +96,7 @@
                             <td>{{ item.id }}</td>
                             <td>{{ item.english_name }}</td>
                             <td>{{ item.persian_name }}</td>
-                            <td>{{ item.level }}</td>
+                            <td :style="{color:levelColor(item.level)}">{{ item.level }}</td>
                             <td>
                                 <v-btn color="primary" dark dens :to="{name:'edit_grammer' , params:{id : item.id}}">
                                     ویرایش

@@ -128,7 +128,16 @@
                     </v-row>
 
                     <v-row>
-                        <v-col cols="6" class="pb-0">
+                        <v-col cols="12" sm="12" md="4" class="pb-0">
+                            <v-select
+                                label="سطح"
+                                :items="levels"
+                                v-model="form_data.level"
+                                :error-messages="errors.level"
+                                outlined dense
+                            ></v-select>
+                        </v-col>
+                        <v-col cols="12" sm="12" md="4" class="pb-0">
                             <v-select
                                 label="زیرنویس فارسی ؟"
                                 :items="[{text: 'دارد',value: 1},{text: 'ندارد',value: 0}]"
@@ -139,7 +148,7 @@
                                 outlined clearable dense
                             ></v-select>
                         </v-col>
-                        <v-col cols="6" class="pb-0">
+                        <v-col cols="12" sm="12" md="4" class="pb-0">
                             <v-select
                                 label="وضعیت"
                                 :items="[{text: 'فعال',value: 1},{text: 'غیر فعال',value: 0}]"
@@ -258,6 +267,7 @@ export default {
             data.priority ? form.append('priority', data.priority) : '';
             data.extension ? form.append('extension', data.extension) : '';
             data.description ? form.append('description', data.description) : '';
+            data.level ? form.append('level', data.level) : '';
             form.append('persian_subtitle', data.persian_subtitle ? 1 : 0);
             form.append('status', data.status ? 1 : 0);
 

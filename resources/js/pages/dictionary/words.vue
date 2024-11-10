@@ -78,6 +78,7 @@
                         <tr>
                             <th>#</th>
                             <th>لغت</th>
+                            <th>سطح</th>
                             <th>نوع</th>
                             <th>تلفظ</th>
                             <th>عملیات</th>
@@ -96,7 +97,16 @@
                             :key="item.id"
                         >
                             <td>{{ item.id }}</td>
-                            <td>{{ item.english_word }}</td>
+                            <td>
+                                {{ item.english_word }}
+                            </td>
+                            <td style="width: 60px;" class="en-font">
+                                <v-select
+                                    v-model="item.level" outlined
+                                    :items="levels" dense hide-details
+                                    @change="updateLevel(item.id, item.level)"
+                                ></v-select>
+                            </td>
                             <td>
                                 <template v-if="item.word_types">{{ item.word_types }}</template>
                                 <template v-else>---</template>
@@ -168,6 +178,9 @@ export default {
                 .catch( () => {
                     this.fetch_loading = false
                 });
+        },
+        updateLevel(id, level){
+            this.$http.post(`words/update_level?` , {id,level})
         },
         Search(e){
             if (e.keyCode === 13) {

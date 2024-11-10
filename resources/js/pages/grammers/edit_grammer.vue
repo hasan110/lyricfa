@@ -44,7 +44,7 @@
                                     v-model="form_data.level"
                                     outlined
                                     :error-messages="errors.level"
-                                    :items="['A1', 'A2', 'B1', 'B2', 'C1', 'C2']"
+                                    :items="levels"
                                     dense label="سطح"
                                 ></v-select>
                             </v-col>
@@ -128,14 +128,21 @@
                                                     dense :label="'عنوان بخش ' + (section_key + 1)" hide-details
                                                 ></v-text-field>
                                             </v-col>
-                                            <v-col cols="12" xs="12" sm="4" class="pb-0">
+                                            <v-col cols="12" xs="12" sm="6" class="pb-0">
                                                 <v-text-field
                                                     v-model="section_item.priority" outlined
                                                     :error-messages="errors[`grammer_sections.${section_key}.priority`] ? errors[`grammer_sections.${section_key}.priority`] : null"
                                                     dense :label="'اولویت بخش ' + (section_key + 1)" hide-details
                                                 ></v-text-field>
                                             </v-col>
-                                            <v-col cols="12" xs="12" sm="2" class="pb-0">
+                                            <v-col cols="12" xs="12" sm="6" class="pb-0">
+                                                <v-select
+                                                    v-model="section_item.level" outlined :items="levels"
+                                                    :error-messages="errors[`grammer_sections.${section_key}.level`] ? errors[`grammer_sections.${section_key}.level`] : null"
+                                                    dense :label="'سطح بخش ' + (section_key + 1)" hide-details
+                                                ></v-select>
+                                            </v-col>
+                                            <v-col cols="12" xs="12" sm="6" class="pb-0 d-flex justify-end">
                                                 <v-btn
                                                     dark small color="error"
                                                     @click="removeSection(section_key)"

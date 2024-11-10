@@ -105,6 +105,7 @@ class GrammerController extends Controller
             'rules.array' => 'قوانین باید آرایه باشد.',
             'prerequisite.array' => 'گرامر های پیش نیاز باید آرایه باشد.',
             'grammer_sections.*.title.required' => 'عنوان بخش نمی تواند خالی باشد.',
+            'grammer_sections.*.level.required' => 'سطح بخش نمی تواند خالی باشد.',
             'grammer_sections.*.priority.required' => 'اولویت بخش نمی تواند خالی باشد.',
             'grammer_sections.*.grammer_explanations.*.type.filled' => 'نوع توضیح گرامر نمی تواند خالی باشد.',
             'grammer_sections.*.grammer_explanations.*.content.filled' => 'متن توضیح گرامر نمی تواند خالی باشد.',
@@ -116,11 +117,12 @@ class GrammerController extends Controller
             'english_name' => 'required',
             'persian_name' => 'required',
             'description' => 'required',
-            'level' => 'required',
+            'level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'priority' => 'required',
             'rules' => 'required|array',
             'prerequisite' => 'array',
             'grammer_sections.*.title' => 'required',
+            'grammer_sections.*.level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'grammer_sections.*.priority' => 'required',
             'grammer_sections.*.grammer_explanations.*.type' => 'filled',
             'grammer_sections.*.grammer_explanations.*.content' => 'filled',
@@ -160,6 +162,7 @@ class GrammerController extends Controller
             $grammer_section = new GrammerSection();
             $grammer_section->grammer_id = $grammer->id;
             $grammer_section->title = $section['title'];
+            $grammer_section->level = $section['level'];
             $grammer_section->priority = $section['priority'];
             $grammer_section->save();
             foreach ($section['grammer_explanations'] as $explanation)
@@ -378,6 +381,7 @@ class GrammerController extends Controller
             'rules.array' => 'قوانین باید آرایه باشد.',
             'prerequisite.array' => 'گرامر های پیش نیاز باید آرایه باشد.',
             'grammer_sections.*.title.required' => 'عنوان بخش نمی تواند خالی باشد.',
+            'grammer_sections.*.level.required' => 'سطح بخش نمی تواند خالی باشد.',
             'grammer_sections.*.priority.required' => 'اولویت بخش نمی تواند خالی باشد.',
             'grammer_sections.*.grammer_explanations.*.type.filled' => 'نوع توضیح گرامر نمی تواند خالی باشد.',
             'grammer_sections.*.grammer_explanations.*.content.filled' => 'متن توضیح گرامر نمی تواند خالی باشد.',
@@ -395,6 +399,7 @@ class GrammerController extends Controller
             'rules' => 'required|array',
             'prerequisite' => 'array',
             'grammer_sections.*.title' => 'required',
+            'grammer_sections.*.level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'grammer_sections.*.priority' => 'required',
             'grammer_sections.*.grammer_explanations.*.type' => 'filled',
             'grammer_sections.*.grammer_explanations.*.content' => 'filled',
@@ -445,6 +450,7 @@ class GrammerController extends Controller
             $grammer_section = new GrammerSection();
             $grammer_section->grammer_id = $grammer->id;
             $grammer_section->title = $section['title'];
+            $grammer_section->level = $section['level'];
             $grammer_section->priority = $section['priority'];
             $grammer_section->save();
             foreach ($section['grammer_explanations'] as $explanation)

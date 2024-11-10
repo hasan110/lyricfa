@@ -68,7 +68,7 @@
                             <th>#</th>
                             <th>شماره تلفن</th>
                             <th>اشتراک</th>
-                            <th>ثبت نام از</th>
+                            <th>ثبت نام از / سطح</th>
                             <th>تاریخ ثبت نام</th>
                             <th>جزییات</th>
                         </tr>
@@ -96,6 +96,11 @@
                                 <span style="color: #6200ed" class="text-primary" v-else-if="item.corridor === 'web-app'">
                                     وب اپ
                                 </span>
+                                /
+                                <template v-if="item.level">
+                                    <span :style="{color:levelColor(item.level)}" class="en-font">{{item.level}}</span>
+                                </template>
+                                <span v-else>_</span>
                             </td>
                             <td>{{ item.persian_created_at }}</td>
                             <td>

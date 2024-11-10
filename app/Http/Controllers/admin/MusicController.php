@@ -77,6 +77,8 @@ class MusicController extends Controller
             'english_title.required' => 'عنوان انگلیسی آهنگ نمی تواند خالی باشد',
             'persian_title.required' => 'عنوان فارسی آهنگ نمی تواند خالی باشد',
             'singers.required' => 'حتما یک خواننده باید انتخاب شود.',
+            'level.required' => 'سطح موزیک باید انتخاب شود',
+            'level.in' => 'سطح باید یکی از موارد: A1, A2, B1, B2, C1, C2 باشد',
             'start_demo.required' => 'زمان شروع دمو آهنگ نمی تواند خالی باشد',
             'start_demo.numeric' => 'زمان شروع دمو آهنگ باید عدد باشد',
             'end_demo.required' => 'زمان پایان دمو آهنگ نمی تواند خالی باشد',
@@ -87,6 +89,7 @@ class MusicController extends Controller
             'date_publication.date' => 'تاریخ انتشار آهنگ باید از جنس تاریخ باشد',
             'music.required' => 'فایل موزیک باید آپلود شود',
             'music.file' => 'نوع موزیک باید فایل باشد',
+            'image.required' => 'فایل پوستر موزیک باید آپلود شود',
             'image.file' => 'نوع عکس باید فایل باشد',
             'image.mimes' => 'نوع فایل باید jpg باشد',
             'image.dimensions' => 'عکس باید 300 در 300 باشد',
@@ -98,11 +101,13 @@ class MusicController extends Controller
             'english_title' => 'required',
             'persian_title' => 'required',
             'singers' => 'required',
+            'level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'start_demo' => 'required|numeric',
             'end_demo' => 'required|numeric',
             'hardest_degree' => 'required|numeric',
             'date_publication' => 'required|date',
-            'image' => 'file|mimes:jpg|dimensions:min_width=300,min_height=300,max_width=300,max_height=300',
+            'image' => 'file|required|mimes:jpg|dimensions:min_width=300,min_height=300,max_width=300,max_height=300',
+            'music' => 'file|required',
             'is_user_request' => 'required|numeric'
         ], $message);
 
@@ -120,6 +125,7 @@ class MusicController extends Controller
         $music->start_demo = $request->start_demo;
         $music->end_demo = $request->end_demo;
         $music->degree = $request->hardest_degree;
+        $music->level = $request->level;
         $music->published_at = $request->date_publication;
         $music->is_user_request = $request->is_user_request;
         $music->status = $request->has('status') ? intval($request->status) : 0;
@@ -149,9 +155,6 @@ class MusicController extends Controller
         ]);
     }
 
-
-
-    //TODO this before added
     public function musicsUpdate(Request $request)
     {
         $messages = array(
@@ -160,6 +163,8 @@ class MusicController extends Controller
             'singers.required' => 'لیست خواننده ها نمی تواند خالی باشد',
             'english_title.required' => 'عنوان انگلیسی آهنگ نمی تواند خالی باشد',
             'persian_title.required' => 'عنوان فارسی آهنگ نمی تواند خالی باشد',
+            'level.required' => 'سطح موزیک باید انتخاب شود',
+            'level.in' => 'سطح باید یکی از موارد: A1, A2, B1, B2, C1, C2 باشد',
             'start_demo.required' => 'زمان شروع دمو آهنگ نمی تواند خالی باشد',
             'start_demo.numeric' => 'زمان شروع دمو آهنگ باید عدد باشد',
             'end_demo.required' => 'زمان پایان دمو آهنگ نمی تواند خالی باشد',
@@ -179,10 +184,12 @@ class MusicController extends Controller
             'singers' => 'required',
             'english_title' => 'required',
             'persian_title' => 'required',
+            'level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'start_demo' => 'required|numeric',
             'end_demo' => 'required|numeric',
             'hardest_degree' => 'required|numeric',
             'date_publication' => 'required|date',
+            'music' => 'file',
             'image' => 'file|mimes:jpg|dimensions:min_width=300,min_height=300,max_width=300,max_height=300'
         ], $messages);
 
@@ -210,6 +217,7 @@ class MusicController extends Controller
         $music->start_demo = $request->start_demo;
         $music->end_demo = $request->end_demo;
         $music->degree = $request->hardest_degree;
+        $music->level = $request->level;
         $music->published_at = $request->date_publication;
         if ($request->album) {
             $music->album_id = $request->album;
@@ -233,11 +241,6 @@ class MusicController extends Controller
             'errors' => null,
             'message' => "موزیک با موفقیت اضافه شد"
         ]);
-    }
-
-    public static function getMusicById($id)
-    {
-        return Music::where('id', $id)->first();
     }
 
     public function getMusicCompleteInfo(Request $request)

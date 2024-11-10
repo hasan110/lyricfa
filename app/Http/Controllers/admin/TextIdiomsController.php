@@ -9,11 +9,8 @@ use Illuminate\Support\Facades\Validator;
 
 class TextIdiomsController extends Controller
 {
-
     public function getTextIdioms(Request $request)
     {
-
-
         $messages = array(
             'id_text.required' => 'id_text نمی تواند خالی باشد',
             'id_text.numeric' => 'id_text باید عدد باشد'
@@ -47,10 +44,8 @@ class TextIdiomsController extends Controller
         ]);
     }
 
-
     public function createTextIdiom(Request $request)
     {
-
         $messages = array(
             'id_text.required' => 'id_text نمی تواند خالی باشد',
             'id_text.numeric' => 'id_text باید عدد باشد',
@@ -71,7 +66,6 @@ class TextIdiomsController extends Controller
             ], 400);
         }
 
-
         $idiomText = new TextIdioms();
         $idiomText->id_text = $request->id_text;
         $idiomText->id_idiom = $request->id_idiom;
@@ -88,7 +82,6 @@ class TextIdiomsController extends Controller
 
     public function deleteTextIdiom(Request $request)
     {
-
         $messages = array(
             'id.required' => 'شناسه کامنت الزامی است',
             'id.numeric' => 'شناسه کامنت باید شامل عدد باشد'
@@ -115,7 +108,6 @@ class TextIdiomsController extends Controller
                 'message' => "چنین اصطلاحی وجود ندارد جهت حذف",
             ], 400);
         }
-
 
         $idiom = $name;
         $idiom->id = (int)$name->id;

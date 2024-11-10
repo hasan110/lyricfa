@@ -51,7 +51,10 @@ class WordController extends Controller
         $messages = array(
             'english_word.required' => 'لغت نمی تواند خالی باشد',
             'english_word.unique' => 'این لغت قبلا ثبت شده و تکراری است',
+            'level.required' => 'سطح نمیتواند خالی باشد',
+            'level.in' => 'سطح باید یکی از موارد: A1, A2, B1, B2, C1, C2 باشد',
             'definitions.*.definition.filled' => 'معنی لغت نمی تواند خالی باشد.',
+            'definitions.*.level.filled' => 'سطح معنی لغت نمی تواند خالی باشد.',
             'english_definitions.*.definition.filled' => 'معنی انگلیسی لغت نمی تواند خالی باشد.',
             'definitions.*.definition_examples.*.definition.filled' => 'معنی مثال لغت نمی تواند خالی باشد.',
             'definitions.*.definition_examples.*.phrase.filled' => 'عبارت مثال لغت نمی تواند خالی باشد.',
@@ -59,7 +62,9 @@ class WordController extends Controller
 
         $validator = Validator::make($request->all(), [
             'english_word' => 'required|unique:words',
+            'level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'definitions.*.definition' => 'filled',
+            'definitions.*.level' => 'filled',
             'english_definitions.*.definition' => 'filled',
             'definitions.*.definition_examples.*.definition' => 'filled',
             'definitions.*.definition_examples.*.phrase' => 'filled',
@@ -75,8 +80,9 @@ class WordController extends Controller
 
         $word = new Word();
         $word->english_word = $request->english_word;
+        $word->level = $request->level;
         $word->pronunciation = $request->pronunciation;
-        $word->word_types = $request->word_types;
+        $word->word_types = implode(',', $request->word_type);
 
         $word->save();
 
@@ -85,6 +91,7 @@ class WordController extends Controller
             $word_definition = new WordDefinition();
             $word_definition->word_id = $word->id;
             $word_definition->definition = $definition['definition'];
+            $word_definition->level = $definition['level'];
             $word_definition->save();
 
             foreach ($definition['definition_examples'] as $definition_example)
@@ -124,13 +131,15 @@ class WordController extends Controller
         ]);
     }
 
-
     public function updateWord(Request $request)
     {
         $messages = array(
             'id.required' => 'شناسه نمی تواند خالی باشد',
             'english_word.required' => 'لغت نمی تواند خالی باشد',
+            'level.required' => 'سطح نمیتواند خالی باشد',
+            'level.in' => 'سطح باید یکی از موارد: A1, A2, B1, B2, C1, C2 باشد',
             'word_definitions.*.definition.filled' => 'معنی لغت نمی تواند خالی باشد.',
+            'word_definitions.*.level.filled' => 'سطح معنی لغت نمی تواند خالی باشد.',
             'english_definitions.*.definition.filled' => 'معنی انگلیسی لغت نمی تواند خالی باشد.',
             'word_definitions.*.word_definition_examples.*.definition.filled' => 'معنی مثال لغت نمی تواند خالی باشد.',
             'word_definitions.*.word_definition_examples.*.phrase.filled' => 'عبارت مثال لغت نمی تواند خالی باشد.',
@@ -139,7 +148,9 @@ class WordController extends Controller
         $validator = Validator::make($request->all(), [
             'id' => 'required',
             'english_word' => 'required',
+            'level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'word_definitions.*.definition' => 'filled',
+            'word_definitions.*.level' => 'filled',
             'english_definitions.*.definition' => 'filled',
             'word_definitions.*.word_definition_examples.*.definition' => 'filled',
             'word_definitions.*.word_definition_examples.*.phrase' => 'filled',
@@ -161,6 +172,7 @@ class WordController extends Controller
                 'message' => " لغت یافت نشد.",
             ], 404);
         }
+
         // delete all word relations and ...
         foreach ($word->word_definitions as $item){
             foreach ($item->word_definition_examples as $example_item){
@@ -170,8 +182,9 @@ class WordController extends Controller
         }
 
         $word->english_word = $request->english_word;
+        $word->level = $request->level;
         $word->pronunciation = $request->pronunciation;
-        $word->word_types = $request->word_types;
+        $word->word_types = implode(',', $request->word_type);
         $word->save();
 
         foreach ($request->word_definitions as $definition)
@@ -179,6 +192,7 @@ class WordController extends Controller
             $word_definition = new WordDefinition();
             $word_definition->word_id = $word->id;
             $word_definition->definition = $definition['definition'];
+            $word_definition->level = $definition['level'];
             $word_definition->save();
 
             if (isset($definition['word_definition_examples'])) {
@@ -226,6 +240,46 @@ class WordController extends Controller
         ]);
     }
 
+    public function updateWordLevel(Request $request)
+    {
+        $messages = array(
+            'id.required' => 'شناسه نمی تواند خالی باشد',
+            'level.required' => 'سطح نمیتواند خالی باشد',
+            'level.in' => 'سطح باید یکی از موارد: A1, A2, B1, B2, C1, C2 باشد',
+        );
+
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+            'level' => 'required|in:A1,A2,B1,B2,C1,C2',
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => null,
+                'errors' => $validator->errors(),
+                'message' => "افزودن لغت با مشکل اعتبارسنجی مواجه شد",
+            ], 400);
+        }
+
+        $word = Word::with('word_definitions')->find($request->id);
+        if (!$word) {
+            return response()->json([
+                'data' => null,
+                'errors' => null,
+                'message' => " لغت یافت نشد.",
+            ], 404);
+        }
+
+        $word->level = $request->level;
+        $word->save();
+
+        return response()->json([
+            'data' => $word,
+            'errors' => null,
+            'message' => "لغت با موفقیت اضافه شد"
+        ]);
+    }
+
     public function getWord(Request $request)
     {
         $messages = array(
@@ -255,6 +309,8 @@ class WordController extends Controller
         $english_word = WordEnEn::where('ci_word' , $get->english_word)->first();
         if($english_word){
             $get['english_definitions'] = $english_word->english_word_definitions;
+        } else {
+            $get['english_definitions'] = [];
         }
 
         return response()->json([
@@ -298,7 +354,7 @@ class WordController extends Controller
         ]);
     }
 
-    public function getTypes(Request $request)
+    public function getTypes()
     {
         return response()->json([
             'data' => Word::getWordTypes(),

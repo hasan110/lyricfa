@@ -1,6 +1,5 @@
 <template>
     <div>
-
         <div class="page-head">
             <div class="titr">ویرایش لغت</div>
             <div class="back">
@@ -11,10 +10,8 @@
                 </router-link>
             </div>
         </div>
-
         <div class="ma-auto" style="max-width: 720px;">
             <v-container>
-
                 <v-row class="pt-3">
                     <v-col cols="12" xs="12" sm="12" class="pb-0 text-left">
                         <v-btn
@@ -23,7 +20,6 @@
                         >حذف لغت</v-btn>
                     </v-col>
                 </v-row>
-
                 <v-row class="pt-3">
                     <v-col cols="12" xs="12" sm="6" class="pb-0">
                         <v-text-field
@@ -42,13 +38,21 @@
                             label="تلفظ"
                         ></v-text-field>
                     </v-col>
-                    <v-col cols="12" class="pb-0">
+                    <v-col cols="12" xs="12" sm="6" class="pb-0">
                         <v-select
                             v-model="form_data.word_type"
                             outlined
                             :items="word_types"
                             dense multiple
                             label="نوع لغت"
+                        ></v-select>
+                    </v-col>
+                    <v-col cols="12" xs="12" sm="6" class="pb-0">
+                        <v-select
+                            v-model="form_data.level"
+                            outlined label="سطح"
+                            :error-messages="errors.level"
+                            :items="levels" dense
                         ></v-select>
                     </v-col>
                 </v-row>
@@ -67,18 +71,26 @@
                 <v-container>
                     <div v-for="(item , key) in form_data.word_definitions" :key="key">
                         <v-row>
-                            <v-col cols="12" xs="12" sm="12" class="pb-0">
+                            <v-col cols="12" sm="12" md="8" class="pb-0">
                                 <v-text-field
                                     v-model="item.definition"
                                     outlined clearable
-                                    append-outer-icon="mdi-delete"
-                                    @click:append-outer="removeDefinition(1 , key)"
                                     :error-messages="errors[`word_definitions.${key}.definition`] ? errors[`word_definitions.${key}.definition`] : null"
                                     dense :label="'معنی ' + (key + 1)"
                                 ></v-text-field>
                             </v-col>
+                            <v-col cols="12" sm="12" md="4" class="pb-0">
+                                <v-select
+                                    v-model="item.level" outlined
+                                    append-outer-icon="mdi-delete"
+                                    :items="levels"
+                                    @click:append-outer="removeDefinition(1 , key)"
+                                    :error-messages="errors[`word_definitions.${key}.level`] ? errors[`word_definitions.${key}.level`] : null"
+                                    dense :label="'سطح معنی ' + (key + 1)"
+                                ></v-select>
+                            </v-col>
                         </v-row>
-                        <div>
+                        <div style="color: #6200ed">
                             <small>مثال برای معنی</small>
                         </div>
                         <div v-for="(example , example_key) in item.word_definition_examples">
@@ -106,7 +118,7 @@
                         <div class="d-flex justify-end">
                             <v-btn x-small color="primary" dark @click="addExample(key)">افزودن مثال </v-btn>
                         </div>
-                        <hr style="margin-top: 8px;margin-bottom: 16px;">
+                        <hr style="margin-top: 8px;margin-bottom: 48px;border-style: dashed">
                     </div>
                 </v-container>
                 <hr class="mt-3">
@@ -154,7 +166,6 @@
                         </v-row>
                     </div>
                 </v-container>
-
                 <div class="text-center pt-3">
                     <v-btn
                         :loading="loading"
@@ -163,10 +174,8 @@
                         @click="saveWord()"
                     >ویرایش</v-btn>
                 </div>
-
             </v-container>
         </div>
-
     </div>
 </template>
 <script>
@@ -188,6 +197,7 @@ export default {
             if(type === 1){
                 this.form_data.word_definitions.push({
                     definition:'',
+                    word_definition_examples: [],
                     definition_examples: []
                 })
             }else if(type === 2){
@@ -201,7 +211,7 @@ export default {
         },
         removeDefinition(type , definition_key){
             if(type === 1){
-                if(this.form_data.word_definitions.length == 1){
+                if(this.form_data.word_definitions.length === 1){
                     alert('حداقل یک معنی باید تعریف شود');
                     return false;
                 }
@@ -237,38 +247,38 @@ export default {
                     this.$router.replace({name:'words'});
                 });
         },
-        saveWord(){
+        saveWord() {
             this.loading = true;
             if (this.form_data.word_types) {
                 this.form_data.word_types = this.form_data.word_type.join(',')
             }
             this.$http.post(`words/update` , this.form_data)
-                .then(res => {
-                    this.form_data = {};
-                    this.loading = false;
+            .then(res => {
+                this.form_data = {};
+                this.loading = false;
+                this.$fire({
+                    title: "موفق",
+                    text: res.data.message,
+                    type: "success",
+                    timer: 5000
+                })
+                this.$router.push({name:'words'})
+            })
+            .catch( err => {
+                this.loading = false;
+                const e = err.response.data
+                if(e.errors){ this.errors = e.errors }
+                else if(e.message){
+
                     this.$fire({
-                        title: "موفق",
-                        text: res.data.message,
-                        type: "success",
+                        title: "خطا",
+                        text: e.message,
+                        type: "error",
                         timer: 5000
                     })
-                    this.$router.push({name:'words'})
-                })
-                .catch( err => {
-                    this.loading = false;
-                    const e = err.response.data
-                    if(e.errors){ this.errors = e.errors }
-                    else if(e.message){
 
-                        this.$fire({
-                            title: "خطا",
-                            text: e.message,
-                            type: "error",
-                            timer: 5000
-                        })
-
-                    }
-                });
+                }
+            });
         },
         deleteWord(){
             if (confirm('باحذف این لغت تمامی معانی و مثال های فارسی و انگلیسی حذف خواهد شد. \n \n از حذف لغت اطمینان دارید؟')){

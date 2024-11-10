@@ -74,7 +74,7 @@
                             <th>#</th>
                             <th>موزیک</th>
                             <th>آمار</th>
-                            <th>امتیاز از 5</th>
+                            <th>سطح</th>
                             <th>وضعیت</th>
                             <th>عملیات</th>
                         </tr>
@@ -113,7 +113,12 @@
                                 <span class="pa-2">کامنت : {{ item.num_comment }}</span>
                                 <span class="pa-2">بازدید : {{ item.views }}</span>
                             </td>
-                            <td>-</td>
+                            <td>
+                                <template v-if="item.level">
+                                    <span :style="{color:levelColor(item.level)}" class="en-font">{{item.level}}</span>
+                                </template>
+                                <span v-else>_</span>
+                            </td>
                             <td>
                                 <template v-if="parseInt(item.status) === 1">
                                     <v-badge color="success" content="فعال"></v-badge>

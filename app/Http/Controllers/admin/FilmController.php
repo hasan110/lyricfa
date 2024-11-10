@@ -82,6 +82,8 @@ class FilmController extends Controller
             'type.required' => 'نوع فیلم لازم است.',
             'parent.required' => 'فیلم مرتبط را انتخاب کنید',
             'extension.required' => 'پسوند فایل لازم است',
+            'level.required' => 'سطح نمیتواند خالی باشد',
+            'level.in' => 'سطح باید یکی از موارد: A1, A2, B1, B2, C1, C2 باشد',
             'type.numeric' => 'نوع فیلم عدد می باشد',
             'parent.numeric' => 'فیلم مرتبط باید عدد باشد',
             'film.file' => 'نوع فایل آپلودی باید فایل باشد',
@@ -100,6 +102,7 @@ class FilmController extends Controller
             'type' => 'required|numeric',
             'parent' => 'required|numeric',
             'extension' => 'required',
+            'level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'priority' => 'required_if:type,3,4,5',
             'film' => 'file|mimetypes:video/*',
             'poster' => 'file|mimes:jpg|dimensions:min_width=750,min_height=1000,max_width=750,max_height=1000'
@@ -119,6 +122,7 @@ class FilmController extends Controller
         $film->type = $request->type;
         $film->parent = $request->parent;
         $film->extension = $request->extension;
+        $film->level = $request->level;
         $film->description = $request->description;
         $film->persian_subtitle = $request->persian_subtitle ? 1 : 0;
         $film->status = $request->status ? 1 : 0;
@@ -162,6 +166,7 @@ class FilmController extends Controller
             'type.required' => 'نوع فیلم لازم است.',
             'parent.required' => 'فیلم مرتبط لازم است',
             'type.numeric' => 'نوع فیلم عدد می باشد',
+            'level.required' => 'سطح نمیتواند خالی باشد',
             'parent.numeric' => 'فیلم مرتبط باید عدد باشد',
             'film.file' => 'نوع فایل آپلودی باید فایل باشد',
             'film.mimeTypes' => 'نوع فایل فیلم باید ویدئو باشد',
@@ -180,6 +185,7 @@ class FilmController extends Controller
             'parent' => 'required|numeric',
             'film' => 'file|mimeTypes:video',
             'extension' => 'required',
+            'level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'priority' => 'required_if:type,3,4,5',
             'poster' => 'file|mimes:jpg|dimensions:min_width=750,min_height=1000,max_width=750,max_height=1000'
         ], $messages);
@@ -206,6 +212,7 @@ class FilmController extends Controller
         $film->type = $request->type;
         $film->parent = $request->parent;
         $film->extension = $request->extension;
+        $film->level = $request->level;
         $film->description = $request->description;
         $film->persian_subtitle = $request->persian_subtitle ? 1 : 0;
         $film->status = $request->status ? 1 : 0;

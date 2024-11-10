@@ -5,6 +5,7 @@ Plugin.install = function(Vue) {
   Vue.mixin({
     data: function() {
       return {
+          levels: ['A1','A2','B1','B2','C1','C2']
       }
     },
     computed: {
@@ -51,6 +52,21 @@ Plugin.install = function(Vue) {
       },
       setPageTitle(title){
         document.title = `لیریکفا | ${title}`;
+      },
+      levelColor(level){
+          if (!level) return "#000";
+          const levels = {
+              'A1':'#0d6013',
+              'A2':'#4faf56',
+              'B1':'#ffd901',
+              'B2':'#ff4d00',
+              'C1':'#ed2323',
+              'C2':'#b10000',
+          };
+          if (levels[level] !== undefined) {
+              return levels[level];
+          }
+          return "#000";
       }
     }
 

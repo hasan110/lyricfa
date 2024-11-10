@@ -30,11 +30,15 @@
   src: url('../fonts/IRANSansMedium.ttf') format('truetype');
 }
 
+.en-font,
+.en-font * {
+    font-family: "Roboto", sans-serif !important;
+}
 
 * {
   scrollbar-width: normal;
   scrollbar-color: rgb(233, 233, 233) #fff;
-  font-family: iransans;
+    font-family: iransans, serif;
 }
 *::-webkit-scrollbar {
   width: 8px;
@@ -67,6 +71,7 @@
 }
 
 /* styles */
+
 .font-en-input input{
     font-family: "Roboto", sans-serif !important;
 }
