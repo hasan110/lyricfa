@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\admin;
 
+use App\Models\File;
+use App\Models\Film;
 use App\Models\Word;
 use App\Models\WordDefinition;
 use App\Models\WordDefinitionExample;
@@ -82,16 +84,17 @@ class WordController extends Controller
         $word->english_word = $request->english_word;
         $word->level = $request->level;
         $word->pronunciation = $request->pronunciation;
-        $word->word_types = implode(',', $request->word_type);
+        $word->word_types = $request->word_type ? implode(',', $request->word_type) : null;
 
         $word->save();
 
-        foreach ($request->definitions as $definition)
+        foreach ($request->definitions as $key => $definition)
         {
             $word_definition = new WordDefinition();
             $word_definition->word_id = $word->id;
             $word_definition->definition = $definition['definition'];
             $word_definition->level = $definition['level'];
+            $word_definition->priority = $key + 1;
             $word_definition->save();
 
             foreach ($definition['definition_examples'] as $definition_example)
@@ -104,9 +107,9 @@ class WordController extends Controller
             }
         }
 
-        if($request->english_definitions){
+        if($request->english_definitions) {
             $check = WordEnEn::where('ci_word' , $request->english_word)->first();
-            if ($check){
+            if ($check) {
                 $english_word = $check;
             }else{
                 $english_word = WordEnEn::create([
@@ -173,26 +176,31 @@ class WordController extends Controller
             ], 404);
         }
 
-        // delete all word relations and ...
+        // delete word definition examples
         foreach ($word->word_definitions as $item){
             foreach ($item->word_definition_examples as $example_item){
                 $example_item->delete();
             }
-            $item->delete();
         }
 
         $word->english_word = $request->english_word;
         $word->level = $request->level;
         $word->pronunciation = $request->pronunciation;
-        $word->word_types = implode(',', $request->word_type);
+        $word->word_types = $request->word_type ? implode(',', $request->word_type) : null;
         $word->save();
 
-        foreach ($request->word_definitions as $definition)
+        foreach ($request->word_definitions as $key => $definition)
         {
-            $word_definition = new WordDefinition();
-            $word_definition->word_id = $word->id;
+            if (isset($definition['id'])) {
+                $word_definition = WordDefinition::find($definition['id']);
+                if (!$word_definition) continue;
+            } else {
+                $word_definition = new WordDefinition();
+                $word_definition->word_id = $word->id;
+            }
             $word_definition->definition = $definition['definition'];
             $word_definition->level = $definition['level'];
+            $word_definition->priority = $key + 1;
             $word_definition->save();
 
             if (isset($definition['word_definition_examples'])) {
@@ -351,6 +359,52 @@ class WordController extends Controller
             'data' => null,
             'errors' => null,
             'message' => " تمامی اطلاعات این لغت با موفقیت حذف شد.",
+        ]);
+    }
+
+    public function addImageToDefinition(Request $request)
+    {
+        $messages = array(
+            'word_definition_id.required' => 'شناسه معنی لغت اجباری است',
+            'image.required' => 'تصویر باید انتخاب شود',
+            'image.file' => 'تصویر باید فایل باشد',
+            'image.mimes' => 'نوع تصویر باید jpg باشد',
+            'image.dimensions' => 'تصویر باید 300 در 450 باشد',
+            'image.max' => 'حجم تصویر حداکثر باید 50 کیلو بایت باشد',
+        );
+
+        $validator = Validator::make($request->all(), [
+            'word_definition_id' => 'required',
+            'image' => 'required|file|mimes:jpg|dimensions:min_width=450,min_height=300,max_width=450,max_height=300|max:50'
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => null,
+                'errors' => $validator->errors(),
+                'message' => "عملیات شکست خورد",
+            ], 400);
+        }
+
+        $definition = WordDefinition::find($request->word_definition_id);
+        if (!$definition) {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => "معنی لغت یافت نشد",
+            ], 400);
+        }
+
+        if ($definition->files) {
+            File::deleteFile($definition->files, WordDefinition::IMAGE_FILE_TYPE);
+        }
+
+        File::createFile($request->image, $definition, WordDefinition::IMAGE_FILE_TYPE, true);
+
+        return response()->json([
+            'data' => null,
+            'errors' => null,
+            'message' => "تصویر با موفقیت اضافه شد"
         ]);
     }
 

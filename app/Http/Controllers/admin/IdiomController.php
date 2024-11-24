@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Helpers\IdiomHelper;
+use App\Models\File;
 use App\Models\Idiom;
 use App\Models\IdiomDefinition;
 use App\Models\IdiomDefinitionExample;
@@ -12,16 +13,6 @@ use Illuminate\Support\Facades\Validator;
 
 class IdiomController extends Controller
 {
-    public static function getIdiomById(int $id)
-    {
-        $idiom =  Idiom::where('id', $id)->first();
-
-        $rooms = json_decode($idiom->definition, true);
-
-        $idiom->parse = $rooms;
-        return $idiom;
-    }
-
     public function idiomsList(Request $request)
     {
         $list = Idiom::with('idiom_definitions');
@@ -135,12 +126,13 @@ class IdiomController extends Controller
         $idiom->type = $type;
         $idiom->save();
 
-        foreach ($request->idiom_definitions as $definition)
+        foreach ($request->idiom_definitions as $key => $definition)
         {
             $idiom_definition = new IdiomDefinition();
             $idiom_definition->idiom_id = $idiom->id;
             $idiom_definition->definition = $definition['definition'];
             $idiom_definition->level = $definition['level'];
+            $idiom_definition->priority = $key + 1;
             $idiom_definition->save();
 
             foreach ($definition['idiom_definition_examples'] as $definition_example)
@@ -214,20 +206,25 @@ class IdiomController extends Controller
         $idiom->type = $type;
         $idiom->save();
 
-        // delete all word relations and ...
+        // delete all idiom definition examples ...
         foreach ($idiom->idiom_definitions as $item){
             foreach ($item->idiom_definition_examples as $example_item){
                 $example_item->delete();
             }
-            $item->delete();
         }
 
-        foreach ($request->idiom_definitions as $definition)
+        foreach ($request->idiom_definitions as $key => $definition)
         {
-            $idiom_definition = new IdiomDefinition();
-            $idiom_definition->idiom_id = $idiom->id;
+            if ($definition['id']) {
+                $idiom_definition = IdiomDefinition::find($definition['id']);
+                if (!$idiom_definition) continue;
+            } else {
+                $idiom_definition = new IdiomDefinition();
+                $idiom_definition->idiom_id = $idiom->id;
+            }
             $idiom_definition->definition = $definition['definition'];
             $idiom_definition->level = $definition['level'];
+            $idiom_definition->priority = $key + 1;
             $idiom_definition->save();
 
             foreach ($definition['idiom_definition_examples'] as $definition_example)
@@ -311,6 +308,52 @@ class IdiomController extends Controller
             'data' => null,
             'errors' => null,
             'message' => "اصطلاح باموفقیت حذف شد"
+        ]);
+    }
+
+    public function addImageToDefinition(Request $request)
+    {
+        $messages = array(
+            'idiom_definition_id.required' => 'شناسه معنی لغت اجباری است',
+            'image.required' => 'تصویر باید انتخاب شود',
+            'image.file' => 'تصویر باید فایل باشد',
+            'image.mimes' => 'نوع تصویر باید jpg باشد',
+            'image.dimensions' => 'تصویر باید 300 در 450 باشد',
+            'image.max' => 'حجم تصویر حداکثر باید 50 کیلو بایت باشد',
+        );
+
+        $validator = Validator::make($request->all(), [
+            'idiom_definition_id' => 'required',
+            'image' => 'required|file|mimes:jpg|dimensions:min_width=450,min_height=300,max_width=450,max_height=300|max:50'
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => null,
+                'errors' => $validator->errors(),
+                'message' => "عملیات شکست خورد",
+            ], 400);
+        }
+
+        $definition = IdiomDefinition::find($request->idiom_definition_id);
+        if (!$definition) {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => "معنی اصطلاح یافت نشد",
+            ], 400);
+        }
+
+        if ($definition->files) {
+            File::deleteFile($definition->files, IdiomDefinition::IMAGE_FILE_TYPE);
+        }
+
+        File::createFile($request->image, $definition, IdiomDefinition::IMAGE_FILE_TYPE, true);
+
+        return response()->json([
+            'data' => null,
+            'errors' => null,
+            'message' => "تصویر با موفقیت اضافه شد"
         ]);
     }
 }

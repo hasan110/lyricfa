@@ -123,6 +123,12 @@ class UserHelper extends Helper
             $user->minutes_remain = $diffInMinutes;
         }
 
+        if (Carbon::now()->diffInSeconds($user->created_at) <= 20) {
+            $user->new_user = true;
+        } else {
+            $user->new_user = false;
+        }
+
         return $user;
     }
 

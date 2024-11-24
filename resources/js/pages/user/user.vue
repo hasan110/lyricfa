@@ -59,35 +59,62 @@
                     </v-card>
                 </v-col>
                 <v-col cols="12" sm="12" md="6" lg="4">
-                    <v-row>
-                        <v-col cols="12">
-                            <v-text-field
-                                v-model="subscribe.title"
-                                label="افزودن اشتراک"
-                                append-outer-icon="mdi-minus"
-                                @click:append-outer="subscribe.title--"
-                                prepend-icon="mdi-plus"
-                                @click:prepend="subscribe.title++"
-                                outlined
-                                dense
-                            >
-                            </v-text-field>
-                        </v-col>
-                        <v-col cols="12">
-                            <v-textarea
-                                v-model="subscribe.description"
-                                label="علت افزایش اشتراک"
-                                outlined
-                                dense
-                            >
-                            </v-textarea>
-                        </v-col>
-                        <v-col cols="12">
-                            <v-btn :loading="subscribe_loading" :disabled="subscribe_loading" color="success" dens @click="increaseSubscription()">
-                                ثبت
-                            </v-btn>
-                        </v-col>
-                    </v-row>
+                    <v-card>
+                        <v-card-title>تمدید اشتراک</v-card-title>
+                        <v-card-text>
+                            <v-row>
+                                <v-col cols="12">
+                                    <v-text-field
+                                        v-model="subscribe.title"
+                                        label="چند روز؟"
+                                        append-outer-icon="mdi-minus"
+                                        @click:append-outer="subscribe.title--"
+                                        prepend-icon="mdi-plus"
+                                        @click:prepend="subscribe.title++"
+                                        outlined dense hide-details
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="12">
+                                    <v-select
+                                        :items="[{value:0 , title:'پولی'},{value:1 , title:'رایگان'}]"
+                                        v-model="subscribe.type"
+                                        item-text="title"
+                                        item-value="value"
+                                        label="نوع اعمال"
+                                        outlined dense hide-details
+                                    ></v-select>
+                                </v-col>
+                                <v-col cols="12" v-if="subscribe.type === 0">
+                                    <v-text-field
+                                        v-model="subscribe.val_money"
+                                        label="مقدار پرداختی (تومان)"
+                                        outlined dense hide-details
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="12" v-if="subscribe.type === 0">
+                                    <v-text-field
+                                        v-model="subscribe.ref_id"
+                                        label="کد درگاه / پیگیری"
+                                        outlined dense hide-details
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="12">
+                                    <v-textarea
+                                        v-model="subscribe.description"
+                                        label="توضیحات"
+                                        outlined
+                                        dense hide-details
+                                    >
+                                    </v-textarea>
+                                </v-col>
+                                <v-col cols="12">
+                                    <v-btn block :loading="subscribe_loading" :disabled="subscribe_loading" color="success" dens @click="increaseSubscription()">
+                                        ثبت
+                                    </v-btn>
+                                </v-col>
+                            </v-row>
+                        </v-card-text>
+                    </v-card>
                 </v-col>
             </v-row>
 
@@ -106,8 +133,7 @@
                                 <th>#</th>
                                 <th>شناسه پرداخت</th>
                                 <th>مقدار</th>
-                                <th>توسط</th>
-                                <th>روزهای اضافه شده</th>
+                                <th>نوع</th>
                                 <th>توضیحات</th>
                                 <th>تاریخ</th>
                             </tr>
@@ -115,17 +141,30 @@
                             <tbody>
                             <tr v-for="(item , key) in user.subscription" :key="key">
                                 <td>{{item.id}}</td>
-                                <td>{{item.ref_id}}</td>
-                                <td>{{item.val_money}} تومان</td>
                                 <td>
-                                    <template v-if="item.type == 1">
-                                        ادمین
+                                    <template v-if="item.ref_id">
+                                        {{item.ref_id}}
                                     </template>
                                     <template v-else>
-                                        کاربر
+                                        ---
                                     </template>
                                 </td>
-                                <td>{{item.title}}</td>
+                                <td>
+                                    <template v-if="item.val_money">
+                                    {{item.val_money}} تومان
+                                    </template>
+                                    <template v-else>
+                                        ---
+                                    </template>
+                                </td>
+                                <td>
+                                    <template v-if="parseInt(item.type) === 1">
+                                        رایگان
+                                    </template>
+                                    <template v-else>
+                                        خرید
+                                    </template>
+                                </td>
                                 <td>{{item.description}}</td>
                                 <td>{{item.persian_created_at}}</td>
                             </tr>

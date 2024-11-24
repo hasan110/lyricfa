@@ -19,6 +19,6 @@ class GrammerSection extends Model
 
     public function grammer_explanations()
     {
-        return $this->hasMany(GrammerExplanation::class, 'grammer_section_id');
+        return $this->hasMany(GrammerExplanation::class, 'grammer_section_id')->orderBy('priority');
     }
 }

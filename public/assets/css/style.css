@@ -124,6 +124,9 @@
   height: calc(100vh - var(--md-section-height) - var(--sm-section-height) - var(--sm-section-height) - var(--sm-section-height) - var(--sm-section-height));
 }
 
+.w-100 {
+    width: 100% !important;
+}
 
 .item-profile{
     width: 50px;

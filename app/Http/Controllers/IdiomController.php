@@ -31,7 +31,7 @@ class IdiomController extends Controller
             ], 400);
         }
         $word = $request->word;
-        $phrase = $request->phrase;
+        $phrase = preg_replace('/\s+/', ' ', trim($request->phrase));
 
         if(!str_contains($phrase , $word))
         {

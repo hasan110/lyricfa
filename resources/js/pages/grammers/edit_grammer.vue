@@ -112,121 +112,119 @@
                         </div>
                         <div class="pa-2">
                             <v-expansion-panels accordion multiple>
-                                <v-expansion-panel v-for="(section_item, section_key) in form_data.grammer_sections" :key="section_key">
-                                    <v-expansion-panel-header>
-                                        <template v-if="section_item.title">
-                                            {{section_item.title}}
-                                        </template>
-                                        <template v-else>بخش {{ section_key+1 }}</template>
-                                    </v-expansion-panel-header>
-                                    <v-expansion-panel-content>
-                                        <v-row>
-                                            <v-col cols="12" xs="12" sm="6" class="pb-0">
-                                                <v-text-field
-                                                    v-model="section_item.title" outlined
-                                                    :error-messages="errors[`grammer_sections.${section_key}.title`] ? errors[`grammer_sections.${section_key}.title`] : null"
-                                                    dense :label="'عنوان بخش ' + (section_key + 1)" hide-details
-                                                ></v-text-field>
-                                            </v-col>
-                                            <v-col cols="12" xs="12" sm="6" class="pb-0">
-                                                <v-text-field
-                                                    v-model="section_item.priority" outlined
-                                                    :error-messages="errors[`grammer_sections.${section_key}.priority`] ? errors[`grammer_sections.${section_key}.priority`] : null"
-                                                    dense :label="'اولویت بخش ' + (section_key + 1)" hide-details
-                                                ></v-text-field>
-                                            </v-col>
-                                            <v-col cols="12" xs="12" sm="6" class="pb-0">
-                                                <v-select
-                                                    v-model="section_item.level" outlined :items="levels"
-                                                    :error-messages="errors[`grammer_sections.${section_key}.level`] ? errors[`grammer_sections.${section_key}.level`] : null"
-                                                    dense :label="'سطح بخش ' + (section_key + 1)" hide-details
-                                                ></v-select>
-                                            </v-col>
-                                            <v-col cols="12" xs="12" sm="6" class="pb-0 d-flex justify-end">
-                                                <v-btn
-                                                    dark small color="error"
-                                                    @click="removeSection(section_key)"
-                                                >
-                                                    حذف بخش
-                                                </v-btn>
-                                            </v-col>
-                                        </v-row>
-                                        <div class="d-flex align-center justify-space-between pa-2">
-                                            <div>توضیح</div>
-                                            <div>
-                                                <v-btn
-                                                    class="mx-2" fab dark small color="primary"
-                                                    @click="addExplanation(section_key)"
-                                                >
-                                                    <v-icon dark>mdi-plus</v-icon>
-                                                </v-btn>
-                                            </div>
-                                        </div>
-                                        <v-container>
-                                            <div v-for="(item , key) in section_item.grammer_explanations" :key="key">
-                                                <v-row>
-                                                    <v-col cols="12" xs="12" sm="6" class="pb-0">
-                                                        <v-text-field
-                                                            v-model="item.title"
-                                                            outlined clearable
-                                                            :error-messages="errors[`grammer_sections.${section_key}.grammer_explanations.${key}.title`] ? errors[`grammer_sections.${section_key}.grammer_explanations.${key}.title`] : null"
-                                                            dense :label="'عنوان ' + (key + 1)"
-                                                        ></v-text-field>
-                                                    </v-col>
-                                                    <v-col cols="12" xs="12" sm="6" class="pb-0">
-                                                        <v-select
-                                                            v-model="item.type"
-                                                            :items="grammer_explanation_types"
-                                                            item-text="title" item-value="value"
-                                                            outlined clearable
-                                                            append-outer-icon="mdi-delete"
-                                                            @click:append-outer="removeExplanation(key, section_key)"
-                                                            :error-messages="errors[`grammer_sections.${section_key}.grammer_explanations.${key}.type`] ? errors[`grammer_sections.${section_key}.grammer_explanations.${key}.type`] : null"
-                                                            dense :label="'نوع توضیح ' + (key + 1)"
-                                                        ></v-select>
-                                                    </v-col>
-                                                    <v-col cols="12" xs="12" sm="12" class="pb-0">
-                                                        <v-textarea
-                                                            v-model="item.content"
-                                                            outlined clearable
-                                                            :error-messages="errors[`grammer_sections.${section_key}.grammer_explanations.${key}.content`] ? errors[`grammer_sections.${section_key}.grammer_explanations.${key}.content`] : null"
-                                                            dense :label="'متن توضیح ' + (key + 1)"
-                                                        ></v-textarea>
-                                                    </v-col>
-                                                </v-row>
+                                <draggable v-model="form_data.grammer_sections" class="w-100">
+                                    <v-expansion-panel v-for="(section_item, section_key) in form_data.grammer_sections" :key="section_key">
+                                        <v-expansion-panel-header>
+                                            <template v-if="section_item.title">
+                                                {{section_item.title}}
+                                            </template>
+                                            <template v-else>بخش {{ section_key+1 }}</template>
+                                        </v-expansion-panel-header>
+                                        <v-expansion-panel-content>
+                                            <v-row style="background: #f2f2f2;padding-bottom: .5rem; border-radius: .5rem;">
+                                                <v-col cols="12" xs="12" sm="6" class="pb-0">
+                                                    <v-text-field
+                                                        v-model="section_item.title" outlined
+                                                        :error-messages="errors[`grammer_sections.${section_key}.title`] ? errors[`grammer_sections.${section_key}.title`] : null"
+                                                        dense :label="'عنوان بخش ' + (section_key + 1)" hide-details
+                                                    ></v-text-field>
+                                                </v-col>
+                                                <v-col cols="12" xs="12" sm="3" class="pb-0">
+                                                    <v-select
+                                                        v-model="section_item.level" outlined :items="levels"
+                                                        :error-messages="errors[`grammer_sections.${section_key}.level`] ? errors[`grammer_sections.${section_key}.level`] : null"
+                                                        dense :label="'سطح بخش ' + (section_key + 1)" hide-details
+                                                    ></v-select>
+                                                </v-col>
+                                                <v-col cols="12" xs="12" sm="3" class="pb-0 d-flex justify-end">
+                                                    <v-btn
+                                                        v-if="!section_item.id"
+                                                        dark small color="error"
+                                                        @click="removeSection(section_key)"
+                                                    >
+                                                        حذف بخش
+                                                    </v-btn>
+                                                </v-col>
+                                            </v-row>
+                                            <div class="d-flex align-center justify-space-between pa-4">
+                                                <div>توضیح</div>
                                                 <div>
-                                                    <small>مثال برای توضیح</small>
+                                                    <v-btn
+                                                        class="mx-2" fab dark small color="primary"
+                                                        @click="addExplanation(section_key)"
+                                                    >
+                                                        <v-icon dark>mdi-plus</v-icon>
+                                                    </v-btn>
                                                 </div>
-                                                <div v-for="(example , example_key) in item.grammer_examples">
-                                                    <v-row>
-                                                        <v-col cols="12" xs="12" sm="12" class="pb-0">
-                                                            <v-text-field
-                                                                v-model="example.english_content"
-                                                                outlined clearable
-                                                                dense :label="'متن انگلیسی مثال ' + (example_key + 1)"
-                                                                :error-messages="errors[`grammer_sections.${section_key}.grammer_explanations.${key}.grammer_examples.${example_key}.english_content`] ? errors[`grammer_sections.${section_key}.grammer_explanations.${key}.grammer_examples.${example_key}.english_content`] : null"
-                                                            ></v-text-field>
-                                                        </v-col>
-                                                        <v-col cols="12" xs="12" sm="12" class="pb-0">
-                                                            <v-text-field
-                                                                v-model="example.persian_content"
-                                                                outlined clearable
-                                                                append-outer-icon="mdi-delete"
-                                                                @click:append-outer="removeExample(key , example_key, section_key)"
-                                                                dense :label="'متن فارسی ' + (example_key + 1)"
-                                                                :error-messages="errors[`grammer_sections.${section_key}.grammer_explanations.${key}.grammer_examples.${example_key}.persian_content`] ? errors[`grammer_sections.${section_key}.grammer_explanations.${key}.grammer_examples.${example_key}.persian_content`] : null"
-                                                            ></v-text-field>
-                                                        </v-col>
-                                                    </v-row>
-                                                </div>
-                                                <div class="d-flex justify-end">
-                                                    <v-btn x-small color="primary" dark @click="addExample(key, section_key)">افزودن مثال </v-btn>
-                                                </div>
-                                                <hr style="margin-block: 8px;">
                                             </div>
-                                        </v-container>
-                                    </v-expansion-panel-content>
-                                </v-expansion-panel>
+                                            <v-container>
+                                                <draggable v-model="section_item.grammer_explanations" class="w-100">
+                                                    <div v-for="(item , key) in section_item.grammer_explanations" :key="key">
+                                                        <v-row>
+                                                            <v-col cols="12" xs="12" sm="6" class="pb-0">
+                                                                <v-text-field
+                                                                    v-model="item.title"
+                                                                    outlined clearable
+                                                                    :error-messages="errors[`grammer_sections.${section_key}.grammer_explanations.${key}.title`] ? errors[`grammer_sections.${section_key}.grammer_explanations.${key}.title`] : null"
+                                                                    dense :label="'عنوان توضیح ' + (key + 1)"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col cols="12" xs="12" sm="6" class="pb-0">
+                                                                <v-select
+                                                                    v-model="item.type"
+                                                                    :items="grammer_explanation_types"
+                                                                    item-text="title" item-value="value"
+                                                                    outlined clearable
+                                                                    :append-outer-icon="item.id ? '' : 'mdi-delete'"
+                                                                    @click:append-outer="removeExplanation(key, section_key)"
+                                                                    :error-messages="errors[`grammer_sections.${section_key}.grammer_explanations.${key}.type`] ? errors[`grammer_sections.${section_key}.grammer_explanations.${key}.type`] : null"
+                                                                    dense :label="'نوع توضیح ' + (key + 1)"
+                                                                ></v-select>
+                                                            </v-col>
+                                                            <v-col cols="12" xs="12" sm="12" class="pb-0">
+                                                                <v-textarea
+                                                                    v-model="item.content"
+                                                                    outlined clearable
+                                                                    :error-messages="errors[`grammer_sections.${section_key}.grammer_explanations.${key}.content`] ? errors[`grammer_sections.${section_key}.grammer_explanations.${key}.content`] : null"
+                                                                    dense :label="'متن توضیح ' + (key + 1)"
+                                                                ></v-textarea>
+                                                            </v-col>
+                                                        </v-row>
+                                                        <div class="py-3 text-primary">
+                                                            <small>مثال برای توضیح</small>
+                                                        </div>
+                                                        <div v-for="(example , example_key) in item.grammer_examples" style="padding-inline: .5rem; border-radius: .5rem; background: #8647ff29; margin-bottom: 1.5rem;">
+                                                            <v-row>
+                                                                <v-col cols="12" xs="12" sm="12" class="pb-0">
+                                                                    <v-text-field
+                                                                        v-model="example.english_content"
+                                                                        outlined clearable
+                                                                        dense :label="'متن انگلیسی مثال ' + (example_key + 1)"
+                                                                        :error-messages="errors[`grammer_sections.${section_key}.grammer_explanations.${key}.grammer_examples.${example_key}.english_content`] ? errors[`grammer_sections.${section_key}.grammer_explanations.${key}.grammer_examples.${example_key}.english_content`] : null"
+                                                                    ></v-text-field>
+                                                                </v-col>
+                                                                <v-col cols="12" xs="12" sm="12" class="pb-0">
+                                                                    <v-text-field
+                                                                        v-model="example.persian_content"
+                                                                        outlined clearable
+                                                                        append-outer-icon="mdi-delete"
+                                                                        @click:append-outer="removeExample(key , example_key, section_key)"
+                                                                        dense :label="'متن فارسی ' + (example_key + 1)"
+                                                                        :error-messages="errors[`grammer_sections.${section_key}.grammer_explanations.${key}.grammer_examples.${example_key}.persian_content`] ? errors[`grammer_sections.${section_key}.grammer_explanations.${key}.grammer_examples.${example_key}.persian_content`] : null"
+                                                                    ></v-text-field>
+                                                                </v-col>
+                                                            </v-row>
+                                                        </div>
+                                                        <div class="d-flex justify-end mb-3">
+                                                            <v-btn x-small color="primary" dark @click="addExample(key, section_key)">افزودن مثال </v-btn>
+                                                        </div>
+                                                        <hr style="margin-block: 8px; border-style: dashed;">
+                                                    </div>
+                                                </draggable>
+                                            </v-container>
+                                        </v-expansion-panel-content>
+                                    </v-expansion-panel>
+                                </draggable>
                             </v-expansion-panels>
                         </div>
                     </v-tab-item>
@@ -247,8 +245,13 @@
     </div>
 </template>
 <script>
+import draggable from 'vuedraggable'
+
 export default {
     name:'edit_grammer',
+    components: {
+        draggable,
+    },
     data: () => ({
         tab:'main',
         rules_filter:{},

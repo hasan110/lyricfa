@@ -28,6 +28,6 @@ class Grammer extends Model
 
     public function grammer_sections()
     {
-        return $this->hasMany(GrammerSection::class, 'grammer_id');
+        return $this->hasMany(GrammerSection::class, 'grammer_id')->orderBy('priority');
     }
 }

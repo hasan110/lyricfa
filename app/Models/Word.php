@@ -15,7 +15,7 @@ class Word extends Model
 
     public function word_definitions()
     {
-        return $this->hasMany(WordDefinition::class);
+        return $this->hasMany(WordDefinition::class)->orderBy("priority");
     }
 
     public static function getWordTypes()

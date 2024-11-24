@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class File extends Model
 {
@@ -19,7 +20,9 @@ class File extends Model
         Music::POSTER_FILE_TYPE,
         Music::SOURCE_FILE_TYPE,
         Singer::POSTER_FILE_TYPE,
-        Notification::IMAGE_FILE_TYPE
+        Notification::IMAGE_FILE_TYPE,
+        WordDefinition::IMAGE_FILE_TYPE,
+        IdiomDefinition::IMAGE_FILE_TYPE,
     ];
 
     public const TYPES_PATH = [
@@ -31,6 +34,8 @@ class File extends Model
         Music::SOURCE_FILE_TYPE => 'musics/128',
         Singer::POSTER_FILE_TYPE => 'singers',
         Notification::IMAGE_FILE_TYPE => 'notifications',
+        WordDefinition::IMAGE_FILE_TYPE => 'words',
+        IdiomDefinition::IMAGE_FILE_TYPE => 'idioms',
     ];
 
     public function fileable()
@@ -58,14 +63,18 @@ class File extends Model
         return null;
     }
 
-    public static function createFile($file, $model, $type)
+    public static function createFile($file, $model, $type, $custom_name = false): ?string
     {
-        if (!self::checkType($type)) {
-            return null;
-        }
+        if (!$file || !$model) return null;
+
+        if (!self::checkType($type)) return null;
 
         $path = self::TYPES_PATH[$type];
-        $file_name = $model->id . '.' .$file->getClientOriginalExtension();
+        if ($custom_name) {
+            $file_name = $model->id . '-' . date('Ymd') . '-' . Str::random(8) . '.' . $file->extension();
+        } else {
+            $file_name = $model->id . '.' .$file->getClientOriginalExtension();
+        }
         if(config('app.deployed')){
             Storage::disk('ftp')->put('uploads/'. $path .'/'. $file_name, fopen($file, 'r+'));
         }else{
@@ -82,5 +91,20 @@ class File extends Model
         ]);
 
         return $upload_path;
+    }
+
+    public static function deleteFile($files , $type)
+    {
+        foreach ($files as $file) {
+            if ($file->type === $type) {
+                if(config('app.deployed')){
+                    Storage::disk('ftp')->delete($file->upload_path);
+                }else{
+                    \Illuminate\Support\Facades\File::delete(public_path().'/'.$file->upload_path);
+                }
+                $file->delete();
+            }
+        }
+        return true;
     }
 }

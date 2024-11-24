@@ -70,57 +70,59 @@
                     </div>
                 </div>
                 <v-container>
-                    <div v-for="(item , key) in form_data.definitions" :key="key">
-                        <v-row>
-                            <v-col cols="12" sm="12" md="8" class="pb-0">
-                                <v-text-field
-                                    v-model="item.definition"
-                                    outlined clearable
-                                    :error-messages="errors[`definitions.${key}.definition`] ? errors[`definitions.${key}.definition`] : null"
-                                    dense :label="'معنی ' + (key + 1)"
-                                ></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="12" md="4" class="pb-0">
-                                <v-select
-                                    v-model="item.level" outlined
-                                    append-outer-icon="mdi-delete"
-                                    :items="levels"
-                                    @click:append-outer="removeDefinition(1 , key)"
-                                    :error-messages="errors[`definitions.${key}.level`] ? errors[`definitions.${key}.level`] : null"
-                                    dense :label="'سطح معنی ' + (key + 1)"
-                                ></v-select>
-                            </v-col>
-                        </v-row>
-                        <div>
-                            <small>مثال برای معنی</small>
-                        </div>
-                        <div v-for="(example , example_key) in item.definition_examples">
+                    <draggable v-model="form_data.definitions" class="w-100">
+                        <div v-for="(item , key) in form_data.definitions" :key="key">
                             <v-row>
-                                <v-col cols="12" xs="12" sm="6" class="pb-0">
-                                    <v-textarea
-                                        v-model="example.phrase"
-                                        outlined clearable rows="3"
-                                        dense :label="'عبارت ' + (example_key + 1)"
-                                        :error-messages="errors[`definitions.${key}.definition_examples.${example_key}.phrase`] ? errors[`definitions.${key}.definition_examples.${example_key}.phrase`] : null"
-                                    ></v-textarea>
+                                <v-col cols="12" sm="12" md="8" class="pb-0">
+                                    <v-text-field
+                                        v-model="item.definition"
+                                        outlined clearable
+                                        :error-messages="errors[`definitions.${key}.definition`] ? errors[`definitions.${key}.definition`] : null"
+                                        dense :label="'معنی ' + (key + 1)"
+                                    ></v-text-field>
                                 </v-col>
-                                <v-col cols="12" xs="12" sm="6" class="pb-0">
-                                    <v-textarea
-                                        v-model="example.definition"
-                                        outlined clearable rows="3"
+                                <v-col cols="12" sm="12" md="4" class="pb-0">
+                                    <v-select
+                                        v-model="item.level" outlined
                                         append-outer-icon="mdi-delete"
-                                        @click:append-outer="removeExample(key , example_key)"
-                                        dense :label="'معنی عبارت ' + (example_key + 1)"
-                                        :error-messages="errors[`definitions.${key}.definition_examples.${example_key}.definition`] ? errors[`definitions.${key}.definition_examples.${example_key}.definition`] : null"
-                                    ></v-textarea>
+                                        :items="levels"
+                                        @click:append-outer="removeDefinition(1 , key)"
+                                        :error-messages="errors[`definitions.${key}.level`] ? errors[`definitions.${key}.level`] : null"
+                                        dense :label="'سطح معنی ' + (key + 1)"
+                                    ></v-select>
                                 </v-col>
                             </v-row>
+                            <div class="mt-4">
+                                <small>مثال برای معنی</small>
+                            </div>
+                            <div v-for="(example , example_key) in item.definition_examples">
+                                <v-row>
+                                    <v-col cols="12" xs="12" sm="6" class="pb-0">
+                                        <v-textarea
+                                            v-model="example.phrase"
+                                            outlined clearable rows="3"
+                                            dense :label="'عبارت ' + (example_key + 1)"
+                                            :error-messages="errors[`definitions.${key}.definition_examples.${example_key}.phrase`] ? errors[`definitions.${key}.definition_examples.${example_key}.phrase`] : null"
+                                        ></v-textarea>
+                                    </v-col>
+                                    <v-col cols="12" xs="12" sm="6" class="pb-0">
+                                        <v-textarea
+                                            v-model="example.definition"
+                                            outlined clearable rows="3"
+                                            append-outer-icon="mdi-delete"
+                                            @click:append-outer="removeExample(key , example_key)"
+                                            dense :label="'معنی عبارت ' + (example_key + 1)"
+                                            :error-messages="errors[`definitions.${key}.definition_examples.${example_key}.definition`] ? errors[`definitions.${key}.definition_examples.${example_key}.definition`] : null"
+                                        ></v-textarea>
+                                    </v-col>
+                                </v-row>
+                            </div>
+                            <div class="d-flex justify-end">
+                                <v-btn x-small color="primary" dark @click="addExample(key)">افزودن مثال </v-btn>
+                            </div>
+                            <hr style="margin-block: 1rem;border-style: dashed;">
                         </div>
-                        <div class="d-flex justify-end">
-                            <v-btn x-small color="primary" dark @click="addExample(key)">افزودن مثال </v-btn>
-                        </div>
-                        <hr style="margin-block: 8px;">
-                    </div>
+                    </draggable>
                 </v-container>
                 <hr class="mt-3">
                 <div class="d-flex align-center justify-space-between pa-2">
@@ -168,7 +170,7 @@
                     </div>
                 </v-container>
 
-                <div class="text-center pt-3">
+                <div class="text-center pt-3 mb-4">
                     <v-btn
                         :loading="loading"
                         :disabled="loading"
@@ -183,8 +185,12 @@
     </div>
 </template>
 <script>
+import draggable from "vuedraggable";
 export default {
     name:'create_word',
+    components:{
+        draggable
+    },
     data: () => ({
         form_data:{
             english_word:'',

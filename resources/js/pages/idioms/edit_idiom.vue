@@ -108,57 +108,66 @@
                     </div>
                 </div>
                 <v-container>
-                    <div v-for="(item , key) in form_data.idiom_definitions" :key="key">
-                        <v-row>
-                            <v-col cols="12" sm="12" md="8" class="pb-0">
-                                <v-textarea
-                                    v-model="item.definition"
-                                    outlined clearable rows="3"
-                                    :error-messages="errors[`idiom_definitions.${key}.definition`] ? errors[`idiom_definitions.${key}.definition`] : null"
-                                    dense :label="'معنی ' + (key + 1)"
-                                ></v-textarea>
-                            </v-col>
-                            <v-col cols="12" sm="12" md="4" class="pb-0">
-                                <v-select
-                                    :items="levels"
-                                    v-model="item.level" outlined
-                                    append-outer-icon="mdi-delete"
-                                    @click:append-outer="removeDefinition(key)"
-                                    :error-messages="errors[`idiom_definitions.${key}.level`] ? errors[`idiom_definitions.${key}.level`] : null"
-                                    dense :label="'سطح معنی ' + (key + 1)"
-                                ></v-select>
-                            </v-col>
-                        </v-row>
-                        <div>
-                            <small>مثال برای معنی</small>
-                        </div>
-                        <div v-for="(example , example_key) in item.idiom_definition_examples">
+                    <draggable v-model="form_data.idiom_definitions" class="w-100">
+                        <div v-for="(item , key) in form_data.idiom_definitions" :key="key">
                             <v-row>
-                                <v-col cols="12" xs="12" sm="6" class="pb-0">
+                                <v-col v-if="item.idiom_definition_image" cols="12" xs="12" sm="12" class="pb-0">
+                                    <v-card rounded="lg" ripple max-width="200" width="100%" class="ma-auto">
+                                        <v-img width="100%" :src="item.idiom_definition_image"></v-img>
+                                    </v-card>
+                                </v-col>
+                                <v-col cols="12" sm="12" md="8" class="pb-0">
                                     <v-textarea
-                                        v-model="example.phrase"
+                                        v-model="item.definition"
                                         outlined clearable rows="3"
-                                        dense :label="'عبارت ' + (example_key + 1)"
-                                        :error-messages="errors[`idiom_definitions.${key}.idiom_definition_examples.${example_key}.phrase`] ? errors[`idiom_definitions.${key}.idiom_definition_examples.${example_key}.phrase`] : null"
+                                        :error-messages="errors[`idiom_definitions.${key}.definition`] ? errors[`idiom_definitions.${key}.definition`] : null"
+                                        dense :label="'معنی ' + (key + 1)"
+                                        :prepend-icon="item.id ? 'mdi-image-area' : ''"
+                                        @click:prepend="definition_upload_image = item , definition_upload_image_modal = true"
                                     ></v-textarea>
                                 </v-col>
-                                <v-col cols="12" xs="12" sm="6" class="pb-0">
-                                    <v-textarea
-                                        v-model="example.definition"
-                                        outlined clearable rows="3"
-                                        append-outer-icon="mdi-delete"
-                                        @click:append-outer="removeExample(key , example_key)"
-                                        dense :label="'معنی عبارت ' + (example_key + 1)"
-                                        :error-messages="errors[`idiom_definitions.${key}.idiom_definition_examples.${example_key}.definition`] ? errors[`idiom_definitions.${key}.idiom_definition_examples.${example_key}.definition`] : null"
-                                    ></v-textarea>
+                                <v-col cols="12" sm="12" md="4" class="pb-0">
+                                    <v-select
+                                        :items="levels"
+                                        v-model="item.level" outlined
+                                        :append-outer-icon="item.id ? '' : 'mdi-delete'"
+                                        @click:append-outer="removeDefinition(key)"
+                                        :error-messages="errors[`idiom_definitions.${key}.level`] ? errors[`idiom_definitions.${key}.level`] : null"
+                                        dense :label="'سطح معنی ' + (key + 1)"
+                                    ></v-select>
                                 </v-col>
                             </v-row>
+                            <div class="mb-4">
+                                <small>مثال برای معنی</small>
+                            </div>
+                            <div v-for="(example , example_key) in item.idiom_definition_examples">
+                                <v-row>
+                                    <v-col cols="12" xs="12" sm="6" class="pb-0">
+                                        <v-textarea
+                                            v-model="example.phrase"
+                                            outlined clearable rows="3"
+                                            dense :label="'عبارت ' + (example_key + 1)"
+                                            :error-messages="errors[`idiom_definitions.${key}.idiom_definition_examples.${example_key}.phrase`] ? errors[`idiom_definitions.${key}.idiom_definition_examples.${example_key}.phrase`] : null"
+                                        ></v-textarea>
+                                    </v-col>
+                                    <v-col cols="12" xs="12" sm="6" class="pb-0">
+                                        <v-textarea
+                                            v-model="example.definition"
+                                            outlined clearable rows="3"
+                                            append-outer-icon="mdi-delete"
+                                            @click:append-outer="removeExample(key , example_key)"
+                                            dense :label="'معنی عبارت ' + (example_key + 1)"
+                                            :error-messages="errors[`idiom_definitions.${key}.idiom_definition_examples.${example_key}.definition`] ? errors[`idiom_definitions.${key}.idiom_definition_examples.${example_key}.definition`] : null"
+                                        ></v-textarea>
+                                    </v-col>
+                                </v-row>
+                            </div>
+                            <div class="d-flex justify-end">
+                                <v-btn x-small color="primary" dark @click="addExample(key)">افزودن مثال </v-btn>
+                            </div>
+                            <hr style="margin-block: 1rem;border-style: dashed;">
                         </div>
-                        <div class="d-flex justify-end">
-                            <v-btn x-small color="primary" dark @click="addExample(key)">افزودن مثال </v-btn>
-                        </div>
-                        <hr style="margin-block: 8px;">
-                    </div>
+                    </draggable>
                 </v-container>
 
                 <div class="text-center pt-3">
@@ -173,11 +182,53 @@
             </v-container>
         </div>
 
+        <v-dialog
+            max-width="600"
+            v-model="definition_upload_image_modal"
+        >
+            <v-card>
+                <v-toolbar
+                    color="accent"
+                    dark
+                >انتخاب تصویر جدید برای معنی با شناسه {{definition_upload_image.id}}</v-toolbar>
+                <v-card-text>
+                    <v-container>
+                        <v-row class="pt-3">
+                            <v-col cols="12" class="pb-0">
+                                <v-file-input
+                                    label="تصویر خود را انتخاب کنید"
+                                    outlined dense
+                                    v-model="definition_upload_image.image"
+                                    hint="فرمت تصویر باید jpg و سایز آن 450*300 و حجمش حداکثر 50kb باشد"
+                                    show-size accept="image/*" persistent-hint
+                                    :error-messages="errors.image"
+                                ></v-file-input>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                </v-card-text>
+
+                <v-card-actions class="justify-end">
+                    <v-btn color="danger" dark @click="definition_upload_image_modal = false">بستن</v-btn>
+                    <v-btn
+                        :loading="upload_loading"
+                        :disabled="upload_loading"
+                        color="success"
+                        @click="uploadDefinitionImage()"
+                    >آپلود</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
     </div>
 </template>
 <script>
+import draggable from 'vuedraggable'
 export default {
     name:'create_idiom',
+    components:{
+        draggable
+    },
     data: () => ({
         form_data:{
             idiom_definitions: [
@@ -188,7 +239,10 @@ export default {
                 }
             ]
         },
+        definition_upload_image:{},
         errors:{},
+        definition_upload_image_modal: false,
+        upload_loading: false,
         loading: false,
     }),
     methods:{
@@ -221,24 +275,50 @@ export default {
         getIdiom(id){
             this.$store.commit('SHOW_APP_LOADING' , 1)
             this.$http.post(`idioms/single` , {id:id})
-                .then(res => {
-                    this.form_data = res.data.data
-                    this.$store.commit('SHOW_APP_LOADING' , 0)
-                })
-                .catch( () => {
-                    this.$store.commit('SHOW_APP_LOADING' , 0)
-                    this.$router.replace({name:'idioms'});
-                });
+            .then(res => {
+                this.form_data = res.data.data
+                this.$store.commit('SHOW_APP_LOADING' , 0)
+            })
+            .catch( () => {
+                this.$store.commit('SHOW_APP_LOADING' , 0)
+                this.$router.replace({name:'idioms'});
+            });
         },
         editIdiom(){
             this.loading = true;
             this.$http.post(`idioms/update` , this.form_data)
+            .then(res => {
+                this.form_data = {
+                    idiom_definitions: [],
+                    idiom_definition_examples: []
+                };
+                this.loading = false;
+                this.$fire({
+                    title: "موفق",
+                    text: res.data.message,
+                    type: "success",
+                    timer: 5000
+                })
+                this.$router.push({name:'idioms'})
+            })
+            .catch( err => {
+                this.loading = false;
+                const e = err.response.data
+                if(e.errors){ this.errors = e.errors }
+                else if(e.message){
+                    this.$fire({
+                        title: "خطا",
+                        text: e.message,
+                        type: "error",
+                        timer: 5000
+                    })
+                }
+            });
+        },
+        deleteIdiom(){
+            if (confirm('باحذف این اصطلاح تمامی معانی و مثال های مرتبط باآن حذف خواهد شد. \n \n از حذف اصطلاح اطمینان دارید؟')){
+                this.$http.post(`idioms/remove` , {id:this.form_data.id})
                 .then(res => {
-                    this.form_data = {
-                        idiom_definitions: [],
-                        idiom_definition_examples: []
-                    };
-                    this.loading = false;
                     this.$fire({
                         title: "موفق",
                         text: res.data.message,
@@ -260,36 +340,42 @@ export default {
                         })
                     }
                 });
+            }
         },
-        deleteIdiom(){
-            if (confirm('باحذف این اصطلاح تمامی معانی و مثال های مرتبط باآن حذف خواهد شد. \n \n از حذف اصطلاح اطمینان دارید؟')){
-                this.$http.post(`idioms/remove` , {id:this.form_data.id})
-                    .then(res => {
+        uploadDefinitionImage(){
+            this.upload_loading = true
+            const form = new FormData();
+
+            this.definition_upload_image.id ? form.append('idiom_definition_id', this.definition_upload_image.id) : '';
+            this.definition_upload_image.image ? form.append('image', this.definition_upload_image.image) : '';
+
+            this.$http.post(`idioms/add_image` , form)
+                .then(res => {
+                    this.definition_upload_image = {};
+                    this.$fire({
+                        title: "موفق",
+                        text: res.data.message,
+                        type: "success",
+                        timer: 5000
+                    })
+                    this.getIdiom(this.$route.params.id)
+                    this.definition_upload_image_modal = false;
+                })
+                .catch( err => {
+                    const e = err.response.data
+                    if(e.errors){ this.errors = e.errors }
+                    else {
                         this.$fire({
-                            title: "موفق",
-                            text: res.data.message,
-                            type: "success",
+                            title: "خطا",
+                            text: e.message,
+                            type: "error",
                             timer: 5000
                         })
-                        this.$router.push({name:'idioms'})
-                    })
-                    .catch( err => {
-                        this.loading = false;
-                        const e = err.response.data
-                        if(e.errors){ this.errors = e.errors }
-                        else if(e.message){
-
-                            this.$fire({
-                                title: "خطا",
-                                text: e.message,
-                                type: "error",
-                                timer: 5000
-                            })
-
-                        }
-                    });
-            }
-        }
+                    }
+                }).finally(() => {
+                this.upload_loading = false;
+            });
+        },
     },
     beforeMount(){
         this.checkAuth()

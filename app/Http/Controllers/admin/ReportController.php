@@ -20,19 +20,25 @@ class ReportController extends Controller
             'title.required' => 'تعداد روزهای اشتراک نمی تواند خالی باشد',
             'title.numeric' => 'تعداد روزهای اشتراک باید عدد صحیح باشد',
             'description.required' => 'دلیل اشتراک نمی تواند خالی باشد',
+            'type.required' => 'نوع اعمال نمی تواند خالی باشد',
+            'val_money.required_if' => 'مقدار پرداختی الزامی است',
+            'ref_id.required_if' => 'کد درگاه / پیگیری الزامی است',
         );
 
         $validator = Validator::make($request->all(), [
             'user_id' => 'required',
             'title' => 'required|numeric',
             'description' => 'required',
+            'type' => 'required',
+            'val_money' => 'required_if:type,0',
+            'ref_id' => 'required_if:type,0',
         ], $messages);
 
         if ($validator->fails()) {
             return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
-                'message' => " شکست در وارد کردن اطلاعات",
+                'message' => " لطفا تمامی فیلد ها را به دقت پر کنید",
             ], 400);
         }
 
@@ -49,12 +55,12 @@ class ReportController extends Controller
 
         $report = new Report();
         $report->user_id = $request->user_id;
-        $report->ref_id = 0;
-        $report->val_money = 0 ;
+        $report->ref_id = $request->ref_id;
+        $report->val_money = $request->val_money;
         $report->id_zarin = 0;
         $report->description = $request->description;
-        $report->title = $request->title;
-        $report->type = 1;
+        $report->title = null;
+        $report->type = $request->type;
         $report->save();
 
         return response()->json([

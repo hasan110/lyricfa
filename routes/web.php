@@ -44,15 +44,8 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
         Route::post('/update', [IdiomController::class, 'updateIdiom'])->name('idioms/update');
         Route::post('/update_level', [IdiomController::class, 'updateIdiomLevel'])->name('idioms/update/level');
         Route::post("/remove", [IdiomController::class, "removeIdiom"])->name('idioms/remove');
+        Route::post("/add_image", [IdiomController::class, "addImageToDefinition"])->name('idioms/add_image');
     });
-
-
-    Route::prefix('idioms_text')->group(function () {
-        Route::post('/create', [TextIdiomsController::class, 'createTextIdiom'])->name('idioms_text/create');
-        Route::post('/list', [TextIdiomsController::class, 'getTextIdioms'])->name('idioms_text/list');
-        Route::post('/remove', [TextIdiomsController::class, 'deleteTextIdiom'])->name('idioms_text/remove');
-    });
-
 
     Route::prefix('notifications')->group(function () {
         Route::post('/send', [NotificationController::class, 'sendFCM'])->name('notifications/send');
@@ -153,6 +146,7 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
         Route::post("/create", [WordController::class, "createWord"])->name('words/create');
         Route::post("/remove", [WordController::class, "removeWord"])->name('words/remove');
         Route::get( "/types",  [WordController::class, "getTypes"])->name('words/types');
+        Route::post( "/add_image",  [WordController::class, "addImageToDefinition"])->name('words/add_image');
     });
 
     Route::prefix('replace')->group(function () {
