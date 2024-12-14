@@ -267,7 +267,7 @@ class GrammerController extends Controller
 
         foreach ($request->grammer_sections as $section_key => $section)
         {
-            if ($section['id']) {
+            if (isset($section['id'])) {
                 $grammer_section = GrammerSection::find($section['id']);
                 if (!$grammer_section) continue;
                 $grammer_section->update([
@@ -286,7 +286,7 @@ class GrammerController extends Controller
             }
             foreach ($section['grammer_explanations'] as $explanation_key => $explanation)
             {
-                if ($explanation['id']) {
+                if (isset($explanation['id'])) {
                     $grammer_explanation = GrammerExplanation::find($explanation['id']);
                     if (!$grammer_explanation) continue;
                     $grammer_explanation->update([

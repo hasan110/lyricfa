@@ -299,7 +299,7 @@ export default {
                     type: "success",
                     timer: 5000
                 })
-                this.$router.push({name:'idioms'})
+                this.getIdiom(this.$route.params.id);
             })
             .catch( err => {
                 this.loading = false;

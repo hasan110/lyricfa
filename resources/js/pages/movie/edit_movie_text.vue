@@ -203,7 +203,16 @@
                                 ></v-file-input>
                             </v-col>
                             <v-col cols="12" class="pb-0">
-                                <v-checkbox v-model="form_data.just_english" label="فقط متن انگلیسی ؟"></v-checkbox>
+                                <v-checkbox v-model="form_data.persian_subtitle" label="زیر نویس فارسی جداگانه؟"></v-checkbox>
+                            </v-col>
+                            <v-col v-if="form_data.persian_subtitle" cols="12" class="pb-0">
+                                <v-file-input
+                                    label="زیر نویس فارسی را انتخاب کنید"
+                                    outlined
+                                    dense
+                                    v-model="form_data.persian_lyrics"
+                                    show-size
+                                ></v-file-input>
                             </v-col>
                         </v-row>
 
@@ -248,7 +257,8 @@ export default {
         errors:{},
         form_data:{
             lyrics:null,
-            just_english:false,
+            persian_lyrics:null,
+            persian_subtitle:false,
         },
         upload_modal: false,
         upload_loading: false,
@@ -377,7 +387,8 @@ export default {
             const d = new FormData();
             d.append('id', this.movie_id);
             this.form_data.lyrics ? d.append('lyrics', this.form_data.lyrics) : '';
-            d.append('just_english', this.form_data.just_english ? 1 : 0);
+            this.form_data.persian_lyrics ? d.append('persian_lyrics', this.form_data.persian_lyrics) : '';
+            d.append('persian_subtitle', this.form_data.persian_subtitle ? '1' : '0');
             this.upload_loading = true
             this.$http.post(`film_texts/upload` , d).then(res => {
                 this.upload_loading = false

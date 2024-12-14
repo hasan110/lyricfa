@@ -174,12 +174,15 @@ class FilmTextController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required|numeric',
-            'lyrics' => 'required|file|max:512'
+            'lyrics' => 'required|file',
+            'persian_lyrics' => 'file|required_if:persian_subtitle,1'
         ], array(
             'id.required' => 'شناسه ی آهنگ الزامی است',
             'id.numeric' => 'شناسه ی آهنگ باید عدد باشد',
             'lyrics.required' => 'فایل متنی الزامی می باشد',
-            'lyrics.file' => 'نوع فایل باید فایل باشد',
+            'lyrics.file' => 'نوع زیرنویس باید فایل باشد',
+            'persian_lyrics.file' => 'نوع زیرنویس فارسی باید فایل باشد',
+            'persian_lyrics.required_if' => 'انتخاب زیرنویس فارسی الزامی می باشد',
             'lyrics.max' => 'ماکزیمم سایز یک مگا بایت',
         ));
 
@@ -192,45 +195,86 @@ class FilmTextController extends Controller
         }
 
         $upload_path = $this->uploadFile($request->lyrics, "film_texts");
-        $just_english = $request->has('just_english') && intval($request->just_english);
+        $persian_subtitle = $request->has('persian_subtitle') && intval($request->persian_subtitle);
 
         $contents = file_get_contents(config('app.files_base_path').$upload_path);
 
         $content = explode(PHP_EOL, $contents);
 
         $mainList = array();
-        if ($just_english) {
-            $list = [];
-            $chunked = [];
-            foreach ($content as $index => $item) {
-                $item = str_replace("\r", '', $item);
-                if (strlen($item) > 0) {
-                    $chunked[] = $item;
-                } else {
-                    $list[] = $chunked;
-                    $chunked = [];
+        if ($persian_subtitle) {
+            if ($request->hasFile('persian_lyrics')) {
+                $persian_upload_path = $this->uploadFile($request->persian_lyrics, "film_texts");
+                $persian_contents = file_get_contents(config('app.files_base_path').$persian_upload_path);
+                $persian_content = explode(PHP_EOL, $persian_contents);
+
+                $separated_blocks = [];
+                $new_block = [];
+                foreach ($content as $block) {
+                    if (strlen(trim($block)) === 0) {
+                        $separated_blocks[] = $new_block;
+                        $new_block = [];
+                        continue;
+                    }
+                    $new_block[] = $block;
                 }
-            }
-            foreach ($list as $value) {
-                $object = array(
-                    "text_english" => "",
-                    "text_persian" => "",
-                    "start_time" => "",
-                    "end_time" => "",
-                );
-                foreach ($value as $key => $data) {
-                    if ($key === 0) continue;
-                    if ($key === 1) {
-                        $object["start_time"] = (new FilmHelper())->getStartTime($data);
-                        $object["end_time"] = (new FilmHelper())->getEndTime($data);
-                    } else  {
-                        $object["text_english"] .= strip_tags($data).PHP_EOL;
+
+                $persian_separated_blocks = [];
+                $persian_new_block = [];
+                foreach ($persian_content as $persian_block) {
+                    if (strlen(trim($persian_block)) === 0 && count($persian_new_block) > 0) {
+                        $persian_separated_blocks[] = $persian_new_block;
+                        $persian_new_block = [];
+                        continue;
+                    }
+                    $persian_new_block[] = $persian_block;
+                }
+
+                $text_persian_list = [];
+                foreach ($persian_separated_blocks as $key => $persian_block) {
+                    $text_persian = '';
+                    foreach ($persian_block as $block_key => $item) {
+                        if ($block_key === 0 || $block_key === 1 || strlen(trim($item)) === 0) continue;
+                        if (strlen($text_persian)) {
+                            $text_persian .= "\n".$item;
+                        } else {
+                            $text_persian = $item;
+                        }
+                    }
+                    $text_persian_list[] = $text_persian;
+                }
+
+                foreach ($separated_blocks as $key => $block) {
+                    $object = array(
+                        "text_english" => "",
+                        "text_persian" => "",
+                        "start_time" => "",
+                        "end_time" => "",
+                    );
+                    if (isset($text_persian_list[$key])) {
+                        $object["text_persian"] = $text_persian_list[$key];
+                    }
+                    $text_english = '';
+                    foreach ($block as $block_key => $item) {
+                        if ($block_key === 0) continue;
+                        if ($block_key === 1) {
+                            $object["start_time"] = (new FilmHelper())->getStartTime($item);
+                            $object["end_time"] = (new FilmHelper())->getEndTime($item);
+                            continue;
+                        }
+                        if (strlen($text_english)) {
+                            $text_english .= "\n".$item;
+                        } else {
+                            $text_english = $item;
+                        }
+                    }
+                    $object["text_english"] = $text_english;
+                    if ($object["start_time"]) {
+                        $mainList[] = $object;
                     }
                 }
-                if ($object["text_english"] == "") {
-                    continue;
-                }
-                $mainList[] = $object;
+
+                $this->deleteFile($persian_upload_path);
             }
         } else {
             $separated_blocks = [];

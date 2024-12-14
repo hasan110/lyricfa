@@ -215,7 +215,7 @@ class IdiomController extends Controller
 
         foreach ($request->idiom_definitions as $key => $definition)
         {
-            if ($definition['id']) {
+            if (isset($definition['id'])) {
                 $idiom_definition = IdiomDefinition::find($definition['id']);
                 if (!$idiom_definition) continue;
             } else {
