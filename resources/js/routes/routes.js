@@ -10,12 +10,12 @@ import user from '../pages/user/user.vue';
 import movies from '../pages/movie/movies.vue';
 import create_movie from '../pages/movie/create_movie.vue';
 import edit_movie from '../pages/movie/edit_movie.vue';
-import edit_movie_text from '../pages/movie/edit_movie_text.vue';
 
 import musics from '../pages/music/musics.vue';
 import create_music from '../pages/music/create_music.vue';
 import edit_music from '../pages/music/edit_music.vue';
-import edit_music_text from '../pages/music/edit_music_text.vue';
+
+import edit_texts from '../pages/texts/edit_texts.vue';
 
 import singers from '../pages/singer/singers.vue';
 
@@ -75,12 +75,12 @@ const allUrl = [
     { path: '/musics', name: 'musics', component: musics },
     { path: '/musics/create', name: 'create_music', component: create_music },
     { path: '/musics/edit/:id', name: 'edit_music', component: edit_music },
-    { path: '/musics/edit_text/:id', name: 'edit_music_text', component: edit_music_text },
 
     { path: '/movies', name: 'movies', component: movies },
     { path: '/movies/create', name: 'create_movie', component: create_movie },
     { path: '/movies/edit/:id', name: 'edit_movie', component: edit_movie },
-    { path: '/movies/edit_text/:id', name: 'edit_movie_text', component: edit_movie_text },
+
+    { path: '/edit_texts/:type/:textable_id', name: 'edit_texts', component: edit_texts },
 
     { path: '/singers', name: 'singers', component: singers },
 

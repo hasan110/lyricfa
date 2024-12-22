@@ -186,7 +186,7 @@
     unicode-bidi: plaintext;
 }
 
-.video-wrapper {
+.mini-player-wrapper {
     position: fixed;
     right: 50%;
     bottom: 0;
@@ -198,7 +198,15 @@
     box-shadow: 0 0 20px -2px;
     border-radius: 1rem 1rem 0 0;
 }
-.close-video-wrapper{
+.mini-player-wrapper.audio {
+    height: 100px;
+    padding: 0 8px;
+}
+.mini-player-wrapper.audio audio{
+    width: 100%;
+    margin-top: 2.5rem;
+}
+.close-mini-player-wrapper{
     position: absolute;
     left: 5px;
     top: 5px;

@@ -129,12 +129,12 @@
                                         ویرایش
                                     </router-link>
                                 </v-btn>
-                                <v-btn v-if="item.type == 1" color="primary" dens small>
-                                    <router-link :to="{ name:'edit_movie_text' , params:{ id:item.id } }">
+                                <v-btn v-if="item.type === 1" color="primary" dens small>
+                                    <router-link :to="{ name:'edit_texts' , params:{ type:'film',textable_id:item.id } }">
                                         ویرایش متن
                                     </router-link>
                                 </v-btn>
-                                <v-btn v-if="item.type == 2" color="primary" dens small @click="getChilds(item.id , 1)">
+                                <v-btn v-if="item.type === 2" color="primary" dens small @click="getChilds(item.id , 1)">
                                     بخش ها
                                 </v-btn>
                             </td>
@@ -232,12 +232,12 @@
                                         ویرایش
                                     </router-link>
                                 </v-btn>
-                                <v-btn v-if="item.type == 4" color="primary" dens small>
-                                    <router-link :to="{ name:'edit_movie_text' , params:{ id:item.id } }">
+                                <v-btn v-if="parseInt(item.type) === 4" color="primary" dens small>
+                                    <router-link :to="{ name:'edit_texts' , params:{ type:'film',textable_id:item.id } }">
                                         ویرایش متن
                                     </router-link>
                                 </v-btn>
-                                <v-btn v-if="item.type == 3" color="primary" dens small @click="getChilds(item.id , 2)">
+                                <v-btn v-if="parseInt(item.type) === 3" color="primary" dens small @click="getChilds(item.id , 2)">
                                     بخش ها
                                 </v-btn>
                             </td>
@@ -319,7 +319,7 @@
                                     </router-link>
                                 </v-btn>
                                 <v-btn color="primary" dens small>
-                                    <router-link :to="{ name:'edit_movie_text' , params:{ id:item.id } }">
+                                    <router-link :to="{ name:'edit_texts' , params:{ type:'film',textable_id:item.id } }">
                                         ویرایش متن
                                     </router-link>
                                 </v-btn>

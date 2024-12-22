@@ -47,7 +47,11 @@ class UserHelper extends Helper
             $phone_number = substr($phone_number, -strlen($phone_number) + 1);
         }
         $user = User::where('phone_number', $phone_number)->first();
-        $user->tokens()->delete();
+        $tokens = $user->tokens()->latest()->get();
+        foreach ($tokens as $key => $token) {
+            if ($key === 0) continue;
+            $token->delete();
+        }
         $token = $user->createToken(config('app.name') . '-' . $corridor);
         $user->api_token = $token->plainTextToken;
         return $user;
@@ -56,7 +60,11 @@ class UserHelper extends Helper
     public function generateTokenByAbsolutePhoneNumber($phone_number , $prefix , $corridor = 'app')
     {
         $user = User::where('phone_number', $phone_number)->where('prefix_code', $prefix)->first();
-        $user->tokens()->delete();
+        $tokens = $user->tokens()->latest()->get();
+        foreach ($tokens as $key => $token) {
+            if ($key === 0) continue;
+            $token->delete();
+        }
         $token = $user->createToken(config('app.name') . '-' . $corridor);
         $user->api_token = $token->plainTextToken;
         return $user;
@@ -84,7 +92,6 @@ class UserHelper extends Helper
 
         $user->save();
 
-        $user->tokens()->delete();
         $token = $user->createToken(config('app.name').'-'.$corridor);
         $user->api_token = $token->plainTextToken;
 

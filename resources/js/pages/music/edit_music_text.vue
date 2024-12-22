@@ -64,9 +64,9 @@
                         <thead>
                         <tr>
                             <th style="width: 5px;">#</th>
+                            <th style="width: 100px;">شناسه</th>
                             <th style="width: 220px;">متن انگلیسی</th>
                             <th style="width: 220px;">متن فارسی</th>
-                            <th style="width: 220px;">توضیحات</th>
                             <th style="width: 100px;">شروع</th>
                             <th style="width: 100px;">پایان</th>
                             <th style="width: 10px;">افزودن</th>
@@ -78,6 +78,7 @@
                             <td>
                                 {{ index + 1 }}
                             </td>
+                            <td class="text-center">{{ row.id }}</td>
                             <td>
                                 <v-textarea
                                     v-model="row.text_english"
@@ -90,13 +91,6 @@
                                 <v-textarea
                                     v-model="row.text_persian"
                                     :background-color="(text_errors[index] && text_errors[index].text_persian ? 'red lighten-5' : null) || (!row.text_persian ? 'red lighten-5' : null)"
-                                    outlined
-                                    dense
-                                ></v-textarea>
-                            </td>
-                            <td>
-                                <v-textarea
-                                    v-model="row.comments"
                                     outlined
                                     dense
                                 ></v-textarea>
@@ -348,7 +342,7 @@ export default {
                     timer: 5000
                 })
 
-                const texts = res.data
+                const texts = res.data.data
                 if(texts.length > 0){
                     this.rows = texts
                 }

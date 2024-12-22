@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Helpers\FilmHelper;
 use App\Http\Helpers\UserHelper;
 use App\Models\Film;
-use App\Models\FilmText;
 use App\Models\ReplaceRule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -34,16 +33,22 @@ class FilmTextController extends Controller
             ], 400);
         }
 
-        if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken"))) {
-
-            $films = FilmText::where('film_id', '=', $request->id_film)->orderBy("id")->skip($request->page * 25)->take(25)->get();
-
+        $film = Film::where('id', $request->id_film)->where('status' , 1)->first();
+        if (!$film) {
             return response()->json([
-                'data' => $films,
+                'data' => null,
+                'errors' => [],
+                'message' => "فیلم یافت نشد."
+            ], 400);
+        }
+
+        if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken"))) {
+            $texts = $film->texts()->orderBy("start_time")->skip($request->page * 25)->take(25)->get();
+            return response()->json([
+                'data' => $texts,
                 'errors' => null,
                 'message' => "اطلاعات با موفقیت گرفته شد",
             ]);
-
         } else {
             return response()->json([
                 'data' => null,
@@ -88,7 +93,7 @@ class FilmTextController extends Controller
 
         if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken"))) {
 
-            $texts = FilmText::where('film_id', '=', $film_id)->orderBy("id")->paginate(50);
+            $texts = $film->texts()->orderBy("start_time")->paginate(50);
             return response()->json([
                 'data' => [
                     'film' => $film,
@@ -110,10 +115,18 @@ class FilmTextController extends Controller
 
     public function getTimesForPagin(Request $request)
     {
-        $id_film = $request->id_film;
-        $films = FilmText::where('film_id', '=', $id_film)->orderBy("id")->get()->toArray();
+        $film = Film::where('id' , $request->id_film)->where('status' , 1)->first();
+        if (!$film) {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => "فیلم یافت نشد."
+            ], 400);
+        }
 
-        if (!count($films)) {
+        $texts = $film->texts()->orderBy("start_time")->get()->toArray();
+
+        if (!count($texts)) {
             return response()->json([
                 'data' => null,
                 'errors' => null,
@@ -121,7 +134,7 @@ class FilmTextController extends Controller
             ], 400);
         }
 
-        $chunked = array_chunk($films, 25);
+        $chunked = array_chunk($texts, 25);
         $result = [];
 
         foreach ($chunked as $item) {

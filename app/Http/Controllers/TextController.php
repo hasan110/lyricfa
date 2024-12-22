@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Helpers\UserHelper;
-use App\Models\Text;
+use App\Models\Music;
 use Illuminate\Http\Request;
 
 class TextController extends Controller
@@ -12,8 +12,16 @@ class TextController extends Controller
     {
         if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken"))) {
 
-            $id_music = $request->id_music;
-            $texts = Text::where('id_music', '=', $id_music)->orderBy("id")->get();
+            $music = Music::where('id', $request->id_music)->first();
+            if (!$music) {
+                return response()->json([
+                    'data' => null,
+                    'errors' => [],
+                    'message' => "آهنگ یافت نشد",
+                ], 400);
+            }
+
+            $texts = $music->texts()->orderBy("start_time")->get();
 
             return response()->json([
                 'data' => $texts,

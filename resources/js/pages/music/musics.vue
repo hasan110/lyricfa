@@ -134,7 +134,7 @@
                                     </router-link>
                                 </v-btn>
                                 <v-btn color="primary" small>
-                                    <router-link :to="{ name:'edit_music_text' , params:{ id:item.id } }">
+                                    <router-link :to="{ name:'edit_texts' , params:{ type:'music',textable_id:item.id } }">
                                         ویرایش متن آهنگ
                                     </router-link>
                                 </v-btn>

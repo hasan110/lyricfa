@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\admin;
 
 use App\Models\Film;
-use App\Models\FilmText;
 use App\Models\Map;
 use App\Models\Music;
 use App\Models\ReplaceRule;
-use App\Models\Text;
 use App\Models\Word;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -40,26 +38,26 @@ class ReplaceController extends Controller
         $page = $request->input('page', 1);
 
         if ($request->input('type') == 'music') {
-            if (!Music::find($request->input('id'))) {
+            if (!$music = Music::find($request->input('id'))) {
                 return response()->json([
                     'data' => null,
                     'errors' => null,
                     'message' => "موزیک یافت نشد",
                 ], 400);
             }
-            $texts_query = Text::select(['id', 'text_english', 'text_persian'])->where('id_music' , $request->input('id'))->orderBy('id');
+            $texts_query = $music->texts()->select(['id', 'text_english', 'text_persian'])->orderBy('start_time');
             $total = $texts_query->count();
             $texts = $texts_query->offset(($page - 1) * $per_page)->limit($per_page)->get();
 
         } else if ($request->input('type') == 'film') {
-            if (!Film::find($request->input('id'))) {
+            if (!$film = Film::find($request->input('id'))) {
                 return response()->json([
                     'data' => null,
                     'errors' => null,
                     'message' => "فیلم یافت نشد",
                 ], 400);
             }
-            $texts_query = FilmText::select(['id', 'text_english', 'text_persian'])->where('film_id' , $request->input('id'))->orderBy('id');
+            $texts_query = $film->texts()->select(['id', 'text_english', 'text_persian'])->orderBy('start_time');
             $total = $texts_query->count();
             $texts = $texts_query->offset(($page - 1) * $per_page)->limit($per_page)->get();
 
@@ -246,12 +244,8 @@ class ReplaceController extends Controller
         try {
             if ($request->type === 'music') {
                 $model = Music::find($request->input('id'));
-                $text_model = new Text();
-                $related_column = 'id_music';
             } else if ($request->type === 'film') {
                 $model = Film::find($request->input('id'));
-                $text_model = new FilmText();
-                $related_column = 'film_id';
             } else {
                 throw new Exception(" نوع متن معتبر نیست.");
             }
@@ -261,7 +255,7 @@ class ReplaceController extends Controller
             }
 
             foreach ($request->input('texts') as $text) {
-                $model_text = $text_model->where('id',$text['id'])->where($related_column,$model->id)->first();
+                $model_text = $model->texts()->where('id',$text['id'])->first();
                 if (!$model_text) {
                     continue;
                 }

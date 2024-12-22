@@ -6,7 +6,6 @@ use App\Http\Helpers\MusicHelper;
 use App\Http\Helpers\UserHelper;
 use App\Models\Music;
 use App\Models\Singer;
-use App\Models\Text;
 use App\Models\View;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -225,7 +224,7 @@ class MusicController extends Controller
 
         $texts = [];
         if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken"))) {
-            $texts = Text::where('id_music', '=', $request->id)->orderBy("id")->get();
+            $texts = $music->texts()->orderBy("start_time")->get();
         }
 
         $data = (new MusicHelper())->musicTemplate($music, $user->id);
@@ -266,10 +265,10 @@ class MusicController extends Controller
     public function getMusicWithTextPaginate(Request $request)
     {
         $word = $request->word;
-        $musics = Music::where("status", 1)->with(['text' => function ($query) use ($word) {
+        $musics = Music::where("status", 1)->with(['texts' => function ($query) use ($word) {
             $query->where('text_english', 'LIKE', "%{$word}%");
         },
-        ])->whereHas('text', function ($query) use ($word) {
+        ])->whereHas('texts', function ($query) use ($word) {
             $query->where('text_english', 'LIKE', "%{$word}%");
         })->paginate(24);
 

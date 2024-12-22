@@ -71,10 +71,11 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
 
     Route::prefix('texts')->group(function () {
         Route::post('/list', [TextController::class, 'textsList'])->name('texts/list');
-        Route::post("/create", [TextController::class, "textsCreate"])->name('texts/create');
         Route::post("/update", [TextController::class, "textsUpdate"])->name('texts/update');
-        Route::post("/upload", [TextController::class, "uploadFileGetInfoAndSave"])->name('texts/upload');
-        Route::post("/download", [TextController::class, "downloadMusicTextFile"])->name('texts/download');
+        Route::post("/upload", [TextController::class, "textsUpdateUsingFile"])->name('texts/upload');
+        Route::post("/download", [TextController::class, "downloadTexts"])->name('texts/download');
+        Route::post("/add", [TextController::class, "addText"])->name('texts/add');
+        Route::post("/remove", [TextController::class, "removeText"])->name('texts/remove');
     });
 
     Route::prefix('albums')->group(function () {
@@ -132,7 +133,6 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
 
     Route::prefix('film_texts')->group(function () {
         Route::post('/list', [FilmTextController::class, 'getTextList'])->name('film_texts/list');
-        Route::post("/create", [FilmTextController::class, "insertListTexts"])->name('film_texts/create');
         Route::post("/update", [FilmTextController::class, "updateListTexts"])->name('film_texts/update');
         Route::post("/upload", [FilmTextController::class, "uploadFileGetInfoAndSave"])->name('film_texts/upload');
         Route::post("/download", [FilmTextController::class, "downloadFilmTextFile"])->name('film_texts/download');

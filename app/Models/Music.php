@@ -41,8 +41,9 @@ class Music extends Model
         return null;
     }
 
-    public function text(){
-        return $this->hasMany(Text::class, 'id_Music');
+    public function texts()
+    {
+        return $this->morphMany(Text::class, 'textable', 'textable_type', 'textable_id');
     }
 
     public function comments()

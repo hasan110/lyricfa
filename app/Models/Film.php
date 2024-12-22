@@ -20,6 +20,11 @@ class Film extends Model
         'status'=>'integer',
     ];
 
+    public function texts()
+    {
+        return $this->morphMany(Text::class, 'textable', 'textable_type', 'textable_id');
+    }
+
     public function files()
     {
         return $this->morphMany(File::class, 'fileable', 'fileable_type', 'fileable_id');

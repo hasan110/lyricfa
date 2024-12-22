@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Helpers\UserHelper;
 use App\Models\Film;
-use App\Models\FilmText;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -62,9 +61,7 @@ class FilmController extends Controller
         $film['texts'] = [];
 
         if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken")) && $request->with_text) {
-            $id_film = $request->id;
-            $texts = FilmText::where('film_id', '=', $id_film)->orderBy("id")->get();
-            $film['texts'] = $texts;
+            $film['texts'] = $film->texts()->orderBy("start_time")->get();
         }
 
         return response()->json([
