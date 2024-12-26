@@ -16,6 +16,7 @@ import create_music from '../pages/music/create_music.vue';
 import edit_music from '../pages/music/edit_music.vue';
 
 import edit_texts from '../pages/texts/edit_texts.vue';
+import join_text from '../pages/texts/join_text.vue';
 
 import singers from '../pages/singer/singers.vue';
 
@@ -81,6 +82,7 @@ const allUrl = [
     { path: '/movies/edit/:id', name: 'edit_movie', component: edit_movie },
 
     { path: '/edit_texts/:type/:textable_id', name: 'edit_texts', component: edit_texts },
+    { path: '/join_text', name: 'join_text', component: join_text },
 
     { path: '/singers', name: 'singers', component: singers },
 

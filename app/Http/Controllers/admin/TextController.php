@@ -5,8 +5,13 @@ namespace App\Http\Controllers\admin;
 use App\Http\Helpers\FilmHelper;
 use App\Http\Helpers\MusicHelper;
 use App\Models\Film;
+use App\Models\GrammerSection;
+use App\Models\IdiomDefinition;
+use App\Models\Map;
 use App\Models\Music;
 use App\Models\Text;
+use App\Models\TextJoin;
+use App\Models\WordDefinition;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
@@ -24,6 +29,59 @@ class TextController extends Controller
         }
 
         return $model;
+    }
+
+    public function searchTexts(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'search_word' => 'required',
+        ], [
+            'search_word.required' => 'متن جست و جو الزامی است',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => null,
+                'errors' => $validator->errors(),
+                'message' => " افزودن متن شکست خورد",
+            ], 400);
+        }
+
+        $search_word = $request->input('search_word');
+        $words = explode(' ', $search_word);
+
+        $array = [];
+        foreach ($words as $index => $item) {
+            $maps = Map::where('ci_base' , $item)->get();
+            $array[$index][] = $item;
+            foreach ($maps as $map) {
+                $array[$index][] = $map->word;
+            }
+        }
+
+        $texts_query = Text::with('textable')->where(function ($query) use ($array) {
+            $query->whereHasMorph('textable',Film::class,function ($query)  {
+                $query->where('status' , 1)->where('persian_subtitle' , 1);
+            })->orWhereHasMorph('textable',  Music::class,function ($query) {
+                $query->where('status' , 1);
+            });
+        });
+
+        foreach ($array as $word_list) {
+            $texts_query = $texts_query->where(function($query) use ($word_list) {
+                foreach ($word_list as $word) {
+                    $query->orWhere('text_english' , 'regexp' , '\\b'.$word.'\\b');
+                }
+            });
+        }
+
+        $texts = $texts_query->orWhere('id' , $search_word)->inRandomOrder()->take(500)->get();
+
+        return response()->json([
+            'data' => $texts,
+            'errors' => null,
+            'message' => "اطلاعات با موفقیت گرفته شد",
+        ]);
     }
 
     public function textsList(Request $request)
@@ -292,7 +350,15 @@ class TextController extends Controller
         $this->deleteFile($upload_path);
         $mainList = mb_convert_encoding($mainList , 'UTF-8', 'UTF-8');
         $model->texts()->delete();
-        $model->texts()->insert($mainList);
+
+        foreach ($mainList as $item) {
+            $model->texts()->create([
+                'text_english' => $item['text_english'],
+                'text_persian' => $item['text_persian'],
+                'start_time' => $item['start_time'],
+                'end_time' => $item['end_time'],
+            ]);
+        }
 
         return response()->json([
             'data' => $mainList,
@@ -373,6 +439,140 @@ class TextController extends Controller
             'data' => null,
             'errors' => null,
             'message' => "حذف انجام شد",
+        ]);
+    }
+
+    public function loadText(Request $request)
+    {
+        $messages = array(
+            'text_id.required' => 'شناسه الزامی است',
+            'text_id.numeric' => 'شناسه باید عدد باشد'
+        );
+
+        $validator = Validator::make($request->all(), [
+            'text_id' => 'required|numeric',
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => null,
+                'errors' => $validator->errors(),
+                'message' => " اطلاعات را کامل ارسال کنید",
+            ], 400);
+        }
+
+        $text = Text::with('textable')->where('id' , $request->text_id)->first();
+        if (!$text) {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => " متن یافت نشد",
+            ], 400);
+        }
+
+        $text_list = $text->textable->texts()->with("textable")->orderBy("start_time")->get()->toArray();
+
+        $text_index = array_search($request->text_id, array_column($text_list, 'id'));
+        $start = 0;
+        if ($text_index - 3 > 0) {
+            $start = $text_index - 3;
+            $length = 7;
+        } else {
+            $length = $text_index + 4;
+        }
+
+        $final_list = array_slice($text_list, $start, $length);
+
+        return response()->json([
+            'data' => $final_list,
+            'errors' => null,
+            'message' => "لیست متن ها لود شد",
+        ]);
+    }
+
+    public function joinText(Request $request)
+    {
+        $messages = array(
+            'text_id.required' => 'شناسه متن الزامی است',
+            'join_to.required' => 'نوع اتصال الزامی است',
+            'joinable_id.required' => 'شناسه اتصال الزامی است',
+        );
+
+        $validator = Validator::make($request->all(), [
+            'text_id' => 'required',
+            'join_to' => 'required',
+            'joinable_id' => 'required',
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => null,
+                'errors' => $validator->errors(),
+                'message' => " اطلاعات را کامل ارسال کنید",
+            ], 400);
+        }
+
+        $join_to = $request->input('join_to');
+        $joinable_id = $request->input('joinable_id');
+        $joinable = null;
+        $model = null;
+        if ($join_to === "word_definition") {
+            $joinable = WordDefinition::find($joinable_id);
+            $model = WordDefinition::class;
+        } else if ($join_to === "idiom_definition") {
+            $joinable = IdiomDefinition::find($joinable_id);
+            $model = IdiomDefinition::class;
+        } else if ($join_to === "grammer_section") {
+            $joinable = GrammerSection::find($joinable_id);
+            $model = GrammerSection::class;
+        }
+
+        if (!$joinable) {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => "مدل یافت نشد",
+            ], 400);
+        }
+
+        $text_before = intval($request->input('text_before'));
+        $text_after  = intval($request->input('text_after'));
+
+        $text = Text::with('textable')->where('id' , $request->text_id)->first();
+        if (!$text) {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => " متن یافت نشد",
+            ], 400);
+        }
+
+        $text_join = TextJoin::create([
+            'text_id' => $text->id,
+            'joinable_id' => $joinable_id,
+            'joinable_type' => $model,
+        ]);
+
+        if (!$text_before && !$text_after) {
+            $text_join->texts()->attach([$text->id]);
+        } else {
+            $text_list = $text->textable->texts()->with("textable")->orderBy("start_time")->get()->toArray();
+            $text_index = array_search($request->text_id, array_column($text_list, 'id'));
+            $start = 0;
+            if ($text_index - $text_before > 0) {
+                $start = $text_index - $text_before;
+                $length = $text_before + 1 + $text_after;
+            } else {
+                $length = $text_index + 1 + $text_after;
+            }
+            $final_list = array_slice($text_list, $start, $length);
+            $text_join->texts()->attach(array_column($final_list, 'id'));
+        }
+
+        return response()->json([
+            'data' => null,
+            'errors' => null,
+            'message' => "اتصال متن با موفقیت انجام شد",
         ]);
     }
 

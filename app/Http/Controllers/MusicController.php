@@ -275,7 +275,8 @@ class MusicController extends Controller
         $list = [];
         foreach ($musics as $music) {
             $data = (new MusicHelper())->musicTemplate($music);
-            $data['text'] = $music['text'];
+            $music['text'] = $music['texts'];
+            $data['text'] = $music['texts'];
             $list[] = $data;
         }
         $last_page = $musics->lastPage();

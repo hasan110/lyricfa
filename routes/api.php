@@ -112,6 +112,7 @@ Route::middleware('CheckApiAuthentication')->group(function () {
 
     //text
     Route::post('/get_text_list', [TextController::class, 'getTextList']);
+    Route::post('/get_text_joins', [TextController::class, 'getTextJoins']);
     Route::post('/get_text_music', [MusicController::class, 'getMusicWithTextPaginate']);
 
     //english persian words
@@ -148,6 +149,8 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     // grammer
     Route::get('/grammer_list', [GrammerController::class, 'grammerList']);
     Route::post('/get_grammer', [GrammerController::class, 'getGrammer']);
+    Route::post('/learned_grammer', [GrammerController::class, 'learnedGrammer']);
+    Route::post('/learned_grammer/empty', [GrammerController::class, 'emptyLearnedGrammers']);
     Route::post('/get_grammer_prerequisites', [GrammerController::class, 'getGrammerPrerequisites']);
     Route::post('/find_grammer', [GrammerController::class, 'findGrammer'])->withoutMiddleware('throttle:api')->middleware('throttle:600,1');
 

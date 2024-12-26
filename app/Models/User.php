@@ -12,4 +12,9 @@ class User extends Model
 
     protected $guarded = [];
     protected $table = 'users';
+
+    public function learned_grammers()
+    {
+        return $this->belongsToMany(Grammer::class, 'grammer_learned', 'user_id', 'grammer_id');
+    }
 }

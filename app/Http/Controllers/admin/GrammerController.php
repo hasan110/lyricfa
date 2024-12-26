@@ -15,7 +15,7 @@ class GrammerController extends Controller
 {
     public function GrammersList(Request $request)
     {
-        $list = Grammer::query();
+        $list = Grammer::with('grammer_sections');
 
         if ($request->search_key) {
             $list = $list->where('english_name', 'LIKE', "%{$request->search_key}%")

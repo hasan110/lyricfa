@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Helpers\UserHelper;
 use App\Models\Grammer;
 use App\Models\GrammerRule;
 use App\Models\Word;
@@ -13,9 +14,16 @@ use Illuminate\Support\Facades\Validator;
 
 class GrammerController extends Controller
 {
-    function grammerList()
+    function grammerList(Request $request)
     {
         $list = Grammer::orderBy('priority')->paginate(24);
+
+        $user = (new UserHelper())->getUserByToken($request->header("ApiToken"));
+        $learned = $user->learned_grammers()->pluck('id')->toArray();
+
+        foreach ($list as $grammer) {
+            $grammer->learned = in_array($grammer->id, $learned);
+        }
 
         return response()->json([
             'data' => $list,
@@ -38,6 +46,9 @@ class GrammerController extends Controller
             ] , 404);
         }
 
+        $user = (new UserHelper())->getUserByToken($request->header("ApiToken"));
+        $learned = $user->learned_grammers()->pluck('id')->toArray();
+        $grammer->learned = in_array($grammer->id, $learned);
         $grammer->prerequisites = $grammer->grammer_prerequisites()->with(['grammer_sections' => function ($query) {
             $query->orderBy('priority');
         }])->orderBy('priority')->get();
@@ -46,6 +57,42 @@ class GrammerController extends Controller
             'data' => $grammer,
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد"
+        ]);
+    }
+
+    function learnedGrammer(Request $request)
+    {
+        $grammer = Grammer::where('id' , $request->grammer_id)->first();
+
+        if (!$grammer) {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => "اطلاعات گرامر یافت نشد."
+            ] , 404);
+        }
+
+        $user = (new UserHelper())->getUserByToken($request->header("ApiToken"));
+
+        $user->learned_grammers()->attach($grammer->id);
+
+        return response()->json([
+            'data' => null,
+            'errors' => [],
+            'message' => "اطلاعات با موفقیت افزوده شد"
+        ]);
+    }
+
+    function emptyLearnedGrammers(Request $request)
+    {
+        $user = (new UserHelper())->getUserByToken($request->header("ApiToken"));
+
+        $user->learned_grammers()->delete();
+
+        return response()->json([
+            'data' => null,
+            'errors' => [],
+            'message' => "درخواست با موفقیت انجام شد"
         ]);
     }
 
@@ -219,8 +266,12 @@ class GrammerController extends Controller
             return $item1['priority'] <=> $item2['priority'];
         });
 
+        $user = (new UserHelper())->getUserByToken($request->header("ApiToken"));
+        $learned = $user->learned_grammers()->pluck('id')->toArray();
         $result = [];
+
         foreach ($found_grammers as $gr) {
+            if (in_array($gr->id, $learned)) continue;
             $result[] = [
                 'id' => $gr->id,
                 'english_name' => $gr->english_name,

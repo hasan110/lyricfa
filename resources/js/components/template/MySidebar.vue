@@ -110,6 +110,7 @@ export default {
             { id:15, parent_id:0,  title: 'اصطلاحات', type:'item', link:'idioms', icon: 'mdi-alphabetical' },
             { id:16, parent_id:0,  title: 'گرامر', type:'item', link:'grammers', icon: 'mdi-book-open-page-variant' },
             { id:17, parent_id:0,  title: 'مپ لغات', type:'item', link:'maps', icon: 'mdi-connection' },
+            { id:22, parent_id:0,  title: 'اتصال متن', type:'item', link:'join_text', icon: 'mdi-arrow-collapse' },
         ],
     }),
     watch: {

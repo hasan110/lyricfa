@@ -12,7 +12,7 @@ class IdiomDefinition extends Model
     protected $guarded = [];
     protected $table = 'idiom_definitions';
     protected $with = ['idiom_definition_examples'];
-    protected $appends = [self::IMAGE_FILE_TYPE];
+    protected $appends = [self::IMAGE_FILE_TYPE, 'joins_count'];
 
     public const IMAGE_FILE_TYPE = 'idiom_definition_image';
 
@@ -26,6 +26,11 @@ class IdiomDefinition extends Model
         return $this->morphMany(File::class, 'fileable', 'fileable_type', 'fileable_id');
     }
 
+    public function text_joins()
+    {
+        return $this->morphMany(TextJoin::class, 'joinable', 'joinable_type', 'joinable_id');
+    }
+
     public function getIdiomDefinitionImageAttribute()
     {
         $path = File::getFileUploadPath($this->files, self::IMAGE_FILE_TYPE);
@@ -33,5 +38,10 @@ class IdiomDefinition extends Model
             return config('app.files_base_path') . $path;
         }
         return null;
+    }
+
+    public function getJoinsCountAttribute()
+    {
+        return $this->text_joins()->count();
     }
 }

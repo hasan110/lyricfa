@@ -70,12 +70,15 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
     });
 
     Route::prefix('texts')->group(function () {
+        Route::post('/search', [TextController::class, 'searchTexts'])->name('texts/search');
         Route::post('/list', [TextController::class, 'textsList'])->name('texts/list');
         Route::post("/update", [TextController::class, "textsUpdate"])->name('texts/update');
         Route::post("/upload", [TextController::class, "textsUpdateUsingFile"])->name('texts/upload');
         Route::post("/download", [TextController::class, "downloadTexts"])->name('texts/download');
         Route::post("/add", [TextController::class, "addText"])->name('texts/add');
         Route::post("/remove", [TextController::class, "removeText"])->name('texts/remove');
+        Route::post("/load", [TextController::class, "loadText"])->name('texts/load');
+        Route::post("/join", [TextController::class, "joinText"])->name('texts/join');
     });
 
     Route::prefix('albums')->group(function () {

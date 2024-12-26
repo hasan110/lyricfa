@@ -18,6 +18,11 @@ class Text extends Model
         return $this->morphTo();
     }
 
+    public function text_joins()
+    {
+        return $this->belongsToMany(TextJoin::class, 'text_join_text', 'text_id', 'text_join_id');
+    }
+
     public function getIdMusicAttribute()
     {
         return $this->textable_id;
