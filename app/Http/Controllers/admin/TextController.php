@@ -67,6 +67,12 @@ class TextController extends Controller
             });
         });
 
+        if ($request->input('search_type') === 'film') {
+            $texts_query = $texts_query->where('textable_type' , Film::class);
+        } else if ($request->input('search_type') === 'music') {
+            $texts_query = $texts_query->where('textable_type' , Music::class);
+        }
+
         foreach ($array as $word_list) {
             $texts_query = $texts_query->where(function($query) use ($word_list) {
                 foreach ($word_list as $word) {
@@ -75,7 +81,7 @@ class TextController extends Controller
             });
         }
 
-        $texts = $texts_query->orWhere('id' , $search_word)->inRandomOrder()->take(500)->get();
+        $texts = $texts_query->orWhere('id' , $search_word)->inRandomOrder()->take(200)->get();
 
         return response()->json([
             'data' => $texts,
@@ -97,8 +103,24 @@ class TextController extends Controller
                 'message' => "مدل یافت نشد."
             ], 400);
         }
+        $per_page = 100;
 
-        $texts = $model->texts()->orderBy("start_time")->paginate(100);
+        if ($request->text_id) {
+            $text_list = $model->texts()->orderBy("start_time")->get()->toArray();
+
+            $chunked_list = array_chunk($text_list, $per_page);
+            foreach ($chunked_list as $key => $chunk) {
+                foreach ($chunk as $item) {
+                    if ($item['id'] === intval($request->text_id)) {
+                        $request->page = $key + 1;
+                        break;
+                    }
+                }
+            }
+        }
+
+        $texts = $model->texts()->orderBy("start_time")->paginate($per_page, ['*'], 'page', $request->page);
+
         return response()->json([
             'data' => [
                 'texts' => $texts,
@@ -544,6 +566,15 @@ class TextController extends Controller
                 'data' => null,
                 'errors' => [],
                 'message' => " متن یافت نشد",
+            ], 400);
+        }
+
+        $check_exists = TextJoin::where('text_id', $text->id)->where('joinable_id', $joinable_id)->where('joinable_type', $model)->first();
+        if ($check_exists) {
+            return response()->json([
+                'data' => null,
+                'errors' => null,
+                'message' => "این اتصال قبلا انجام شده است.",
             ], 400);
         }
 

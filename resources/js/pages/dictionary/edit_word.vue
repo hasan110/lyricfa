@@ -97,6 +97,13 @@
                                         dense :label="'سطح معنی ' + (key + 1)"
                                     ></v-select>
                                 </v-col>
+                                <v-col cols="12" sm="12" class="pb-0">
+                                    <v-textarea
+                                        v-model="item.description"
+                                        outlined clearable rows="3"
+                                        dense :label="'توضیحات برای معنی ' + (key + 1)"
+                                    ></v-textarea>
+                                </v-col>
                             </v-row>
                             <div style="color: #6200ed">
                                 <small>مثال برای معنی</small>

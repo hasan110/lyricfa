@@ -5,9 +5,11 @@
             <div class="titr">ویرایش متن
                 <template v-if="type === 'film'">
                     فیلم
+                    <v-btn small color="primary" dark :to="{name:'edit_movie' , params:{id:textable_id}}" text>ویرایش فیلم</v-btn>
                 </template>
                 <template v-else-if="type === 'music'">
                     آهنگ
+                    <v-btn small color="primary" dark :to="{name:'edit_music' , params:{id:textable_id}}" text>ویرایش آهنگ</v-btn>
                 </template>
             </div>
             <div class="back">
@@ -86,7 +88,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr v-for="(row,index) in rows" :key="index">
+                        <tr v-for="(row,index) in rows" :key="index" :id="'item-'+row.id" :style="{'background': row.id === parseInt(text_id) ? '#f4edff' : 'none'}">
                             <td>{{ index + 1 }}</td>
                             <td class="text-center">{{ row.id }}</td>
                             <td>
@@ -459,6 +461,7 @@ export default {
         ],
         current_page:1,
         last_page:1,
+        text_id:null,
         textable_id:null,
         type:null,
         back_link:null,
@@ -486,6 +489,7 @@ export default {
         audio_wrapper: false,
         search_loading: false,
         join_modal: false,
+        loaded: false,
 
 
         text_search:null,
@@ -502,7 +506,9 @@ export default {
         grammer_sections_list:[],
     }),
     watch:{
-        current_page(){
+        current_page(oldVal, newVal){
+            if (this.loaded === false) return;
+            this.text_id = null;
             this.getTexts();
         },
         word_id() {
@@ -653,15 +659,28 @@ export default {
                 textable_id:this.textable_id,
                 type:this.type,
                 page:this.current_page,
+                text_id:this.text_id
             })
             .then(res => {
                 const texts = res.data.data.texts.data
                 this.last_page = res.data.data.texts.last_page
+                this.current_page = res.data.data.texts.current_page
                 if(texts.length > 0){
                     this.rows = texts;
                 }
+
                 this.textable = res.data.data.textable;
                 this.$store.commit('SHOW_APP_LOADING' , 0)
+                if (this.text_id) {
+                    const vm = this;
+                    setTimeout(function () {
+                        const text_element = document.getElementById("item-"+vm.text_id);
+                        if (text_element) {
+                            text_element.scrollIntoView({ block: 'center',  behavior: 'smooth' });
+                        }
+                        vm.loaded = true;
+                    } , 100)
+                }
             })
             .catch( () => {
                 this.$store.commit('SHOW_APP_LOADING' , 0)
@@ -853,7 +872,10 @@ export default {
     mounted(){
         this.textable_id = this.$route.params.textable_id;
         this.type = this.$route.params.type;
-
+        const text_id = this.$route.query.text_id;
+        if (text_id) {
+            this.text_id = text_id;
+        }
         this.back_link = 'musics';
         if (this.type === 'film') {
             this.back_link = 'movies';

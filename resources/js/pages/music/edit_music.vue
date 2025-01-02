@@ -2,7 +2,9 @@
     <div>
 
         <div class="page-head">
-            <div class="titr">ویرایش موزیک</div>
+            <div class="titr">ویرایش موزیک
+                <v-btn small color="primary" dark :to="{name:'edit_texts' , params:{type:'music' , textable_id:music_id}}" text>ویرایش متن</v-btn>
+            </div>
             <div class="back">
                 <router-link :to="{ name : 'musics' }">بازگشت
                     <v-icon>

@@ -270,7 +270,7 @@ export default {
                         timer: 5000
                     })
 
-                    this.$router.push({name:'movies'})
+                    this.$router.push({name:'edit_movie' , params:{id:res.data.id}})
 
                 })
                 .catch( err => {

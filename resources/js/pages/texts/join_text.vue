@@ -15,7 +15,7 @@
                     <v-card>
                         <v-card-text>
                             <v-row>
-                                <v-col cols="12" sm="12">
+                                <v-col cols="12" sm="12" md="9">
                                     <v-autocomplete
                                         v-model="form_data.text_id"
                                         outlined :items="texts_list"
@@ -29,7 +29,7 @@
                                         @keyup.enter="searchText()"
                                     >
                                         <template v-slot:item="{ item }">
-                                            <v-list-item-content>
+                                            <v-list-item-content style="max-width: 500px">
                                                 <v-list-item-title v-text="item.text_english + '-' + item.id"></v-list-item-title>
                                                 <v-list-item-subtitle v-if="item.text_persian">
                                                     {{item.text_persian}}
@@ -44,7 +44,21 @@
                                         </template>
                                     </v-autocomplete>
                                 </v-col>
+                                <v-col cols="12" sm="12" md="3">
+                                    <v-select
+                                        label="جست و جو در"
+                                        v-model="text_search_type"
+                                        outlined
+                                        item-text="item" item-value="value"
+                                        :items="[{'item':'همه','value':null},{'item':'متن آهنگ','value':'music'},{'item':'متن فیلم','value':'film'}]"
+                                    ></v-select>
+                                </v-col>
                             </v-row>
+                            <div v-if="link_data.name" class="d-flex justify-end pb-4 mb-4">
+                                <v-btn dark color="danger" :to="link_data" target="_blank">
+                                    ویرایش متن انتخاب شده
+                                </v-btn>
+                            </div>
                             <v-row v-if="form_data.text_id">
                                 <v-col cols="12" sm="12" md="6">
                                     <v-text-field
@@ -85,6 +99,8 @@
                                         :loading="search_loading"
                                         no-filter
                                         @keyup.enter="searchWord()"
+                                        :append-outer-icon="word_id ? 'mdi-pencil' : null"
+                                        @click:append-outer="redirectTo(word_id , 'word')"
                                     ></v-autocomplete>
                                 </v-col>
                                 <v-col v-if="word_id" cols="12" sm="12" md="12">
@@ -111,6 +127,8 @@
                                         :loading="search_loading"
                                         no-filter
                                         @keyup.enter="searchIdiom()"
+                                        :append-outer-icon="idiom_id ? 'mdi-pencil' : null"
+                                        @click:append-outer="redirectTo(idiom_id , 'idiom')"
                                     ></v-autocomplete>
                                 </v-col>
                                 <v-col v-if="idiom_id" cols="12" sm="12" md="12">
@@ -137,6 +155,8 @@
                                         :loading="search_loading"
                                         no-filter
                                         @keyup.enter="searchGrammer()"
+                                        :append-outer-icon="grammer_id ? 'mdi-pencil' : null"
+                                        @click:append-outer="redirectTo(grammer_id , 'grammer')"
                                     ></v-autocomplete>
                                 </v-col>
                                 <v-col v-if="grammer_id" cols="12" sm="12" md="12">
@@ -223,6 +243,7 @@ export default {
     name:'join_text',
     data: () => ({
         text_search:null,
+        text_search_type:null,
         search_key:null,
         word_id:null,
         idiom_id:null,
@@ -236,6 +257,7 @@ export default {
         grammer_sections_list:[],
         selected_text_list:[],
         errors:{},
+        link_data:{},
         textable:{},
         form_data:{
             text_id:null,
@@ -258,6 +280,35 @@ export default {
                 this.texts_list = [];
                 this.form_data.join_to = null;
             }
+        },
+        'form_data.text_id': {
+            handler (after, before) {
+                if (this.form_data.text_id) {
+                    let text = this.texts_list.findIndex(
+                        (temp) => temp['id'] === this.form_data.text_id
+                    );
+
+                    let selected_text = this.texts_list[text];
+                    let type = 'music';
+                    if (selected_text.textable_type === 'App\\Models\\Film') {
+                        type = 'film';
+                    }
+                    this.link_data = {
+                        name : 'edit_texts',
+                        params:{
+                            textable_id:selected_text.textable_id,
+                            type
+                        },
+                        query:{
+                            'text_id': selected_text.id
+                        }
+                    }
+                    console.log(this.link_data)
+                } else {
+                    this.link_data = {};
+                }
+            },
+            deep: true
         },
         selected_text_modal() {
             if (!this.selected_text_modal) {
@@ -298,6 +349,21 @@ export default {
         }
     },
     methods:{
+        redirectTo(id, type) {
+            let route = null;
+            if (type === 'word') {
+                route = this.$router.resolve({'name':'edit_word' , params:{id}})
+            }
+            if (type === 'idiom') {
+                route = this.$router.resolve({'name':'edit_idiom' , params:{id}})
+            }
+            if (type === 'grammer') {
+                route = this.$router.resolve({'name':'edit_grammer' , params:{id}})
+            }
+            if (route) {
+                window.open(route.href, '_blank');
+            }
+        },
         play(data) {
             if (!data.end_time || !data.start_time) {
                 alert('تاریخ شروع و پایان مشخص نیست!!!');
@@ -330,6 +396,7 @@ export default {
             this.text_search_loading = true;
             this.$http.post(`texts/search` , {
                 search_word:this.text_search,
+                search_type:this.text_search_type,
             })
             .then(res => {
                 this.texts_list = res.data.data
@@ -392,10 +459,9 @@ export default {
                     type: "success",
                     timer: 5000
                 })
-                this.form_data = {}
-                this.text_search = null;
-                this.search_key = null;
-                this.loading = false
+                setTimeout(function () {
+                    location.reload()
+                } , 2000);
             })
             .catch( err => {
                 this.loading = false

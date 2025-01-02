@@ -94,6 +94,7 @@ class WordController extends Controller
             $word_definition->word_id = $word->id;
             $word_definition->definition = $definition['definition'];
             $word_definition->level = $definition['level'];
+            $word_definition->description = $definition['description'] ?? null;
             $word_definition->priority = $key + 1;
             $word_definition->save();
 
@@ -200,6 +201,7 @@ class WordController extends Controller
             }
             $word_definition->definition = $definition['definition'];
             $word_definition->level = $definition['level'];
+            $word_definition->description = $definition['description'] ?? null;
             $word_definition->priority = $key + 1;
             $word_definition->save();
 

@@ -132,6 +132,7 @@ class IdiomController extends Controller
             $idiom_definition->idiom_id = $idiom->id;
             $idiom_definition->definition = $definition['definition'];
             $idiom_definition->level = $definition['level'];
+            $idiom_definition->description = $definition['description'] ?? null;
             $idiom_definition->priority = $key + 1;
             $idiom_definition->save();
 
@@ -224,6 +225,7 @@ class IdiomController extends Controller
             }
             $idiom_definition->definition = $definition['definition'];
             $idiom_definition->level = $definition['level'];
+            $idiom_definition->description = $definition['description'] ?? null;
             $idiom_definition->priority = $key + 1;
             $idiom_definition->save();
 

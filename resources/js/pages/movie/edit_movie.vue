@@ -2,7 +2,9 @@
     <div>
 
         <div class="page-head">
-            <div class="titr"> ویرایش فیلم</div>
+            <div class="titr"> ویرایش فیلم
+                <v-btn small color="primary" dark :to="{name:'edit_texts' , params:{type:'film' , textable_id:movie_id}}" text>ویرایش متن</v-btn>
+            </div>
             <div class="back">
                 <router-link :to="{ name : 'movies' }">بازگشت
                     <v-icon>
@@ -273,17 +275,12 @@ export default {
 
             this.$http.post(`movies/update` , form)
                 .then(res => {
-                    this.form_data = {};
-
                     this.$fire({
                         title: "موفق",
                         text: res.data.message,
                         type: "success",
                         timer: 5000
                     })
-
-                    this.$router.push({name:'movies'})
-
                 })
                 .catch( err => {
                     this.loading = false

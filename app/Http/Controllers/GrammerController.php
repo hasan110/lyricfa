@@ -87,7 +87,7 @@ class GrammerController extends Controller
     {
         $user = (new UserHelper())->getUserByToken($request->header("ApiToken"));
 
-        $user->learned_grammers()->delete();
+        $user->learned_grammers()->detach();
 
         return response()->json([
             'data' => null,
