@@ -16,7 +16,7 @@ class MapController extends Controller
 
     function getWordMapReasons(Request $request)
     {
-        $map = Map::where('word', $request->word)->with('map_reasons')->first();
+        $map = Map::where('word', $request->word)->orWhere('word', strtolower($request->word))->with('map_reasons')->first();
 
         return response()->json([
             'data' => $map,

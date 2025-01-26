@@ -64,7 +64,11 @@ class IdiomController extends Controller
             ], 400);
         }
 
-        $get = Idiom::with('idiom_definitions')->find($request->id);
+        $get = Idiom::with(['idiom_definitions' => function ($query) {
+            $query->with(['text_joins' => function ($q) {
+                $q->with('text');
+            }]);
+        }])->find($request->id);
         if(!$get){
             return response()->json([
                 'data' => null,
@@ -310,6 +314,45 @@ class IdiomController extends Controller
             'data' => null,
             'errors' => null,
             'message' => "اصطلاح باموفقیت حذف شد"
+        ]);
+    }
+
+    public function removeIdiomDefinition(Request $request)
+    {
+        $idiom_definition = IdiomDefinition::find($request->id);
+        if(!$idiom_definition){
+            return response()->json([
+                'data' => null,
+                'errors' => null,
+                'message' => " معنی اصطلاح یافت نشد.",
+            ], 404);
+        }
+
+        if(count($idiom_definition->files) > 0){
+            return response()->json([
+                'data' => null,
+                'errors' => null,
+                'message' => "این معنی دارای فایل می باشد و قابل حذف نیست.",
+            ], 404);
+        }
+
+        if($idiom_definition->joins_count > 0){
+            return response()->json([
+                'data' => null,
+                'errors' => null,
+                'message' => "این معنی دارای اتصال می باشد و قابل حذف نیست.",
+            ], 404);
+        }
+
+        foreach ($idiom_definition->idiom_definition_examples as $example_item){
+            $example_item->delete();
+        }
+        $idiom_definition->delete();
+
+        return response()->json([
+            'data' => null,
+            'errors' => null,
+            'message' => "معنی اصطلاح باموفقیت حذف شد"
         ]);
     }
 

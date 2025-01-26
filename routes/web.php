@@ -16,7 +16,6 @@ use App\Http\Controllers\admin\MusicController;
 use App\Http\Controllers\admin\SingerController;
 use App\Http\Controllers\admin\TextController;
 use App\Http\Controllers\admin\AdminController;
-use App\Http\Controllers\admin\TextIdiomsController;
 use App\Http\Controllers\admin\IdiomController;
 use App\Http\Controllers\admin\WordController;
 use App\Http\Controllers\admin\GrammerController;
@@ -44,6 +43,7 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
         Route::post('/update', [IdiomController::class, 'updateIdiom'])->name('idioms/update');
         Route::post('/update_level', [IdiomController::class, 'updateIdiomLevel'])->name('idioms/update/level');
         Route::post("/remove", [IdiomController::class, "removeIdiom"])->name('idioms/remove');
+        Route::post("/definition/remove", [IdiomController::class, "removeIdiomDefinition"])->name('idioms/definition/remove');
         Route::post("/add_image", [IdiomController::class, "addImageToDefinition"])->name('idioms/add_image');
     });
 
@@ -148,6 +148,7 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
         Route::post("/update_level", [WordController::class, "updateWordLevel"])->name('words/update/level');
         Route::post("/create", [WordController::class, "createWord"])->name('words/create');
         Route::post("/remove", [WordController::class, "removeWord"])->name('words/remove');
+        Route::post("/definition/remove", [WordController::class, "removeWordDefinition"])->name('words/definition/remove');
         Route::get( "/types",  [WordController::class, "getTypes"])->name('words/types');
         Route::post( "/add_image",  [WordController::class, "addImageToDefinition"])->name('words/add_image');
     });

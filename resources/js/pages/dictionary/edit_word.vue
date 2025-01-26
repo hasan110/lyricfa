@@ -68,9 +68,9 @@
                         </v-btn>
                     </div>
                 </div>
-                <v-container>
+                <v-container class="pa-0">
                     <draggable v-model="form_data.word_definitions" class="w-100">
-                        <div v-for="(item , key) in form_data.word_definitions" :key="key">
+                        <div v-for="(item , key) in form_data.word_definitions" :key="key" class="stripes-bg pa-2">
                             <v-row>
                                 <v-col v-if="item.word_definition_image" cols="12" xs="12" sm="12" class="pb-0">
                                     <v-card rounded="lg" ripple max-width="200" width="100%" class="ma-auto">
@@ -78,34 +78,78 @@
                                     </v-card>
                                 </v-col>
                                 <v-col cols="12" sm="12" md="8" class="pb-0">
-                                    <v-text-field
-                                        v-model="item.definition"
-                                        outlined clearable
+                                    <v-textarea
+                                        v-model="item.definition" outlined rows="4"
                                         :error-messages="errors[`word_definitions.${key}.definition`] ? errors[`word_definitions.${key}.definition`] : null"
                                         dense :label="'معنی ' + (key + 1)"
                                         :prepend-icon="item.id ? 'mdi-image-area' : ''"
                                         @click:prepend="definition_upload_image = item , definition_upload_image_modal = true"
-                                    ></v-text-field>
+                                    ></v-textarea>
                                 </v-col>
                                 <v-col cols="12" sm="12" md="4" class="pb-0">
-                                    <v-select
-                                        v-model="item.level" outlined
-                                        :append-outer-icon="item.id ? '' : 'mdi-delete'"
-                                        :items="levels"
-                                        @click:append-outer="removeDefinition(1 , key)"
-                                        :error-messages="errors[`word_definitions.${key}.level`] ? errors[`word_definitions.${key}.level`] : null"
-                                        dense :label="'سطح معنی ' + (key + 1)"
-                                    ></v-select>
+                                    <v-row>
+                                        <v-col cols="12" sm="12" class="pb-0">
+                                            <v-select
+                                                v-model="item.level" outlined
+                                                :append-outer-icon="item.id ? '' : 'mdi-delete'"
+                                                :items="levels"
+                                                @click:append-outer="removeDefinition(1 , key)"
+                                                :error-messages="errors[`word_definitions.${key}.level`] ? errors[`word_definitions.${key}.level`] : null"
+                                                dense :label="'سطح معنی ' + (key + 1)"
+                                            ></v-select>
+                                        </v-col>
+                                        <v-col cols="12" sm="12" class="pb-0">
+                                            <v-select
+                                                v-model="item.type" outlined
+                                                :items="word_types"
+                                                :error-messages="errors[`word_definitions.${key}.type`] ? errors[`word_definitions.${key}.type`] : null"
+                                                dense :label="'نوع معنی ' + (key + 1)"
+                                            ></v-select>
+                                        </v-col>
+                                    </v-row>
                                 </v-col>
                                 <v-col cols="12" sm="12" class="pb-0">
                                     <v-textarea
                                         v-model="item.description"
-                                        outlined clearable rows="3"
+                                        outlined rows="3"
                                         dense :label="'توضیحات برای معنی ' + (key + 1)"
                                     ></v-textarea>
                                 </v-col>
+                                <v-col cols="12" sm="12" class="py-0 mb-6">
+                                    <div class="d-flex justify-space-between">
+                                        <v-btn v-if="item.id" dark color="orange" small @click="joinable_id = item.id , join_modal = true">اتصال به متن</v-btn>
+                                        <v-btn v-if="item.id && parseInt(item.joins_count) === 0" dark :loading="delete_loading" color="danger" small @click="deleteDefinition(item.id)">حذف این معنی</v-btn>
+                                    </div>
+                                </v-col>
                             </v-row>
-                            <div style="color: #6200ed">
+                            <div v-if="item.joins_count > 0">
+                                <div class="d-flex justify-space-between">
+                                    <v-btn
+                                        color="purple" text
+                                        @click="show_joins = parseInt(item.id)"
+                                    >{{item.joins_count}} مثال در آهنگ ها و فیلم ها</v-btn>
+
+                                    <v-btn icon @click="show_joins = 0">
+                                        <v-icon>{{ show_joins === parseInt(item.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                                    </v-btn>
+                                </div>
+                                <v-expand-transition>
+                                    <div v-show="show_joins === parseInt(item.id)">
+                                        <v-divider></v-divider>
+                                        <v-list-item-group>
+                                            <v-list-item v-for="(join, i) in item.text_joins" :key="i" dense>
+                                                <v-list-item-content>
+                                                    <v-list-item-title @click="goToTextsPage(join)">
+                                                        <div>{{join.text.text_english}}</div>
+                                                        <div>{{join.text.text_persian}}</div>
+                                                    </v-list-item-title>
+                                                </v-list-item-content>
+                                            </v-list-item>
+                                        </v-list-item-group>
+                                    </div>
+                                </v-expand-transition>
+                            </div>
+                            <div class="mt-4" style="color: #6200ed">
                                 <small>مثال برای معنی</small>
                             </div>
                             <div v-for="(example , example_key) in item.word_definition_examples">
@@ -113,7 +157,7 @@
                                     <v-col cols="12" xs="12" sm="6" class="pb-0">
                                         <v-textarea
                                             v-model="example.phrase"
-                                            outlined clearable rows="3"
+                                            outlined rows="3"
                                             dense :label="'عبارت ' + (example_key + 1)"
                                             :error-messages="errors[`word_definitions.${key}.word_definition_examples.${example_key}.phrase`] ? errors[`word_definitions.${key}.word_definition_examples.${example_key}.phrase`] : null"
                                         ></v-textarea>
@@ -121,7 +165,7 @@
                                     <v-col cols="12" xs="12" sm="6" class="pb-0">
                                         <v-textarea
                                             v-model="example.definition"
-                                            outlined clearable rows="3"
+                                            outlined rows="3"
                                             append-outer-icon="mdi-delete"
                                             @click:append-outer="removeExample(key , example_key)"
                                             dense :label="'معنی عبارت ' + (example_key + 1)"
@@ -155,7 +199,7 @@
                             <v-col cols="12" xs="12" sm="12" class="pb-0">
                                 <v-textarea
                                     v-model="item.definition"
-                                    outlined clearable rows="3"
+                                    outlined rows="3"
                                     :error-messages="errors[`english_definitions.${en_key}.definition`] ? errors[`english_definitions.${en_key}.definition`] : null"
                                     dense :label="'معنی انگلیسی ' + (en_key + 1)"
                                 ></v-textarea>
@@ -231,6 +275,18 @@
             </v-card>
         </v-dialog>
 
+        <v-dialog
+            max-width="600"
+            v-model="join_modal"
+        >
+            <v-card>
+                <v-toolbar color="accent" dark class="d-flex justify-space-between">
+                    اتصال معنی با شناسه {{joinable_id}}
+                </v-toolbar>
+                <join-text-to-vendor v-if="join_modal" :joinable_id="joinable_id" joinable_type="word_definition" :search_for="form_data.english_word" @close="join_modal = false"></join-text-to-vendor>
+            </v-card>
+        </v-dialog>
+
     </div>
 </template>
 <script>
@@ -248,6 +304,10 @@ export default {
         definition_upload_image_modal: false,
         upload_loading: false,
         loading: false,
+        delete_loading: false,
+        show_joins: 0,
+        join_modal: false,
+        joinable_id: null,
     }),
     watch:{
         singers_count(){
@@ -324,7 +384,8 @@ export default {
                     type: "success",
                     timer: 5000
                 })
-                this.$router.push({name:'words'})
+                this.errors = {};
+                this.getWord(this.$route.params.id);
             })
             .catch( err => {
                 this.loading = false;
@@ -378,6 +439,35 @@ export default {
                     console.log(err)
                 });
         },
+        deleteDefinition(id){
+            if (confirm('از حذف معنی لغت اطمینان دارید؟')){
+                this.delete_loading = true;
+                this.$http.post(`words/definition/remove` , {id})
+                    .then(res => {
+                        this.$fire({
+                            title: "موفق",
+                            text: res.data.message,
+                            type: "success",
+                            timer: 5000
+                        })
+                        this.delete_loading = false;
+                        this.getWord(this.$route.params.id);
+                    })
+                    .catch( err => {
+                        this.delete_loading = false;
+                        const e = err.response.data
+                        if(e.errors){ this.errors = e.errors }
+                        else if(e.message){
+                            this.$fire({
+                                title: "خطا",
+                                text: e.message,
+                                type: "error",
+                                timer: 5000
+                            })
+                        }
+                    });
+            }
+        },
         uploadDefinitionImage(){
             this.upload_loading = true
             const form = new FormData();
@@ -411,6 +501,26 @@ export default {
             }).finally(() => {
                 this.upload_loading = false;
             });
+        },
+        goToTextsPage(join){
+            let type = 'music';
+            if (join.text.textable_type === 'App\\Models\\Film') {
+                type = 'film';
+            }
+            const link = {
+                name : 'edit_texts',
+                params:{
+                    textable_id:join.text.textable_id,
+                    type
+                },
+                query:{
+                    'text_id': join.text_id
+                }
+            };
+            const link_data = this.$router.resolve(link);
+            if (link_data) {
+                window.open(link_data.href, '_blank');
+            }
         },
     },
     beforeMount(){

@@ -223,3 +223,6 @@
     cursor: pointer;
     z-index: 2;
 }
+.stripes-bg:nth-of-type(even) {
+    background-color: #f3f3f3;
+}

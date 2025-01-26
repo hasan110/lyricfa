@@ -188,7 +188,7 @@ export default {
         }
     },
     mounted(){
-        this.filter.sort_by = 'asc';
+        this.filter.sort_by = 'desc';
         this.getList();
     },
     beforeMount(){

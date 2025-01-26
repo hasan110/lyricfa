@@ -631,6 +631,16 @@ export default {
                 this.search_key = null;
                 this.loading = false
                 this.join_modal = false;
+                this.word_id = null;
+                this.idiom_id = null;
+                this.grammer_id = null;
+                this.texts_list = [];
+                this.words_list = [];
+                this.word_definitions_list = [];
+                this.idioms_list = [];
+                this.idiom_definitions_list = [];
+                this.grammers_list = [];
+                this.grammer_sections_list = [];
             })
                 .catch( err => {
                     this.loading = false

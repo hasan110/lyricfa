@@ -2,20 +2,18 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\User;
+use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Laravel\Sanctum\PersonalAccessToken;
-use Morilog\Jalali\Jalalian;
 
 class CheckApiAuthentication
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param Request $request
+     * @param Closure $next
      * @return mixed
      */
     public function handle(Request $request, Closure $next)
@@ -50,6 +48,9 @@ class CheckApiAuthentication
             return response()->json($arr, 401);
 
         }
-         return $next($request);
+        $token->last_used_at = Carbon::now();
+        $token->save();
+
+        return $next($request);
     }
 }

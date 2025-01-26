@@ -57,6 +57,7 @@ class WordController extends Controller
             'level.in' => 'سطح باید یکی از موارد: A1, A2, B1, B2, C1, C2 باشد',
             'definitions.*.definition.filled' => 'معنی لغت نمی تواند خالی باشد.',
             'definitions.*.level.filled' => 'سطح معنی لغت نمی تواند خالی باشد.',
+            'definitions.*.type.filled' => 'نوع معنی لغت نمی تواند خالی باشد.',
             'english_definitions.*.definition.filled' => 'معنی انگلیسی لغت نمی تواند خالی باشد.',
             'definitions.*.definition_examples.*.definition.filled' => 'معنی مثال لغت نمی تواند خالی باشد.',
             'definitions.*.definition_examples.*.phrase.filled' => 'عبارت مثال لغت نمی تواند خالی باشد.',
@@ -67,6 +68,7 @@ class WordController extends Controller
             'level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'definitions.*.definition' => 'filled',
             'definitions.*.level' => 'filled',
+            'definitions.*.type' => 'filled',
             'english_definitions.*.definition' => 'filled',
             'definitions.*.definition_examples.*.definition' => 'filled',
             'definitions.*.definition_examples.*.phrase' => 'filled',
@@ -94,6 +96,7 @@ class WordController extends Controller
             $word_definition->word_id = $word->id;
             $word_definition->definition = $definition['definition'];
             $word_definition->level = $definition['level'];
+            $word_definition->type = $definition['type'];
             $word_definition->description = $definition['description'] ?? null;
             $word_definition->priority = $key + 1;
             $word_definition->save();
@@ -144,6 +147,7 @@ class WordController extends Controller
             'level.in' => 'سطح باید یکی از موارد: A1, A2, B1, B2, C1, C2 باشد',
             'word_definitions.*.definition.filled' => 'معنی لغت نمی تواند خالی باشد.',
             'word_definitions.*.level.filled' => 'سطح معنی لغت نمی تواند خالی باشد.',
+            'word_definitions.*.type.filled' => 'نوع معنی لغت نمی تواند خالی باشد.',
             'english_definitions.*.definition.filled' => 'معنی انگلیسی لغت نمی تواند خالی باشد.',
             'word_definitions.*.word_definition_examples.*.definition.filled' => 'معنی مثال لغت نمی تواند خالی باشد.',
             'word_definitions.*.word_definition_examples.*.phrase.filled' => 'عبارت مثال لغت نمی تواند خالی باشد.',
@@ -155,6 +159,7 @@ class WordController extends Controller
             'level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'word_definitions.*.definition' => 'filled',
             'word_definitions.*.level' => 'filled',
+            'word_definitions.*.type' => 'filled',
             'english_definitions.*.definition' => 'filled',
             'word_definitions.*.word_definition_examples.*.definition' => 'filled',
             'word_definitions.*.word_definition_examples.*.phrase' => 'filled',
@@ -201,6 +206,7 @@ class WordController extends Controller
             }
             $word_definition->definition = $definition['definition'];
             $word_definition->level = $definition['level'];
+            $word_definition->type = $definition['type'];
             $word_definition->description = $definition['description'] ?? null;
             $word_definition->priority = $key + 1;
             $word_definition->save();
@@ -308,7 +314,11 @@ class WordController extends Controller
             ], 400);
         }
 
-        $get = Word::with('word_definitions')->find($request->id);
+        $get = Word::with(['word_definitions' => function ($query) {
+            $query->with(['text_joins' => function ($q) {
+                $q->with('text');
+            }]);
+        }])->find($request->id);
         if(!$get){
             return response()->json([
                 'data' => null,
@@ -361,6 +371,45 @@ class WordController extends Controller
             'data' => null,
             'errors' => null,
             'message' => " تمامی اطلاعات این لغت با موفقیت حذف شد.",
+        ]);
+    }
+
+    public function removeWordDefinition(Request $request)
+    {
+        $word_definition = WordDefinition::find($request->id);
+        if(!$word_definition){
+            return response()->json([
+                'data' => null,
+                'errors' => null,
+                'message' => " معنی لغت یافت نشد.",
+            ], 404);
+        }
+
+        if($word_definition->joins_count > 0){
+            return response()->json([
+                'data' => null,
+                'errors' => null,
+                'message' => "این معنی دارای اتصال می باشد و قابل حذف نیست.",
+            ], 404);
+        }
+
+        if(count($word_definition->files) > 0){
+            return response()->json([
+                'data' => null,
+                'errors' => null,
+                'message' => "این معنی دارای فایل می باشد و قابل حذف نیست.",
+            ], 404);
+        }
+
+        foreach ($word_definition->word_definition_examples as $example_item){
+            $example_item->delete();
+        }
+        $word_definition->delete();
+
+        return response()->json([
+            'data' => null,
+            'errors' => null,
+            'message' => "معنی لغت باموفقیت حذف شد"
         ]);
     }
 

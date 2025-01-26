@@ -31,7 +31,7 @@ class Word extends Model
             'plural',
             'conjunction',
             'interjection',
-            'pronominal',
+            'determiner',
             'superlative',
             'auxiliary',
             'singular',

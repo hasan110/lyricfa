@@ -281,6 +281,7 @@ export default {
                         type: "success",
                         timer: 5000
                     })
+                    this.loading = false
                 })
                 .catch( err => {
                     this.loading = false

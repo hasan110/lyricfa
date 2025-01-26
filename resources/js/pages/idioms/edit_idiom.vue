@@ -38,7 +38,6 @@
                             v-model="form_data.phrase"
                             :error-messages="errors.phrase"
                             outlined
-                            clearable
                             dense rows="3"
                             label="متن اصطلاح"
                         ></v-textarea>
@@ -107,9 +106,9 @@
                         </v-btn>
                     </div>
                 </div>
-                <v-container>
+                <v-container class="pa-0">
                     <draggable v-model="form_data.idiom_definitions" class="w-100">
-                        <div v-for="(item , key) in form_data.idiom_definitions" :key="key">
+                        <div v-for="(item , key) in form_data.idiom_definitions" :key="key" class="pa-2 stripes-bg">
                             <v-row>
                                 <v-col v-if="item.idiom_definition_image" cols="12" xs="12" sm="12" class="pb-0">
                                     <v-card rounded="lg" ripple max-width="200" width="100%" class="ma-auto">
@@ -119,7 +118,7 @@
                                 <v-col cols="12" sm="12" md="8" class="pb-0">
                                     <v-textarea
                                         v-model="item.definition"
-                                        outlined clearable rows="3"
+                                        outlined rows="3"
                                         :error-messages="errors[`idiom_definitions.${key}.definition`] ? errors[`idiom_definitions.${key}.definition`] : null"
                                         dense :label="'معنی ' + (key + 1)"
                                         :prepend-icon="item.id ? 'mdi-image-area' : ''"
@@ -139,12 +138,45 @@
                                 <v-col cols="12" sm="12" class="pb-0">
                                     <v-textarea
                                         v-model="item.description"
-                                        outlined clearable rows="3"
+                                        outlined rows="3"
                                         dense :label="'توضیحات برای معنی ' + (key + 1)"
                                     ></v-textarea>
                                 </v-col>
+                                <v-col cols="12" sm="12" class="py-0 mb-4 pb-2">
+                                    <div class="d-flex justify-space-between">
+                                        <v-btn v-if="item.id" dark color="orange" small @click="joinable_id = item.id , join_modal = true">اتصال به متن</v-btn>
+                                        <v-btn v-if="item.id && parseInt(item.joins_count) === 0" dark :loading="delete_loading" color="danger" small @click="deleteDefinition(item.id)">حذف این معنی</v-btn>
+                                    </div>
+                                </v-col>
                             </v-row>
-                            <div class="mb-4">
+                            <div v-if="item.joins_count > 0">
+                                <div class="d-flex justify-space-between">
+                                    <v-btn
+                                        color="purple" text
+                                        @click="show_joins = parseInt(item.id)"
+                                    >{{item.joins_count}} مثال در آهنگ ها و فیلم ها</v-btn>
+
+                                    <v-btn icon @click="show_joins = 0">
+                                        <v-icon>{{ show_joins === parseInt(item.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                                    </v-btn>
+                                </div>
+                                <v-expand-transition>
+                                    <div v-show="show_joins === parseInt(item.id)">
+                                        <v-divider></v-divider>
+                                        <v-list-item-group>
+                                            <v-list-item v-for="(join, i) in item.text_joins" :key="i" dense>
+                                                <v-list-item-content>
+                                                    <v-list-item-title @click="goToTextsPage(join)">
+                                                        <div>{{join.text.text_english}}</div>
+                                                        <div>{{join.text.text_persian}}</div>
+                                                    </v-list-item-title>
+                                                </v-list-item-content>
+                                            </v-list-item>
+                                        </v-list-item-group>
+                                    </div>
+                                </v-expand-transition>
+                            </div>
+                            <div class="my-4">
                                 <small>مثال برای معنی</small>
                             </div>
                             <div v-for="(example , example_key) in item.idiom_definition_examples">
@@ -152,7 +184,7 @@
                                     <v-col cols="12" xs="12" sm="6" class="pb-0">
                                         <v-textarea
                                             v-model="example.phrase"
-                                            outlined clearable rows="3"
+                                            outlined rows="3"
                                             dense :label="'عبارت ' + (example_key + 1)"
                                             :error-messages="errors[`idiom_definitions.${key}.idiom_definition_examples.${example_key}.phrase`] ? errors[`idiom_definitions.${key}.idiom_definition_examples.${example_key}.phrase`] : null"
                                         ></v-textarea>
@@ -160,7 +192,7 @@
                                     <v-col cols="12" xs="12" sm="6" class="pb-0">
                                         <v-textarea
                                             v-model="example.definition"
-                                            outlined clearable rows="3"
+                                            outlined rows="3"
                                             append-outer-icon="mdi-delete"
                                             @click:append-outer="removeExample(key , example_key)"
                                             dense :label="'معنی عبارت ' + (example_key + 1)"
@@ -227,6 +259,18 @@
             </v-card>
         </v-dialog>
 
+        <v-dialog
+            max-width="600"
+            v-model="join_modal"
+        >
+            <v-card>
+                <v-toolbar color="accent" dark class="d-flex justify-space-between">
+                    اتصال معنی با شناسه {{joinable_id}}
+                </v-toolbar>
+                <join-text-to-vendor v-if="join_modal" :joinable_id="joinable_id" joinable_type="idiom_definition" :search_for="form_data.phrase" @close="join_modal = false"></join-text-to-vendor>
+            </v-card>
+        </v-dialog>
+
     </div>
 </template>
 <script>
@@ -251,6 +295,10 @@ export default {
         definition_upload_image_modal: false,
         upload_loading: false,
         loading: false,
+        delete_loading: false,
+        show_joins: 0,
+        join_modal: false,
+        joinable_id: null,
     }),
     methods:{
         addDefinition(){
@@ -306,6 +354,7 @@ export default {
                     type: "success",
                     timer: 5000
                 })
+                this.errors = {};
                 this.getIdiom(this.$route.params.id);
             })
             .catch( err => {
@@ -336,6 +385,35 @@ export default {
                 })
                 .catch( err => {
                     this.loading = false;
+                    const e = err.response.data
+                    if(e.errors){ this.errors = e.errors }
+                    else if(e.message){
+                        this.$fire({
+                            title: "خطا",
+                            text: e.message,
+                            type: "error",
+                            timer: 5000
+                        })
+                    }
+                });
+            }
+        },
+        deleteDefinition(id){
+            if (confirm('از حذف معنی اصطلاح اطمینان دارید؟')){
+                this.delete_loading = true;
+                this.$http.post(`idioms/definition/remove` , {id})
+                .then(res => {
+                    this.$fire({
+                        title: "موفق",
+                        text: res.data.message,
+                        type: "success",
+                        timer: 5000
+                    })
+                    this.delete_loading = false;
+                    this.getIdiom(this.$route.params.id);
+                })
+                .catch( err => {
+                    this.delete_loading = false;
                     const e = err.response.data
                     if(e.errors){ this.errors = e.errors }
                     else if(e.message){
@@ -382,6 +460,26 @@ export default {
                 }).finally(() => {
                 this.upload_loading = false;
             });
+        },
+        goToTextsPage(join){
+            let type = 'music';
+            if (join.text.textable_type === 'App\\Models\\Film') {
+                type = 'film';
+            }
+            const link = {
+                name : 'edit_texts',
+                params:{
+                    textable_id:join.text.textable_id,
+                    type
+                },
+                query:{
+                    'text_id': join.text_id
+                }
+            };
+            const link_data = this.$router.resolve(link);
+            if (link_data) {
+                window.open(link_data.href, '_blank');
+            }
         },
     },
     beforeMount(){

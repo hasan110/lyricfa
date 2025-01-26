@@ -10,8 +10,9 @@ import vuetify from './plugins/vuetify'
 
 import App from './App.vue';
 import MySidebar from './components/template/MySidebar.vue';
+import JoinTextToVendor from "./components/JoinTextToVendor.vue";
 import VueSimpleAlert from "vue-simple-alert";
- 
+
 require('./bootstrap');
 
 window.Vue = require('vue').default;
@@ -24,6 +25,7 @@ Vue.use(VueSimpleAlert);
 
 Vue.component('app', App);
 Vue.component('my-sidebar', MySidebar);
+Vue.component('join-text-to-vendor', JoinTextToVendor);
 
 const app = new Vue({
     el: '#app',

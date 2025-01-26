@@ -345,7 +345,9 @@ class GrammerController extends Controller
         }
 
         $get = Grammer::with(['grammer_sections' => function ($query) {
-            $query->orderBy('priority', 'asc')->orderBy('id', 'asc');
+            $query->with(['text_joins' => function ($q) {
+                $q->with('text');
+            }])->orderBy('priority', 'asc')->orderBy('id', 'asc');
         }])->find($request->id);
         if(!$get){
             return response()->json([

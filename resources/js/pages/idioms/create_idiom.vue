@@ -14,7 +14,6 @@
 
         <div class="ma-auto" style="max-width: 720px;">
             <v-container>
-
                 <v-row class="pt-3">
                     <v-col cols="12" xs="12" sm="12" class="pb-0">
                         <v-text-field
@@ -29,7 +28,6 @@
                             v-model="form_data.phrase"
                             :error-messages="errors.phrase"
                             outlined
-                            clearable
                             dense rows="3"
                             label="متن اصطلاح"
                         ></v-textarea>
@@ -98,14 +96,14 @@
                         </v-btn>
                     </div>
                 </div>
-                <v-container>
+                <v-container class="pa-0">
                     <draggable v-model="form_data.idiom_definitions" class="w-100">
-                        <div v-for="(item , key) in form_data.idiom_definitions" :key="key">
+                        <div v-for="(item , key) in form_data.idiom_definitions" :key="key" class="pa-2 stripes-bg">
                             <v-row>
                                 <v-col cols="12" sm="12" md="8" class="pb-0">
                                     <v-textarea
                                         v-model="item.definition"
-                                        outlined clearable rows="3"
+                                        outlined rows="3"
                                         :error-messages="errors[`idiom_definitions.${key}.definition`] ? errors[`idiom_definitions.${key}.definition`] : null"
                                         dense :label="'معنی ' + (key + 1)"
                                     ></v-textarea>
@@ -123,7 +121,7 @@
                                 <v-col cols="12" sm="12" class="pb-0">
                                     <v-textarea
                                         v-model="item.description"
-                                        outlined clearable rows="3"
+                                        outlined rows="3"
                                         dense :label="'توضیحات برای معنی ' + (key + 1)"
                                     ></v-textarea>
                                 </v-col>
@@ -136,7 +134,7 @@
                                     <v-col cols="12" xs="12" sm="6" class="pb-0">
                                         <v-textarea
                                             v-model="example.phrase"
-                                            outlined clearable rows="3"
+                                            outlined rows="3"
                                             dense :label="'عبارت ' + (example_key + 1)"
                                             :error-messages="errors[`idiom_definitions.${key}.idiom_definition_examples.${example_key}.phrase`] ? errors[`idiom_definitions.${key}.idiom_definition_examples.${example_key}.phrase`] : null"
                                         ></v-textarea>
@@ -144,7 +142,7 @@
                                     <v-col cols="12" xs="12" sm="6" class="pb-0">
                                         <v-textarea
                                             v-model="example.definition"
-                                            outlined clearable rows="3"
+                                            outlined rows="3"
                                             append-outer-icon="mdi-delete"
                                             @click:append-outer="removeExample(key , example_key)"
                                             dense :label="'معنی عبارت ' + (example_key + 1)"

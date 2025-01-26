@@ -73,12 +73,20 @@ class TextController extends Controller
             $texts_query = $texts_query->where('textable_type' , Music::class);
         }
 
-        foreach ($array as $word_list) {
-            $texts_query = $texts_query->where(function($query) use ($word_list) {
-                foreach ($word_list as $word) {
-                    $query->orWhere('text_english' , 'regexp' , '\\b'.$word.'\\b');
-                }
-            });
+        if ($request->input('search_exact')) {
+            $texts_query = $texts_query->where('text_english' , 'like' , '%'.$request->input('search_word').'%');
+        } else {
+            foreach ($array as $word_list) {
+                $texts_query = $texts_query->where(function($query) use ($word_list) {
+                    foreach ($word_list as $word) {
+                        $query->orWhere('text_english' , 'regexp' , '\\b'.$word.'\\b');
+                    }
+                });
+            }
+        }
+
+        if ($request->input('translate_text_search')) {
+            $texts_query = $texts_query->where('text_persian' , 'like' , '%'.$request->input('translate_text_search').'%');
         }
 
         $texts = $texts_query->orWhere('id' , $search_word)->inRandomOrder()->take(200)->get();

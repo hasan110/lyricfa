@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Helpers\WordHelper;
 use App\Models\Idiom;
 use App\Models\Map;
 use App\Models\Word;
@@ -95,6 +96,7 @@ class IdiomController extends Controller
         foreach ($word_idioms as $key => $word_idiom)
         {
             $word_idiom->rate = 0;
+            $word_idiom->words_rate = count(explode(' ', $word_idiom->phrase_base));
             $separated_phrase = preg_split("/[- ,?;_\"!.}{)(]+/" , $word_idiom->phrase_base);
             $phrase_separated_words = [];
             foreach ($separated_phrase as $separated){
@@ -127,6 +129,7 @@ class IdiomController extends Controller
         foreach ($word_base_idioms as $key => $word_base_idiom)
         {
             $word_base_idiom->rate = 0;
+            $word_base_idiom->words_rate = count(explode(' ', $word_base_idiom->phrase_base));
             $base_separated_phrase = preg_split("/[- ,?;_\"!.}{)(]+/" , $word_base_idiom->phrase_base);
             $base_phrase_separated_words = [];
             foreach ($base_separated_phrase as $base_separated){
@@ -157,8 +160,7 @@ class IdiomController extends Controller
         }
 
         $all_idioms = $word_idioms->merge($word_base_idioms);
-
-        $all_idioms = $all_idioms->sortBy(fn ($item, $key) => strlen($item['phrase']));
+        $all_idioms = $all_idioms->sortBy('words_rate');
         $all_idioms = $all_idioms->sortByDesc('rate');
 
         return response()->json([
@@ -190,19 +192,35 @@ class IdiomController extends Controller
         $lower_word = strtolower($request->word);
 
         $word_base = Map::where('word' , $word)->orWhere('word' , $lower_word)->first();
+        if (!$word_base) {
+            $new_word = null;
+            if (str_ends_with($word , "'s")) {
+                $new_word = rtrim($word, "'s");
+            }
+            if (str_ends_with($word , "s'")) {
+                $new_word = rtrim($word, "s'");
+            }
+            if ($new_word) {
+                $word_base = Map::where('word' , $new_word)->orWhere('word' , strtolower($new_word))->first();
+            }
+        }
         $lower_word_base = null;
-        if($word_base){
+        if ($word_base){
             $word_base = $word_base->ci_base;
             $lower_word_base = strtolower($word_base);
         }
 
-        $get_word = Word::where('english_word' , $word)->first();
-        if (!$get_word) {
-            $get_word = Word::where('english_word' , $lower_word)->first();
-            if (!$get_word) {
-                $get_word = Word::where('english_word' , ucfirst($lower_word))->first();;
+        $get_word = (new WordHelper())->getWord($word);
+        if (!$get_word && (str_ends_with($word , "'s") || str_ends_with($word , "s'"))) {
+            if (str_ends_with($word , "'s")) {
+                $word = rtrim($word, "'s");
             }
+            if (str_ends_with($word , "s'")) {
+                $word = rtrim($word, "s'");
+            }
+            $get_word = (new WordHelper())->getWord($word);
         }
+
         $get_en_word = WordENEN::where('ci_word' , $word)->orWhere('ci_word' , $lower_word)->orWhere('ci_word' , ucfirst($lower_word))->first();
         if($get_word)
         {
@@ -218,20 +236,19 @@ class IdiomController extends Controller
             $word_data = null;
         }
 
-        $get_base_word = Word::where('english_word' , $word_base)->orWhere('english_word' , $lower_word_base)->first();
-        $get_base_en_word = WordENEN::where('ci_word' , $word_base)->orWhere('ci_word' , $lower_word_base)->first();
-        if($get_base_word)
-        {
-            $base_word_data = [
-                'word' => $word_base,
-                'pronunciation' => $get_base_word->pronunciation,
-                'definitions' => $get_base_word->word_definitions,
-                'english_definitions' => $get_base_en_word ? $get_base_en_word->english_word_definitions : null,
-                'idioms' => Idiom::with('idiom_definitions')->where('base' , $word_base)->orWhere('base' , $lower_word_base)->get(),
-            ];
-
-        }else{
-            $base_word_data = null;
+        $base_word_data = null;
+        if ($word_base) {
+            $get_base_word = Word::where('english_word' , $word_base)->orWhere('english_word' , $lower_word_base)->first();
+            $get_base_en_word = WordENEN::where('ci_word' , $word_base)->orWhere('ci_word' , $lower_word_base)->first();
+            if ($get_base_word) {
+                $base_word_data = [
+                    'word' => $word_base,
+                    'pronunciation' => $get_base_word->pronunciation,
+                    'definitions' => $get_base_word->word_definitions,
+                    'english_definitions' => $get_base_en_word ? $get_base_en_word->english_word_definitions : null,
+                    'idioms' => Idiom::with('idiom_definitions')->where('base' , $word_base)->orWhere('base' , $lower_word_base)->get(),
+                ];
+            }
         }
 
         return response()->json([

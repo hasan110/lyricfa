@@ -145,7 +145,42 @@
                                                         حذف بخش
                                                     </v-btn>
                                                 </v-col>
+
+                                                <v-col v-if="section_item.id" cols="12" sm="12" class="py-0 mt-4 pb-2">
+                                                    <div class="d-flex justify-space-between">
+                                                        <v-btn dark color="orange" small @click="joinable_id = section_item.id , join_modal = true">اتصال به متن</v-btn>
+                                                    </div>
+                                                </v-col>
                                             </v-row>
+
+                                            <template v-if="section_item.joins_count > 0">
+                                                <div class="d-flex justify-space-between mt-4">
+                                                    <v-btn
+                                                        color="purple" text
+                                                        @click="show_joins = parseInt(section_item.id)"
+                                                    >{{section_item.joins_count}} مثال در آهنگ ها و فیلم ها</v-btn>
+
+                                                    <v-btn icon @click="show_joins = 0">
+                                                        <v-icon>{{ show_joins === parseInt(section_item.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                                                    </v-btn>
+                                                </div>
+                                                <v-expand-transition>
+                                                    <div v-show="show_joins === parseInt(section_item.id)">
+                                                        <v-divider></v-divider>
+                                                        <v-list-item-group>
+                                                            <v-list-item v-for="(join, i) in section_item.text_joins" :key="i" dense>
+                                                                <v-list-item-content>
+                                                                    <v-list-item-title @click="goToTextsPage(join)">
+                                                                        <div>{{join.text.text_english}}</div>
+                                                                        <div>{{join.text.text_persian}}</div>
+                                                                    </v-list-item-title>
+                                                                </v-list-item-content>
+                                                            </v-list-item>
+                                                        </v-list-item-group>
+                                                    </div>
+                                                </v-expand-transition>
+                                            </template>
+
                                             <div class="d-flex align-center justify-space-between pa-4">
                                                 <div>توضیح</div>
                                                 <div>
@@ -190,6 +225,7 @@
                                                                 ></v-textarea>
                                                             </v-col>
                                                         </v-row>
+
                                                         <div class="py-3 text-primary">
                                                             <small>مثال برای توضیح</small>
                                                         </div>
@@ -242,6 +278,18 @@
             </v-container>
         </div>
 
+        <v-dialog
+            max-width="600"
+            v-model="join_modal"
+        >
+            <v-card>
+                <v-toolbar color="accent" dark class="d-flex justify-space-between">
+                    اتصال بخش با شناسه {{joinable_id}}
+                </v-toolbar>
+                <join-text-to-vendor v-if="join_modal" :joinable_id="joinable_id" joinable_type="grammer_section" @close="join_modal = false"></join-text-to-vendor>
+            </v-card>
+        </v-dialog>
+
     </div>
 </template>
 <script>
@@ -277,6 +325,9 @@ export default {
         ],
         rules_list:[],
         loading: false,
+        show_joins: 0,
+        join_modal: false,
+        joinable_id: null,
     }),
     watch:{
         rules_filter: {
@@ -423,6 +474,26 @@ export default {
                 .catch( err => {
                     console.log(err)
                 });
+        },
+        goToTextsPage(join){
+            let type = 'music';
+            if (join.text.textable_type === 'App\\Models\\Film') {
+                type = 'film';
+            }
+            const link = {
+                name : 'edit_texts',
+                params:{
+                    textable_id:join.text.textable_id,
+                    type
+                },
+                query:{
+                    'text_id': join.text_id
+                }
+            };
+            const link_data = this.$router.resolve(link);
+            if (link_data) {
+                window.open(link_data.href, '_blank');
+            }
         },
     },
     beforeMount(){
