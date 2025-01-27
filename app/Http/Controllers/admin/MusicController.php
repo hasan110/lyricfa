@@ -165,6 +165,8 @@ class MusicController extends Controller
             'persian_title.required' => 'عنوان فارسی آهنگ نمی تواند خالی باشد',
             'level.required' => 'سطح موزیک باید انتخاب شود',
             'level.in' => 'سطح باید یکی از موارد: A1, A2, B1, B2, C1, C2 باشد',
+            'permission_type.required' => 'نوع دسترسی نمی تواند خالی باشد',
+            'permission_type.in' => 'نوع دسترسی باید یکی از مقادیر paid,free باشد',
             'start_demo.required' => 'زمان شروع دمو آهنگ نمی تواند خالی باشد',
             'start_demo.numeric' => 'زمان شروع دمو آهنگ باید عدد باشد',
             'end_demo.required' => 'زمان پایان دمو آهنگ نمی تواند خالی باشد',
@@ -185,6 +187,7 @@ class MusicController extends Controller
             'english_title' => 'required',
             'persian_title' => 'required',
             'level' => 'required|in:A1,A2,B1,B2,C1,C2',
+            'permission_type' => 'required|in:paid,free',
             'start_demo' => 'required|numeric',
             'end_demo' => 'required|numeric',
             'hardest_degree' => 'required|numeric',
@@ -218,6 +221,7 @@ class MusicController extends Controller
         $music->end_demo = $request->end_demo;
         $music->degree = $request->hardest_degree;
         $music->level = $request->level;
+        $music->permission_type = $request->permission_type;
         $music->published_at = $request->date_publication;
         if ($request->album) {
             $music->album_id = $request->album;

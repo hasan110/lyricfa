@@ -103,7 +103,7 @@
                                     </div>
 
                                     <div class="d-flex flex-column">
-                                        <span>{{item.name}}</span>
+                                        <span>{{item.name}}  &nbsp; <v-badge v-if="item.permission_label" color="deep-purple darken-3" :content="item.permission_label"></v-badge></span>
                                         <span>{{item.persian_name}}</span>
                                     </div>
                                 </div>

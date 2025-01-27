@@ -690,6 +690,8 @@ export default {
                         }
                         vm.loaded = true;
                     } , 100)
+                } else {
+                    this.loaded = true;
                 }
             })
             .catch( () => {

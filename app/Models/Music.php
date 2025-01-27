@@ -9,7 +9,7 @@ class Music extends Model
 {
     use HasFactory;
     protected $table = 'musics';
-    protected $appends = [self::POSTER_FILE_TYPE,self::SOURCE_FILE_TYPE];
+    protected $appends = [self::POSTER_FILE_TYPE,self::SOURCE_FILE_TYPE,'permission_label'];
 
     public const POSTER_FILE_TYPE = 'music_poster';
     public const SOURCE_FILE_TYPE = 'music_source';
@@ -69,5 +69,13 @@ class Music extends Model
     public function files()
     {
         return $this->morphMany(File::class, 'fileable', 'fileable_type', 'fileable_id');
+    }
+
+    public function getPermissionLabelAttribute()
+    {
+        if ($this->permission_type === 'free') {
+            return 'رایگان';
+        }
+        return null;
     }
 }

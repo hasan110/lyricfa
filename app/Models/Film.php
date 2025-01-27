@@ -9,7 +9,7 @@ class Film extends Model
 {
     use HasFactory;
     protected $table = 'films';
-    protected $appends = [self::POSTER_FILE_TYPE,self::SOURCE_FILE_TYPE];
+    protected $appends = [self::POSTER_FILE_TYPE,self::SOURCE_FILE_TYPE,'permission_label'];
 
     public const POSTER_FILE_TYPE = 'film_poster';
     public const SOURCE_FILE_TYPE = 'film_source';
@@ -44,6 +44,18 @@ class Film extends Model
         $path = File::getFileUploadPath($this->files, self::SOURCE_FILE_TYPE);
         if ($path) {
             return config('app.files_base_path') . $path;
+        }
+        return null;
+    }
+
+    public function getPermissionLabelAttribute()
+    {
+        if ($this->permission_type === 'free') {
+            return 'رایگان';
+        } else if ($this->permission_type === 'first_episode_free') {
+            return 'قسمت اول رایگان';
+        } else if ($this->permission_type === 'first_season_free') {
+            return 'فصل اول رایگان';
         }
         return null;
     }

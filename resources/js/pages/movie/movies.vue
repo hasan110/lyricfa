@@ -94,7 +94,7 @@
                                         <img :src="item.film_poster" class="rounded m-1" width="40" alt="film poster">
                                     </div>
                                     <div class="d-flex flex-column">
-                                        <span>{{item.english_name}}</span>
+                                        <span>{{item.english_name}} &nbsp; <v-badge v-if="item.permission_label" color="deep-purple darken-3" :content="item.permission_label"></v-badge></span>
                                         <span>{{item.persian_name}}</span>
                                     </div>
                                 </div>
@@ -156,7 +156,7 @@
 
         <v-dialog
             transition="dialog-top-transition"
-            max-width="750"
+            max-width="1000"
             v-model="chlids_modal"
         >
             <v-card>
@@ -197,7 +197,7 @@
                                         <img :src="item.film_poster" class="rounded m-1" width="40" alt="film poster">
                                     </div>
                                     <div class="d-flex flex-column">
-                                        <span>{{item.english_name}}</span>
+                                        <span>{{item.english_name}} &nbsp; <v-badge v-if="item.permission_label" color="deep-purple darken-3" :content="item.permission_label"></v-badge></span>
                                         <span>{{item.persian_name}}</span>
                                     </div>
                                 </div>
@@ -251,7 +251,7 @@
 
         <v-dialog
             transition="dialog-top-transition"
-            max-width="750"
+            max-width="900"
             v-model="sub_chlids_modal"
         >
             <v-card>
@@ -291,7 +291,7 @@
                                         <img :src="item.film_poster" class="rounded m-1" width="40" alt="film poster">
                                     </div>
                                     <div class="d-flex flex-column">
-                                        <span>{{item.english_name}}</span>
+                                        <span>{{item.english_name}} &nbsp; <v-badge v-if="item.permission_label" color="deep-purple darken-3" :content="item.permission_label"></v-badge></span>
                                         <span>{{item.persian_name}}</span>
                                     </div>
                                 </div>

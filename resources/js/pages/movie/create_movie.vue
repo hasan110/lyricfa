@@ -92,7 +92,7 @@
                     </v-row>
                     <v-row>
 
-                        <v-col cols="6" class="pb-0">
+                        <v-col cols="12" sm="6" class="pb-0">
                             <v-file-input
                                 show-size
                                 dense
@@ -104,7 +104,7 @@
                                 :error-messages="errors.poster"
                             ></v-file-input>
                         </v-col>
-                        <v-col cols="6" class="pb-0">
+                        <v-col cols="6" sm="3" class="pb-0">
                             <v-text-field
                                 v-model="form_data.extension"
                                 outlined
@@ -114,13 +114,23 @@
                                 label="پسوند فایل فیلم"
                             ></v-text-field>
                         </v-col>
+                        <v-col cols="6" sm="3" class="pb-0">
+                            <v-select
+                                v-model="form_data.permission_type"
+                                outlined dense
+                                :error-messages="errors.permission_type"
+                                label="نوع دسترسی"
+                                :items="[{text:'اشتراکی',value:'paid'},{text:'رایگان',value:'free'},{text:'فصل اول رایگان',value:'first_season_free'},{text:'قسمت اول رایگان',value:'first_episode_free'}]"
+                                item-value="value" item-text="text"
+                            ></v-select>
+                        </v-col>
                         <v-col cols="12" class="pb-0 plain-text">
                             <v-textarea
                                 v-model="form_data.description"
                                 :error-messages="errors.description"
                                 outlined
                                 clearable
-                                dense rows="12"
+                                dense rows="8"
                                 label="توضیحات فیلم"
                             ></v-textarea>
                         </v-col>
@@ -255,6 +265,7 @@ export default {
             data.priority ? form.append('priority', data.priority) : '';
             data.description ? form.append('description', data.description) : '';
             data.level ? form.append('level', data.level) : '';
+            data.permission_type ? form.append('permission_type', data.permission_type) : '';
             data.film_source_upload_path ? form.append('film_source_upload_path', data.film_source_upload_path) : '';
             form.append('persian_subtitle', data.persian_subtitle ? 1 : 0);
             form.append('status', data.status ? 1 : 0);

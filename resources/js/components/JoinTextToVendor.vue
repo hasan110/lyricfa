@@ -25,10 +25,10 @@
                                         {{item.text_persian}}
                                     </v-list-item-subtitle>
                                     <v-list-item-subtitle v-if="item.textable_type.includes('Music')">
-                                        آهنگ با شناسه {{item.textable.id}} --- {{item.textable.name}}
+                                        آهنگ با شناسه {{item.textable.id}} --- {{item.textable.name}} --- {{item.textable.level}}
                                     </v-list-item-subtitle>
                                     <v-list-item-subtitle v-if="item.textable_type.includes('Film')">
-                                        فیلم با شناسه {{item.textable.id}} --- {{item.textable.english_name}}
+                                        فیلم با شناسه {{item.textable.id}} --- {{item.textable.english_name}} --- {{item.textable.level}}
                                     </v-list-item-subtitle>
                                 </v-list-item-content>
                             </template>

@@ -15,7 +15,7 @@ Plugin.install = function(Vue) {
         evt = (evt) ? evt : window.event;
         var charCode = (evt.which) ? evt.which : evt.keyCode;
         if ((charCode > 31 && (charCode < 48 || charCode > 57)) && charCode !== 46) {
-          evt.preventDefault();;
+          evt.preventDefault();
         } else {
           return true;
         }
@@ -23,14 +23,13 @@ Plugin.install = function(Vue) {
       formatPrice(value) {
         if(value){
           const number = parseInt(value)
-          const val = Number((number).toFixed(1)).toLocaleString()
-          return val
+          return Number((number).toFixed(1)).toLocaleString()
         }else{
           return value
         }
       },
       just_latin(evt){
-        var p = /^[\u0600-\u06FF\s]+$/;
+        const p = /^[\u0600-\u06FF\s]+$/;
         if (p.test(evt.key)) {
           evt.preventDefault();
         }

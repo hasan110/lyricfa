@@ -89,7 +89,7 @@
                         ></v-date-picker>
                     </v-menu>
                 </v-col>
-                <v-col v-if="form_data.has_album" sm="8" lg="4" xl="4" class="pb-2">
+                <v-col v-if="has_album" sm="8" lg="4" xl="4" class="pb-2">
                     <v-text-field
                         v-model="form_data.album_id"
                         :error-messages="errors.album_id"
@@ -99,7 +99,7 @@
                 </v-col>
                 <v-col sm="4" lg="2" xl="2" class="pa-0">
                     <v-checkbox
-                        v-model="form_data.has_album"
+                        v-model="has_album"
                         label="آلبوم دارد؟"
                     ></v-checkbox>
                 </v-col>
@@ -194,6 +194,16 @@
                         label="دموی آهنگ تا"
                     ></v-text-field>
                 </v-col>
+                <v-col cols="12" sm="6" class="pb-0">
+                    <v-select
+                        v-model="form_data.permission_type"
+                        :items="[{text:'اشتراکی',value:'paid'},{text:'رایگان',value:'free'}]"
+                        :error-messages="errors.permission_type"
+                        outlined dense
+                        item-value="value" item-text="text"
+                        label="نوع دسترسی"
+                    ></v-select>
+                </v-col>
             </v-row>
 
             <v-row class="mb-4">
@@ -218,8 +228,8 @@
 export default {
     name:'edit_music',
     data: () => ({
+        has_album: false,
         form_data:{
-            has_album: false,
             is_user_request: false,
             singers: [],
         },
@@ -256,7 +266,7 @@ export default {
                 .then(res => {
                     this.form_data = res.data.data.music
                     this.form_data.singers = res.data.data.singers
-                    this.form_data.album_id ? this.form_data.has_album = true : this.form_data.has_album = false
+                    this.has_album = !!this.form_data.album_id;
                     this.getSingers();
                     this.$store.commit('SHOW_APP_LOADING' , 0)
                 })
@@ -282,12 +292,13 @@ export default {
             x.name ? d.append('english_title', x.name) : '';
             x.persian_name ? d.append('persian_title', x.persian_name) : '';
             x.published_at ? d.append('date_publication', x.published_at) : '';
-            x.has_album ? d.append('has_album', 1) : d.append('has_album', 0);
+            this.has_album ? d.append('has_album', 1) : d.append('has_album', 0);
             x.is_user_request ? d.append('is_user_request', 1) : d.append('is_user_request', 0);
             x.status ? d.append('status', 1) : d.append('status', 0);
             x.album_id ? d.append('album', x.album_id) : '';
             x.degree ? d.append('hardest_degree', parseInt(x.degree)) : '';
             x.level ? d.append('level', x.level) : '';
+            x.permission_type ? d.append('permission_type', x.permission_type) : '';
             x.image ? d.append('image', x.image) : '';
             x.music ? d.append('music', x.music) : '';
             d.append('start_demo', x.start_demo);
