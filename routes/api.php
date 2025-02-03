@@ -34,6 +34,8 @@ Route::post('/check_activate_code', [SmsVerifyController::class, 'checkActivateC
 
 Route::post('/send-verify-code', [SmsVerifyController::class, 'sendVerifyCode']);
 Route::post('/check-verify-code', [SmsVerifyController::class, 'checkVerifyCode']);
+Route::post('/send-verify-code/email', [SmsVerifyController::class, 'sendEmailVerifyCode']);
+Route::post('/check-verify-code/email', [SmsVerifyController::class, 'checkEmailVerifyCode']);
 
 //setting
 Route::get('/get_setting', [SettingController::class, 'getSetting']);

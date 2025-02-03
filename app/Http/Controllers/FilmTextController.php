@@ -42,7 +42,7 @@ class FilmTextController extends Controller
             ], 400);
         }
 
-        if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken"))) {
+        if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken")) || $film->permission_type === 'free') {
             $texts = $film->texts()->orderBy("start_time")->skip($request->page * 25)->take(25)->get();
             return response()->json([
                 'data' => $texts,
@@ -91,7 +91,7 @@ class FilmTextController extends Controller
             ], 400);
         }
 
-        if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken"))) {
+        if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken")) || $film->permission_type === 'free') {
 
             $texts = $film->texts()->orderBy("start_time")->paginate(50);
             return response()->json([

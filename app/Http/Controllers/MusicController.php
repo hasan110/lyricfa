@@ -223,7 +223,7 @@ class MusicController extends Controller
         $user = (new UserHelper())->getUserByToken($request->header("ApiToken"));
 
         $texts = [];
-        if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken"))) {
+        if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken")) || $music->permission_type === 'free') {
             $texts = $music->texts()->orderBy("start_time")->get();
         }
 

@@ -14,16 +14,16 @@ class TextController extends Controller
 {
     public function getTextList(Request $request)
     {
-        if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken"))) {
+        $music = Music::where('id', $request->id_music)->first();
+        if (!$music) {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => "آهنگ یافت نشد",
+            ], 400);
+        }
 
-            $music = Music::where('id', $request->id_music)->first();
-            if (!$music) {
-                return response()->json([
-                    'data' => null,
-                    'errors' => [],
-                    'message' => "آهنگ یافت نشد",
-                ], 400);
-            }
+        if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken")) || $music->permission_type === 'free') {
 
             $texts = $music->texts()->orderBy("start_time")->get();
 

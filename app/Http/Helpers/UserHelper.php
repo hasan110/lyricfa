@@ -40,6 +40,11 @@ class UserHelper extends Helper
         return User::where('phone_number', $phone_number)->where('prefix_code', $prefix)->first();
     }
 
+    public function getUserByEmail($email)
+    {
+        return User::where('email', $email)->first();
+    }
+
     public function generateTokenByPhoneNumber($phone_number , $corridor = 'app')
     {
         $phone_number = str_replace("+98", "", $phone_number);
@@ -60,6 +65,19 @@ class UserHelper extends Helper
     public function generateTokenByAbsolutePhoneNumber($phone_number , $prefix , $corridor = 'app')
     {
         $user = User::where('phone_number', $phone_number)->where('prefix_code', $prefix)->first();
+        $tokens = $user->tokens()->latest()->get();
+        foreach ($tokens as $key => $token) {
+            if ($key === 0) continue;
+            $token->delete();
+        }
+        $token = $user->createToken(config('app.name') . '-' . $corridor);
+        $user->api_token = $token->plainTextToken;
+        return $user;
+    }
+
+    public function generateTokenByEmail($email , $corridor = 'app')
+    {
+        $user = User::where('email', $email)->first();
         $tokens = $user->tokens()->latest()->get();
         foreach ($tokens as $key => $token) {
             if ($key === 0) continue;
@@ -105,6 +123,35 @@ class UserHelper extends Helper
         return $user;
     }
 
+    public function addUserByEmail($email , $referral_code = null , $corridor = 'app')
+    {
+        do{
+            $code_introduce = Str::random(6);
+            $code_introduce_exists = User::where('code_introduce' , $code_introduce)->exists();
+        }while($code_introduce_exists);
+
+        $user = new User();
+        $user->email = $email;
+        $user->expired_at = Carbon::now();
+        $user->code_introduce = $code_introduce;
+        $user->referral_code = $referral_code;
+        $user->corridor = $corridor;
+
+        $user->save();
+
+        $token = $user->createToken(config('app.name').'-'.$corridor);
+        $user->api_token = $token->plainTextToken;
+
+        if ($referral_code)
+        {
+            try {
+                $this->referOperations('register' , $user , 2);
+            } catch (Exception $e) {}
+        }
+
+        return $user;
+    }
+
     public function getUserDetailByToken($api_token)
     {
         $token = PersonalAccessToken::findToken($api_token);
@@ -130,7 +177,7 @@ class UserHelper extends Helper
             $user->minutes_remain = $diffInMinutes;
         }
 
-        if (Carbon::now()->diffInSeconds($user->created_at) <= 20) {
+        if (Carbon::now()->diffInMinutes($user->created_at) <= 10) {
             $user->new_user = true;
         } else {
             $user->new_user = false;

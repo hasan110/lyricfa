@@ -45,9 +45,27 @@ class MusicHelper extends Helper
             $music->in_playlist = 0;
         }
 
+        $difficulty = null;
+        switch($music->degree) {
+            case 1:
+                $difficulty = "EASY";
+                break;
+            case 2:
+                $difficulty = "NORMAL";
+                break;
+            case 3:
+                $difficulty = "HARD";
+                break;
+            case 4:
+                $difficulty = "SO HARD";
+                break;
+            default:
+        }
+
         return [
             'music' => $music,
             'singers' => $singers,
+            'difficulty' => $difficulty,
             'num_like' => $num_like,
             'readable_like' => $this->readableNumber($num_like),
             'readable_views' => $this->readableNumber(intval($music->views)),

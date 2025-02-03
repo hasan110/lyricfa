@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Helpers\UserHelper;
+use App\Mail\SendVerifyCode;
 use App\Models\SmsVerify;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
@@ -286,6 +288,132 @@ class SmsVerifyController extends Controller
                         'message' => "کد فعال سازی اشتباه است"
                     ], 400);
                 }
+            }
+        } else {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => "کد فعال سازی منقضی شده است"
+            ], 400);
+        }
+    }
+
+    public function sendEmailVerifyCode(Request $request)
+    {
+        $messages = array(
+            'email.required' => 'ایمیل الزامی است',
+        );
+
+        $validator = Validator::make($request->all(), [
+            'email' => 'required',
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => null,
+                'errors' => $validator->errors(),
+                'message' => null
+            ], 400);
+        }
+        $email = $request->input('email');
+
+        $check_verify_code = SmsVerify::where('email', $email)->latest()->first();
+        if ($check_verify_code and $check_verify_code->created_at > Carbon::now()->subMinute()) {
+            return response()->json([
+                'data' => null,
+                'errors' => $validator->errors(),
+                'message' => 'کد فعال سازی قبلا ارسال شده است. برای ارسال مجدد یک دقیقه بعد تلاش کنید.'
+            ], 400);
+        }
+
+        $user = (new UserHelper())->getUserByEmail($email);
+
+        $activate_code = rand(1000, 9999);
+        if ($user) {
+            $type = "login";
+        }else{
+            $type = "register";
+        }
+        $smsVerify = new SmsVerify();
+        $smsVerify->email = $email;
+        $smsVerify->type = $type;
+        $smsVerify->code = $activate_code;
+
+        try {
+            Mail::to($email)->send(new SendVerifyCode($smsVerify));
+        } catch (Exception $e) {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => $e->getMessage()
+            ], 400);
+        }
+
+        $smsVerify->save();
+
+        return response()->json([
+            'data' =>null,
+            'errors' => [],
+            'message' => "کد فعال سازی با موفقیت ارسال شد"
+        ]);
+    }
+
+    public function checkEmailVerifyCode(Request $request)
+    {
+        $messages = array(
+            'email.required' => 'ایمیل الزامی است',
+            'code.required' => 'کد ارسالی الزامی است',
+        );
+
+        $validator = Validator::make($request->all(), [
+            'code' => 'required',
+            'email' => 'required'
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => null,
+                'errors' => $validator->errors(),
+                'message' => "بررسی کد فعال سازی شکست خورد"
+            ], 400);
+        }
+
+        $email = $request->input('email');
+
+        $verify = SmsVerify::orderBy('id', 'DESC')->where('email', $email)->first();
+        if (!$verify || $verify->code != $request->input('code')) {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => "اطلاعات وارد شده اشتباه است"
+            ], 400);
+        }
+
+        $t1 = Carbon::parse($verify->updated_at);
+        $t2 = Carbon::now();
+        $diff = $t1->diff($t2);
+        if ($request->corridor === 'web-app') {
+            $corridor = 'web-app';
+        } else {
+            $corridor = 'app';
+        }
+
+        if ($diff->days == 0 && $diff->h == 0 && $diff->i <= 10) {
+            if ((new UserHelper())->getUserByEmail($email)) {
+                $user = (new UserHelper())->generateTokenByEmail($email, $corridor);
+                return response()->json([
+                    'data' => $user,
+                    'errors' => [],
+                    'message' => "اطلاعات کاربر با موفقیت دریافت شد"
+                ]);
+            } else {
+                $referral_code = (new UserHelper())->checkReferralCode($request->referral_code);
+                $user = (new UserHelper())->addUserByEmail($email , $referral_code , $corridor);
+                return response()->json([
+                    'data' => $user,
+                    'errors' => [],
+                    'message' => "اطلاعات کاربر با موفقیت دریافت شد"
+                ]);
             }
         } else {
             return response()->json([

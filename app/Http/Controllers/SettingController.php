@@ -13,6 +13,7 @@ use App\Models\Singer;
 use App\Models\Slider;
 use App\Models\View;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class SettingController extends Controller
 {
@@ -34,38 +35,46 @@ class SettingController extends Controller
 
     public function getHomePageData()
     {
-        $sliders = Slider::where('show_it', '=', 1)->orderBy("id")->get();
-        $recent_musics = Music::orderBy('id', 'DESC')->take(40)->whereStatus(1)->get();
-        $shuffled_recent_musics = $recent_musics->shuffle()->take(20);
+        $data = Cache::remember('home_page_data', 60 * 60 * 6, function () {
 
-        $views = View::selectRaw('viewable_id , COUNT(*) AS cnt')->where('viewable_type',Music::class)->where('created_at', '>' , Carbon::now()->subWeek()->format("Y-m-d H:i:s"))->groupBy("viewable_id")->orderBy("cnt","desc")->limit(24)->get();
-        $most_viewed_ids = array_column($views->toArray(),'viewable_id');
-        $most_viewed_musics = Music::whereIn('id' , $most_viewed_ids)->orderByRaw('FIELD(id, '.implode(',' , $most_viewed_ids).')')->get();
+            $sliders = Slider::where('show_it', '=', 1)->orderBy("id")->get();
+            $free_musics = Music::orderBy('id')->where('permission_type', 'free')->take(24)->whereStatus(1)->get();
+            $recent_musics = Music::orderBy('id', 'DESC')->take(40)->whereStatus(1)->get();
+            $shuffled_recent_musics = $recent_musics->shuffle()->take(20);
 
-        $singers = Singer::take(20)->inRandomOrder()->get();
-        $singer_list = [];
-        foreach ($singers as $singer) {
-            $num_like = (new SingerHelper())->singerLikesCount($singer->id);
-            $singer_list[] = [
-                'singer' => $singer,
-                'num_like' => $num_like,
-                'readable_like' => (new Helper())->readableNumber(intval($num_like)),
-                'num_comment' => 0,
-                'user_like_it' => 0
+            $views = View::selectRaw('viewable_id , COUNT(*) AS cnt')->where('viewable_type',Music::class)->where('created_at', '>' , Carbon::now()->subWeek()->format("Y-m-d H:i:s"))->groupBy("viewable_id")->orderBy("cnt","desc")->limit(48)->get();
+            $most_viewed_ids = array_column($views->toArray(),'viewable_id');
+            $most_viewed_musics = Music::whereIn('id' , $most_viewed_ids)->where('permission_type' , 'paid')->orderByRaw('FIELD(id, '.implode(',' , $most_viewed_ids).')')->limit(24)->get();
+
+            $singers = Singer::take(20)->inRandomOrder()->get();
+            $singer_list = [];
+            foreach ($singers as $singer) {
+                $num_like = (new SingerHelper())->singerLikesCount($singer->id);
+                $singer_list[] = [
+                    'singer' => $singer,
+                    'num_like' => $num_like,
+                    'readable_like' => (new Helper())->readableNumber(intval($num_like)),
+                    'num_comment' => 0,
+                    'user_like_it' => 0
+                ];
+            }
+
+            $albums = Album::orderBy('id', 'DESC')->take(24)->get();
+            $films = Film::orderBy('id', "DESC")->whereIn('type', [1, 2])->where('status' , 1)->take(24)->get();
+            $free_films = Film::orderBy('id', "DESC")->whereIn('type', [1, 2])->where('status' , 1)->whereIn('permission_type' , ['free','first_season_free','first_episode_free'])->take(24)->get();
+
+            return [
+                'sliders' => $sliders,
+                'recent_musics' => (new MusicHelper())->prepareMusicsTemplate($shuffled_recent_musics),
+                'most_viewed_musics' => (new MusicHelper())->prepareMusicsTemplate($most_viewed_musics),
+                'free_musics' => (new MusicHelper())->prepareMusicsTemplate($free_musics),
+                'singers' => $singer_list,
+                'albums' => $albums,
+                'films' => $films,
+                'free_films' => $free_films,
             ];
-        }
+        });
 
-        $albums = Album::orderBy('id', 'DESC')->take(10)->get();
-        $films = Film::orderBy('id', "DESC")->whereIn('type', [1, 2])->where('status' , 1)->take(20)->get();
-
-        $data = [
-            'sliders' => $sliders,
-            'recent_musics' => (new MusicHelper())->prepareMusicsTemplate($shuffled_recent_musics),
-            'most_viewed_musics' => (new MusicHelper())->prepareMusicsTemplate($most_viewed_musics),
-            'singers' => $singer_list,
-            'albums' => $albums,
-            'films' => $films,
-        ];
         return response()->json([
             'data' => $data,
             'errors' => null,

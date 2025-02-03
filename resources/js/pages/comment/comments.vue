@@ -74,7 +74,12 @@
                             <td>
                                 <template v-if="item.user">
                                     <router-link :to="{ name:'user' , params:{ id:item.user.id } }">
-                                        {{item.user.phone_number}}
+                                        <template v-if="item.user.phone_number">
+                                            {{item.user.phone_number}}
+                                        </template>
+                                        <template v-else>
+                                            {{item.user.email}}
+                                        </template>
                                     </router-link>
                                 </template>
                                 <template v-else>

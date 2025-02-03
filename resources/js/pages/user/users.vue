@@ -87,7 +87,14 @@
                             :class="[item.has_subscription ? 'bg-star' : '']"
                         >
                             <td>{{ item.id }}</td>
-                            <td>{{ item.phone_number }}</td>
+                            <td>
+                                <template v-if="item.phone_number">
+                                    {{item.phone_number}}
+                                </template>
+                                <template v-else>
+                                    {{item.email}}
+                                </template>
+                            </td>
                             <td><div v-html="item.expire"></div></td>
                             <td>
                                 <span style="color: blue" v-if="item.corridor === 'app'">

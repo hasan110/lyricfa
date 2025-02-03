@@ -60,7 +60,7 @@ class FilmController extends Controller
         $film['items_count'] = $films->count();
         $film['texts'] = [];
 
-        if ((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken")) && $request->with_text) {
+        if (((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken")) && $request->with_text) || $film->permission_type === 'free') {
             $film['texts'] = $film->texts()->orderBy("start_time")->get();
         }
 

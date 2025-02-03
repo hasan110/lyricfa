@@ -15,8 +15,11 @@
             <v-row>
                 <v-col cols="12" sm="12" md="6" lg="4">
                     <v-card max-width="100%" color="#8B50FF" dark>
-                        <v-card-title class="ltr-dir justify-center">
+                        <v-card-title v-if="user.phone_number" class="ltr-dir justify-center">
                             +{{user.prefix_code}}{{user.phone_number}}
+                        </v-card-title>
+                        <v-card-title v-if="user.email" class="ltr-dir justify-center">
+                            {{user.email}}
                         </v-card-title>
                         <v-card-subtitle>
                             {{user.fullname}}

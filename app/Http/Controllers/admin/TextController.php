@@ -155,7 +155,6 @@ class TextController extends Controller
             'texts' => 'required|array',
             'texts.*.id' => 'required',
             'texts.*.text_english' => 'required',
-            'texts.*.text_persian' => 'required',
             'texts.*.start_time' => 'required',
             'texts.*.end_time' => 'required',
         ], $messages);
@@ -164,7 +163,7 @@ class TextController extends Controller
             return response()->json([
                 'data' => null,
                 'errors' => $validator->errors(),
-                'message' => "افزودن متن موزیک شکست خورد",
+                'message' => "ویرایش متن، شکست خورد",
             ], 400);
         }
 

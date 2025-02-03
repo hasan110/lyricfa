@@ -171,26 +171,13 @@ class ReplaceController extends Controller
                 if (str_ends_with($separated , "'s")) {
                     $separated = str_replace("'s" , "" , $separated);
                 }
-                if ($key === 0) {
-                    $word_capital_check = Word::where('english_word', ucwords($separated))->first();
-                    $word_letter_check = Word::where('english_word', strtolower($separated))->first();
-                    if (!$word_capital_check && !$word_letter_check) {
-                        $map_capital_check = Map::where('word', ucwords($separated))->first();
-                        $map_letter_check = Map::where('word', strtolower($separated))->first();
-                        if (!$map_capital_check && !$map_letter_check) {
-                            if (!in_array($raw_word, $found_words)) {
-                                $found_words[$raw_word] = '<a href="/words/create?word='.$raw_word.'" target="_blank" class="red-mark new-word">'.$raw_word.'</a>';
-                            }
-                        }
-                    }
-                } else {
-                    $word_check = Word::where('english_word', $separated)->first();
-                    if (!$word_check) {
-                        $map_check = Map::where('word', $separated)->first();
-                        if (!$map_check) {
-                            if (!in_array($raw_word, $found_words)) {
-                                $found_words[$raw_word] = '<a href="/words/create?word='.$raw_word.'" target="_blank" class="red-mark new-word">'.$raw_word.'</a>';
-                            }
+
+                $word_check = Word::where('english_word', $separated)->orWhere('english_word', strtolower($separated))->orWhere('english_word', ucwords(strtolower($separated)))->first();
+                if (!$word_check) {
+                    $map_check = Map::where('word', $separated)->orWhere('word', strtolower($separated))->orWhere('word', ucwords(strtolower($separated)))->first();
+                    if (!$map_check) {
+                        if (!in_array($raw_word, $found_words)) {
+                            $found_words[$raw_word] = '<a href="/words/create?word='.$raw_word.'" target="_blank" class="red-mark new-word">'.$raw_word.'</a>';
                         }
                     }
                 }
