@@ -103,7 +103,7 @@ class UserHelper extends Helper
         $user = new User();
         $user->phone_number = $phone_number;
         $user->prefix_code = $prefix;
-        $user->expired_at = Carbon::now()->addDays(2);
+        $user->expired_at = Carbon::now();
         $user->code_introduce = $code_introduce;
         $user->referral_code = $referral_code;
         $user->corridor = $corridor;

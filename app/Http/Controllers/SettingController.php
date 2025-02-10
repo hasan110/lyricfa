@@ -19,15 +19,8 @@ class SettingController extends Controller
 {
     public function getSetting()
     {
-        $settings = Setting::query()->where('is_public' , '=' ,1)->get();
-        $result = [];
-
-        foreach ($settings as $setting) {
-            $result[$setting->key] = $setting->value;
-        }
-
         return response()->json([
-            'data' => $result,
+            'data' => Setting::fetch(false),
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد"
         ]);
@@ -35,7 +28,7 @@ class SettingController extends Controller
 
     public function getHomePageData()
     {
-        $data = Cache::remember('home_page_data', 60 * 60 * 6, function () {
+        $data = Cache::remember('home_page_data', 60 * 60, function () {
 
             $sliders = Slider::where('show_it', '=', 1)->orderBy("id")->get();
             $free_musics = Music::orderBy('id')->where('permission_type', 'free')->take(24)->whereStatus(1)->get();

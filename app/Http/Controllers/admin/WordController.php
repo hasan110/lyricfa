@@ -158,8 +158,8 @@ class WordController extends Controller
             'english_word' => 'required',
             'level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'word_definitions.*.definition' => 'filled',
-            'word_definitions.*.level' => 'filled',
-            'word_definitions.*.type' => 'filled',
+            //'word_definitions.*.level' => 'filled',
+            //'word_definitions.*.type' => 'filled',
             'english_definitions.*.definition' => 'filled',
             'word_definitions.*.word_definition_examples.*.definition' => 'filled',
             'word_definitions.*.word_definition_examples.*.phrase' => 'filled',
@@ -205,8 +205,8 @@ class WordController extends Controller
                 $word_definition->word_id = $word->id;
             }
             $word_definition->definition = $definition['definition'];
-            $word_definition->level = $definition['level'];
-            $word_definition->type = $definition['type'];
+            $word_definition->level = $definition['level'] ?? null;
+            $word_definition->type = $definition['type'] ?? null;
             $word_definition->description = $definition['description'] ?? null;
             $word_definition->priority = $key + 1;
             $word_definition->save();

@@ -12,7 +12,7 @@ class Setting extends Model
     protected $guarded = [];
     public $timestamps = false;
 
-    public static function fetch(bool $all = false): array
+    public static function fetch(bool $all = true, bool $cast = false): array
     {
         $settings = Setting::query();
         if (!$all) {
@@ -22,6 +22,9 @@ class Setting extends Model
         $result = [];
 
         foreach ($settings as $setting) {
+            if ($cast && ($setting->value == 1 || $setting->value == 0)) {
+                $setting->value = intval($setting->value);
+            }
             $result[$setting->key] = $setting->value;
         }
 

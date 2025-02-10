@@ -119,6 +119,9 @@ class IdiomController extends Controller
                     $word_idiom->rate++;
                 }
             }
+            if ($word_idiom->rate === count($separated_phrase) - 1) {
+                $word_idiom->rate++;
+            }
 
             if($word_idiom->rate === 0)
             {
@@ -151,6 +154,9 @@ class IdiomController extends Controller
                 if(in_array($base_after_item , $words_after_main_word)){
                     $word_base_idiom->rate++;
                 }
+            }
+            if ($word_base_idiom->rate === count($base_separated_phrase) - 1) {
+                $word_base_idiom->rate++;
             }
 
             if($word_base_idiom->rate === 0)

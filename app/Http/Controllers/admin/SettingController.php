@@ -7,24 +7,12 @@ use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-
 class SettingController extends Controller
 {
-
-    public function getSetting(Request $request)
+    public function getSetting()
     {
-        $settings = Setting::all();
-        $result = [];
-
-        foreach ($settings as $setting) {
-            if (is_numeric($setting->value)) {
-                $setting->value = intval($setting->value);
-            }
-            $result[$setting->key] = $setting->value;
-        }
-
         return response()->json([
-            'data' => $result,
+            'data' => Setting::fetch(true , true),
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد"
         ]);
@@ -50,8 +38,8 @@ class SettingController extends Controller
             ], 400);
         }
 
-        $setting = Setting::whereIn('key', ['app_version_code','app_version_name','maintenance_mode'])->get();
-        foreach ($setting as $setting) {
+        $settings = Setting::all();
+        foreach ($settings as $setting) {
             if ($request->has($setting->key)) {
                 $setting->update([
                     'value' => $request->input($setting->key),

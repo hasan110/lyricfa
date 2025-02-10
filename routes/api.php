@@ -5,11 +5,9 @@ use App\Http\Controllers\FilmController;
 use App\Http\Controllers\FilmTextController;
 use App\Http\Controllers\IdiomController;
 use App\Http\Controllers\MapController;
-use App\Http\Controllers\MerchentZarinPalController;
 use App\Http\Controllers\MusicController;
 use App\Http\Controllers\PlayListController;
 use App\Http\Controllers\PlayListMusicController;
-use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ScoreMusicController;
 use App\Http\Controllers\SingerController;
 use App\Http\Controllers\SliderController;
@@ -28,9 +26,6 @@ use App\Http\Controllers\OrderMusicController;
 use App\Http\Controllers\GrammerController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
-
-//sms
-Route::post('/check_activate_code', [SmsVerifyController::class, 'checkActivateCode']);// remove this webservice in next force update
 
 Route::post('/send-verify-code', [SmsVerifyController::class, 'sendVerifyCode']);
 Route::post('/check-verify-code', [SmsVerifyController::class, 'checkVerifyCode']);
@@ -126,24 +121,22 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/get_word_idioms', [IdiomController::class, 'getWordIdioms']);
     Route::post('/get_idiom_data', [IdiomController::class, 'getIdiomData']);
 
-    //map
+    // map
     Route::post('/get_base_word', [MapController::class, 'getBaseWord']);
     Route::post('/get_word_map_reasons', [MapController::class, 'getWordMapReasons']);
 
-    //user suggestion
+    // user suggestion
     Route::post('/insert_user_suggestion', [UserSuggestionController::class, 'insertUserSuggestion']);
 
-    //order music
+    // order music
     Route::post('/add_order_music', [OrderMusicController::class, 'addOrderMusic'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');;
 
     //score
     Route::post('/get_user_score', [ScoreMusicController::class, 'getUserScore']);
     Route::post('/add_music_score', [ScoreMusicController::class, 'addMusicScore']);
 
-    //zarin
-    Route::post('/get_merchent_id', [MerchentZarinPalController::class, 'getMerchentId']);
+    // subscription list
     Route::post('/get_subscriptions', [SubscriptionController::class, 'getSubscriptions']);
-    Route::post('/account_active', [ReportController::class, 'addPayReports']); // remove this webservice in next force update
 
     // slider
     Route::post('/get_slider_show', [SliderController::class, 'getSlidersForShow']);

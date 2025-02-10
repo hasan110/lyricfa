@@ -40,7 +40,16 @@ class PaymentController extends Controller
         $date = Jalalian::forge($payment->updated_at)->addMinutes(3.5*60)->format('%Y-%m-%d H:i');
         $link_status = '';
 
-        if ($request->Status != 'OK') {
+        $payment_status = false;
+
+        if ($payment->gateway == 'zarinpal') {
+            $payment_status = $request->Status === 'OK';
+        }
+        if ($payment->gateway == 'zibal') {
+            $payment_status = $request->success == 1;
+        }
+
+        if (!$payment_status) {
             $payment->status = 2;
             $payment->save();
             if ($payment->callback_url == 'http://liricfa/') {
