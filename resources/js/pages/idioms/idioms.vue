@@ -109,6 +109,7 @@
                                 <template v-else-if="parseInt(item.type) === 4">اصطلاحات</template>
                                 <template v-else-if="parseInt(item.type) === 5">ضرب المثل</template>
                                 <template v-else-if="parseInt(item.type) === 6">اسلنگ</template>
+                                <template v-else-if="parseInt(item.type) === 7">عبارت</template>
                                 <template v-else>
                                     انتخاب نشده
                                 </template>

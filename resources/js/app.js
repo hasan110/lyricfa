@@ -12,6 +12,7 @@ import App from './App.vue';
 import MySidebar from './components/template/MySidebar.vue';
 import JoinTextToVendor from "./components/JoinTextToVendor.vue";
 import VueSimpleAlert from "vue-simple-alert";
+import VueApexCharts from 'vue-apexcharts'
 
 require('./bootstrap');
 
@@ -22,10 +23,12 @@ Vue.use(Helper);
 Vue.use(Auth);
 Vue.use(VueCookies)
 Vue.use(VueSimpleAlert);
+Vue.use(VueApexCharts)
 
 Vue.component('app', App);
 Vue.component('my-sidebar', MySidebar);
 Vue.component('join-text-to-vendor', JoinTextToVendor);
+Vue.component('apexchart', VueApexCharts)
 
 const app = new Vue({
     el: '#app',

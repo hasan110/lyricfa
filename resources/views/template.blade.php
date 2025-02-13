@@ -9,17 +9,17 @@
     <title>لیریکفا | پنل مدیریت</title>
     <link rel="icon" type="image/x-icon" href="{{asset('assets/img/favicon.png')}}">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{asset('assets/css/style.css')}}?v=37">
+    <link rel="stylesheet" href="{{asset('assets/css/style.css')}}?v=38">
     {{-- <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet"> --}}
 
 </head>
 <body>
 <div id="app">
-    <App/>
+    <App></App>
 </div>
 
 
-<script src="{{asset('assets/js/vue.js')}}?v=37"></script>
+<script src="{{asset('assets/js/vue.js')}}?v=38"></script>
 
 </body>
 </html>

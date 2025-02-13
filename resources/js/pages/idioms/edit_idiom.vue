@@ -75,6 +75,10 @@
                                     value:6,
                                     title:'اسلنگ',
                                 },
+                                {
+                                    value:7,
+                                    title:'عبارت',
+                                },
                             ]"
                             item-value="value"
                             item-text="title"

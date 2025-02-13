@@ -40,7 +40,7 @@ class UserController extends Controller
 
         foreach ($users as $user)
         {
-            $expire = '<span class="red--text">منقضی شده</span>';
+            $expire = '<span class="orange--text darken-4">بدون اشتراک</span>';
             $user->has_subscription = false;
 
             if ($user->expired_at)
@@ -49,13 +49,9 @@ class UserController extends Controller
                 $diffInMinute = Carbon::now()->diffInMinutes($expired_at, false);
                 if($diffInMinute > 0)
                 {
+                    $user->has_subscription = true;
                     $diff = Carbon::now()->diff($expired_at);
-                    $years_days = $diff->y > 0 ? $diff->y * 365 : 0;
-                    $months_days = $diff->m > 0 ? $diff->m * 30 : 0;
-                    $days = $years_days + $months_days + $diff->d;
-                    if ($days > 3) {
-                        $user->has_subscription = true;
-                    }
+                    $days = Carbon::now()->diffInDays($expired_at);
                     if ($days > 0) {
                         if ($diff->h > 0) {
                             $expire = $days .' روز و ' . $diff->h . ' ساعت';
@@ -73,7 +69,7 @@ class UserController extends Controller
             }
 
             $user['expire'] = $expire;
-            $user->persian_created_at = Jalalian::forge($user->created_at)->format('%Y-%m-%d H:i');
+            $user->persian_created_at = Jalalian::forge($user->created_at)->addMinutes(3.5*60)->format('%Y-%m-%d H:i') . ' - ' . Jalalian::forge($user->created_at)->ago();
         }
 
         return response()->json([

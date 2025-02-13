@@ -89,7 +89,7 @@ class ReportController extends Controller
 
     public function reportsUserList(Request $request)
     {
-        $list = Report::whereNotNull('id')->where('type', 0);
+        $list = Report::where('type', 0);
 
         if($request->sort_by){
             switch ($request->sort_by){
@@ -108,13 +108,12 @@ class ReportController extends Controller
         foreach ($list as $item) {
             unset($item['title'],$item['description']);
             $item->user = (new UserHelper())->getUserById($item->user_id);
-            $item->persian_created_at = Jalalian::forge($item->created_at)->format('%Y-%m-%d H:i');
+            $item->persian_created_at = Jalalian::forge($item->created_at)->addMinutes(3.5*60)->format('%Y-%m-%d H:i') . ' - ' . Jalalian::forge($item->created_at)->ago();
         }
 
         return response()->json([
             'data' => $list,
-            'errors' => [
-            ],
+            'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
         ]);
     }
