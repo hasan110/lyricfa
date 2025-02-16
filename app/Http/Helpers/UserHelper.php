@@ -2,13 +2,16 @@
 
 namespace App\Http\Helpers;
 
+use App\Models\Report;
 use App\Models\Subscription;
 use App\Models\User;
+use App\Models\UserWord;
 use App\Services\Notification;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\PersonalAccessToken;
+use Morilog\Jalali\Jalalian;
 
 class UserHelper extends Helper
 {
@@ -302,5 +305,62 @@ class UserHelper extends Helper
             return $user;
         }
         return null;
+    }
+
+    public function getSubscriptions($user_id, $all = false)
+    {
+        $subscriptions = Report::where('user_id', $user_id);
+        if (!$all) {
+            $subscriptions = $subscriptions->where('type', 1);
+        }
+        return $subscriptions->orderBy('id', 'DESC')->take(100)->get();
+    }
+
+    public function getLightenerBox($user_id)
+    {
+        $box_data = [];
+        for($i = 0 ; $i <= 5 ; $i++)
+        {
+            $count = UserWord::where('user_id', $user_id)->where('status', $i)->count();
+            $words_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('type', 0)->count();
+            $idioms_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('type', 1)->count();
+            $comment_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('type', 2)->count();
+            $grammars_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('type', 3)->count();
+            $reviews_count = 0;
+            $date = Carbon::now();
+            switch ($i) {
+                case 0:
+                    $reviews_count = $count;
+                    break;
+                case 1:
+                    $reviews_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('updated_at', '<=' , $date->subDays(1))->count();
+                    break;
+                case 2:
+                    $reviews_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('updated_at', '<=' , $date->subDays(2))->count();
+                    break;
+                case 3:
+                    $reviews_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('updated_at', '<=' , $date->subDays(4))->count();
+                    break;
+                case 4:
+                    $reviews_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('updated_at', '<=' , $date->subDays(8))->count();
+                    break;
+                case 5:
+                    $reviews_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('updated_at', '<=' , $date->subDays(16))->count();
+                    break;
+            }
+
+            $data = [
+                'status' => $i,
+                'total_count' => $count,
+                'words_count' => $words_count,
+                'idioms_count' => $idioms_count,
+                'comments_count' => $comment_count,
+                'grammars_count' => $grammars_count,
+                'reviews_count' => $reviews_count,
+            ];
+            $box_data[$i] = $data;
+        }
+
+        return $box_data;
     }
 }

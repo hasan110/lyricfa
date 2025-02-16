@@ -4,11 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Morilog\Jalali\Jalalian;
 
 class Like extends Model
 {
     use HasFactory;
     protected $guarded = [];
+    protected $with = ['user','likeable'];
+    protected $appends = ['persian_created_at'];
 
     public function user()
     {
@@ -18,5 +21,13 @@ class Like extends Model
     public function likeable()
     {
         return $this->morphTo();
+    }
+
+    public function getPersianCreatedAtAttribute(): ?string
+    {
+        if ($this->created_at) {
+            return Jalalian::forge($this->created_at)->addMinutes(3.5*60)->format('%Y-%m-%d H:i') . ' - ' . Jalalian::forge($this->created_at)->ago();
+        }
+        return null;
     }
 }

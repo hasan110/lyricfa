@@ -120,48 +120,7 @@ class UserWordController extends Controller
     function getLightenerBoxData(Request $request)
     {
         $user = (new UserHelper())->getUserByToken($request->header("ApiToken"));
-        $box_data = [];
-        for($i = 0 ; $i <= 5 ; $i++)
-        {
-            $count = UserWord::where('user_id', $user->id)->where('status', $i)->count();
-            $words_count = UserWord::where('user_id', $user->id)->where('status', $i)->where('type', 0)->count();
-            $idioms_count = UserWord::where('user_id', $user->id)->where('status', $i)->where('type', 1)->count();
-            $comment_count = UserWord::where('user_id', $user->id)->where('status', $i)->where('type', 2)->count();
-            $grammars_count = UserWord::where('user_id', $user->id)->where('status', $i)->where('type', 3)->count();
-            $reviews_count = 0;
-            $date = Carbon::now();
-            switch ($i) {
-                case 0:
-                    $reviews_count = $count;
-                    break;
-                case 1:
-                    $reviews_count = UserWord::where('user_id', $user->id)->where('status', $i)->where('updated_at', '<=' , $date->subDays(1))->count();
-                    break;
-                case 2:
-                    $reviews_count = UserWord::where('user_id', $user->id)->where('status', $i)->where('updated_at', '<=' , $date->subDays(2))->count();
-                    break;
-                case 3:
-                    $reviews_count = UserWord::where('user_id', $user->id)->where('status', $i)->where('updated_at', '<=' , $date->subDays(4))->count();
-                    break;
-                case 4:
-                    $reviews_count = UserWord::where('user_id', $user->id)->where('status', $i)->where('updated_at', '<=' , $date->subDays(8))->count();
-                    break;
-                case 5:
-                    $reviews_count = UserWord::where('user_id', $user->id)->where('status', $i)->where('updated_at', '<=' , $date->subDays(16))->count();
-                    break;
-            }
-
-            $data = [
-                'status' => $i,
-                'total_count' => $count,
-                'words_count' => $words_count,
-                'idioms_count' => $idioms_count,
-                'comments_count' => $comment_count,
-                'grammars_count' => $grammars_count,
-                'reviews_count' => $reviews_count,
-            ];
-            $box_data[$i] = $data;
-        }
+        $box_data = (new UserHelper())->getLightenerBox($user->id);
         return response()->json(['data' => $box_data, 'errors' => [], 'message' => "اطلاعات با موفقیت گرفته شد"]);
     }
 

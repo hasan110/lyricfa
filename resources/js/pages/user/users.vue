@@ -50,12 +50,6 @@
 
             </v-row>
 
-            <div class="sm-section">
-
-                <v-btn @click="sub_modal = true" color="primary" dark>افزودن اشتراک</v-btn>
-
-            </div>
-
             <div class="main-section">
                 <v-simple-table
                     fixed-header
@@ -131,38 +125,6 @@
                 ></v-pagination>
             </div>
 
-
-            <v-dialog
-                max-width="600"
-                v-model="sub_modal"
-            >
-                <v-card>
-                    <v-toolbar
-                        color="accent"
-                        dark
-                    >تمدید اشتراک کاربران</v-toolbar>
-                    <v-card-text>
-                        <v-container>
-                            <v-row class="pt-3">
-                                <v-col cols="12" class="pb-0">
-                                    <v-text-field
-                                        v-model="sub_form_data.hours"
-                                        outlined
-                                        clearable
-                                        dense
-                                        label="مدت تمدید (به ساعت)"
-                                    ></v-text-field>
-                                </v-col>
-                            </v-row>
-                        </v-container>
-                    </v-card-text>
-                    <v-card-actions class="justify-end">
-                        <v-btn color="danger" dark @click="sub_modal = false">بستن</v-btn>
-                        <v-btn :loading="sub_loading" :disabled="sub_loading" color="success" @click="addSubscription()" >اعمال اشتراک</v-btn>
-                    </v-card-actions>
-                </v-card>
-            </v-dialog>
-
         </v-container>
     </div>
 </template>
@@ -178,15 +140,11 @@ export default {
             {text: 'جدید ترین',value: 'newest'},
             {text: 'قدیمی ترین',value: 'oldest'},
             {text: 'بیشترین اشتراک',value: 'most_subscribed'},
-            //{text: 'اشتراک طلایی',value: 'gold_plan'},
-            //{text: 'اشتراک نقره ای',value: 'silver_plan'},
-            //{text: 'اشتراک الماس',value: 'diamond_plan'},
         ],
         current_page:1,
         per_page:0,
         last_page:5,
         fetch_loading:false,
-        sub_modal:false,
         sub_loading:false,
     }),
     watch:{
@@ -205,30 +163,6 @@ export default {
                 })
                 .catch( () => {
                     this.fetch_loading = false
-                });
-        },
-        addSubscription(){
-            this.sub_loading = true
-            this.$http.post(`users/add_subs/group` , this.sub_form_data)
-                .then( () => {
-                    this.getList()
-                    this.$fire({
-                        title: "موفق",
-                        text: 'تمدید اشتراک کاربران باموفقیت انجام شد.',
-                        type: "success",
-                        timer: 5000
-                    })
-                    this.sub_loading = false
-                    this.sub_modal = false
-                })
-                .catch( () => {
-                    this.$fire({
-                        title: "خطا",
-                        text: 'تمدید اشتراک کاربران با مشکل مواجه شد.',
-                        type: "error",
-                        timer: 5000
-                    })
-                    this.sub_loading = false
                 });
         },
         Search(e){

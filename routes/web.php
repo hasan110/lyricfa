@@ -92,7 +92,6 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
         Route::post('/list', [UserController::class, 'usersList'])->name('users/list');
         Route::post('/single', [UserController::class, 'singleUser'])->name('users/single');
         Route::post("/add_subs", [ReportController::class, "addPanelReports"])->name('users/add_subs');
-        Route::post("/add_subs/group", [ReportController::class, "addGroupSubscription"])->name('users/add_subs/group');
     });
 
     Route::prefix('user_comments')->group(function () {

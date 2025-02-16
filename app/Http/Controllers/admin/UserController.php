@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\SubscriptionController;
-use App\Models\Report;
+use App\Http\Helpers\UserHelper;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Morilog\Jalali\Jalalian;
 
 class UserController extends Controller
@@ -20,6 +18,7 @@ class UserController extends Controller
 
         if($request->search_key){
             $users = $users->where('phone_number', 'LIKE', "%{$request->search_key}%")
+                ->orWhere('email', 'LIKE', "%{$request->search_key}%")
                 ->orWhere('id', '=', $request->search_key);
         }
         if($request->sort_by){
@@ -69,7 +68,6 @@ class UserController extends Controller
             }
 
             $user['expire'] = $expire;
-            $user->persian_created_at = Jalalian::forge($user->created_at)->addMinutes(3.5*60)->format('%Y-%m-%d H:i') . ' - ' . Jalalian::forge($user->created_at)->ago();
         }
 
         return response()->json([
@@ -99,13 +97,26 @@ class UserController extends Controller
             ], 400);
         }
 
-        $user = User::where('id',  $request->id)->first();
-
-        $subscriptions =  Report::where('user_id', $request->id)->orderBy('id', 'DESC')->take(100)->get();
-        foreach ($subscriptions as &$subscription) {
-            $subscription['persian_created_at'] = Jalalian::forge($subscription->created_at)->format('%Y-%m-%d H:i');
+        $user = User::where('id',  $request->id)->with(['comments', 'likes', 'music_orders', 'playlists' => function ($q) {
+            $q->with('musics');
+        }])->first();
+        if (!$user) {
+            return response()->json([
+                'data' => null,
+                'errors' => [],
+                'message' => "شناسه معتبر نیست",
+            ], 400);
         }
-        $user->subscription = $subscriptions;
+
+        $user->subscription = (new UserHelper())->getSubscriptions($user->id, true);
+
+        $tokens = $user->tokens()->latest()->get();
+        foreach ($tokens as &$token) {
+            $token->persian_last_used_at = Jalalian::forge($token->last_used_at)->addMinutes(3.5*60)->format('%Y-%m-%d H:i') . ' - ' . Jalalian::forge($token->last_used_at)->ago();
+            $token->persian_created_at = Jalalian::forge($token->created_at)->addMinutes(3.5*60)->format('%Y-%m-%d H:i') . ' - ' . Jalalian::forge($token->created_at)->ago();
+        }
+        $user->access_tokens = $tokens;
+        $user->lightener_box_data = (new UserHelper())->getLightenerBox($user->id);
 
         $now = Carbon::now();
         $expiredAt = $user->expired_at;

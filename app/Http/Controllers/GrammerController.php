@@ -16,7 +16,16 @@ class GrammerController extends Controller
 {
     function grammerList(Request $request)
     {
-        $list = Grammer::orderBy('priority')->paginate(24);
+        $list = Grammer::orderBy('priority');
+
+        if ($request->search_text) {
+            $list = $list->where(function ($query) use ($request) {
+               $query->where('english_name' , 'like' , '%'.$request->search_text.'%')
+                   ->orWhere('persian_name' , 'like' , '%'.$request->search_text.'%');
+            });
+        }
+
+        $list = $list->paginate(24);
 
         $user = (new UserHelper())->getUserByToken($request->header("ApiToken"));
         $learned = $user->learned_grammers()->pluck('id')->toArray();

@@ -16,11 +16,13 @@ class PlayListController extends Controller
     function insertUserPlayList(Request $request)
     {
         $messages = array(
-            'name.required' => 'نام پلی لیست الزامی است'
+            'name.required' => 'نام پلی لیست الزامی است',
+            'name.min' => 'حداقل 3 کاراکتر وارد کنید',
+            'name.max' => 'حداکثر 30 کاراکتر میتوانید وارد کنید'
         );
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'name' => 'required|min:3|max:30',
         ], $messages);
 
         if ($validator->fails()) {

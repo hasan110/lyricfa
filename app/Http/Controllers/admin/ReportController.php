@@ -72,13 +72,7 @@ class ReportController extends Controller
 
     public function reportsAdminList(Request $request)
     {
-        $list = Report::whereNotNull('id')->where('type','!==', 0)->paginate(50);
-
-        foreach ($list as $item) {
-            unset($item['ref_id'],$item['val_money'],$item['id_zarin']);
-            $item->user = (new UserHelper())->getUserById($item->user_id);
-            $item->persian_created_at = Jalalian::forge($item->created_at)->format('%Y-%m-%d H:i');
-        }
+        $list = Report::with('user')->where('type','!==', 0)->paginate(50);
 
         return response()->json([
             'data' => $list,
@@ -89,7 +83,7 @@ class ReportController extends Controller
 
     public function reportsUserList(Request $request)
     {
-        $list = Report::where('type', 0);
+        $list = Report::where('type', 0)->with('user');
 
         if($request->sort_by){
             switch ($request->sort_by){
@@ -105,49 +99,10 @@ class ReportController extends Controller
 
         $list = $list->paginate(50);
 
-        foreach ($list as $item) {
-            unset($item['title'],$item['description']);
-            $item->user = (new UserHelper())->getUserById($item->user_id);
-            $item->persian_created_at = Jalalian::forge($item->created_at)->addMinutes(3.5*60)->format('%Y-%m-%d H:i') . ' - ' . Jalalian::forge($item->created_at)->ago();
-        }
-
         return response()->json([
             'data' => $list,
             'errors' => [],
             'message' => "اطلاعات با موفقیت گرفته شد",
-        ]);
-    }
-
-    public function addGroupSubscription(Request $request)
-    {
-        $messages = array(
-            'hours.required' => 'تعداد ساعت تمدید اشتراک نمیتواند خالی باشد',
-            'hours.numeric' => 'تعداد ساعت تمدید اشتراک باید عدد صحیح باشد',
-        );
-
-        $validator = Validator::make($request->all(), [
-            'hours' => 'required|numeric'
-        ], $messages);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'data' => null,
-                'errors' => $validator->errors(),
-                'message' => " شکست در وارد کردن اطلاعات",
-            ], 422);
-        }
-
-        $new_date = Carbon::now()->addHours($request->hours);
-        $before_date = Carbon::now()->subHours($request->hours);
-
-        User::where('expired_at' , '<' , $before_date)->update([
-            'expired_at' => $new_date->format('Y-m-d H:i:s')
-        ]);
-
-        return response()->json([
-            'data' => null,
-            'errors' => null,
-            'message' => " تمدید اشتراک کاربران با موفقیت انجام شد",
         ]);
     }
 }

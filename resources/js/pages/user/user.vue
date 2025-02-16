@@ -25,11 +25,25 @@
                             {{user.fullname}}
                         </v-card-subtitle>
                         <v-card-title>
+                            تاریخ ثبت نام:
+                            {{ user.persian_created_at }}
+                        </v-card-title>
+                        <v-card-subtitle class="pt-0 mt-4">
+                            سطح:
+                            <span v-if="user.level" :style="{color: levelColor(user.level)}">
+                                    {{user.level}}
+                                </span>
+                            <span v-else>نامشخص</span>
+                        </v-card-subtitle>
+                        <v-card-subtitle class="pt-0">
                              ثبت نام از:
                             {{ user.corridor }}
-                        </v-card-title>
-                        <v-card-subtitle>
+                        </v-card-subtitle>
+                        <v-card-subtitle class="pt-0">
                             کد معرفی به دیگران: {{user.code_introduce}}
+                        </v-card-subtitle>
+                        <v-card-subtitle v-if="user.referral_code" class="pt-0">
+                            کد معرف: {{user.referral_code}}
                         </v-card-subtitle>
                         <v-card-title>
                             وضعیت اشتراک :
@@ -37,27 +51,13 @@
                                 {{user.days_remain}} روز باقی مانده
                             </template>
                             <template v-else>
-                                منقضی شده
+                                بدون اشتراک
                             </template>
                         </v-card-title>
                         <v-card-title>
                             <v-btn color="success" dens @click="create_notif_modal = true">
                                 ارسال نوتیفیکیشن
                             </v-btn>
-                        </v-card-title>
-                    </v-card>
-                </v-col>
-                <v-col cols="12" sm="12" md="6" lg="4">
-                    <v-card max-width="100%" color="#f1f1f1">
-
-                        <v-card-title class="justify-space-between">
-                            <div>سطح</div>
-                            <div>
-                                <span v-if="user.level" :style="{color: levelColor(user.level)}">
-                                    {{user.level}}
-                                </span>
-                                <span v-else>نامشخص</span>
-                            </div>
                         </v-card-title>
                     </v-card>
                 </v-col>
@@ -122,13 +122,14 @@
             </v-row>
 
             <v-row>
-                <v-col cols="12">
-                    <h3>اشتراک های خریده شده توسط کاربر</h3>
+                <v-col cols="12" class="pb-0">
+                    <h3>📌اشتراک های خریده شده ({{user.subscription.length}})</h3>
                 </v-col>
                 <v-col cols="12">
                     <v-simple-table
                         fixed-header
-                        height="500px"
+                        :height="user.subscription.length === 0 ? '0px' : '300px'"
+                        class="tbl-nowrap"
                     >
                         <template v-slot:default>
                             <thead>
@@ -174,10 +175,380 @@
                             </tbody>
                         </template>
                     </v-simple-table>
+                    <div v-if="user.subscription.length === 0" class="py-4 text-center grey--text">
+                        لیست خالی است
+                    </div>
                 </v-col>
-
             </v-row>
+            <v-row>
+                <v-col cols="12" sm="12" md="6">
+                    <v-col cols="12" class="pb-0">
+                        <h3>📌لاگ ورود</h3>
+                    </v-col>
+                    <v-simple-table
+                        fixed-header
+                        height="200px"
+                        class="tbl-nowrap"
+                    >
+                        <template v-slot:default>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>نوع</th>
+                                <th>تاریخ آخرین استفاده</th>
+                                <th>تاریخ ایجاد</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr
+                                v-for="item in user.access_tokens"
+                                :key="item.id"
+                            >
+                                <td>{{ item.id }}</td>
+                                <td>{{ item.name }}</td>
+                                <td>{{ item.persian_last_used_at }}</td>
+                                <td>{{ item.persian_created_at }}</td>
+                            </tr>
+                            </tbody>
+                        </template>
+                    </v-simple-table>
+                </v-col>
+                <v-col cols="12" sm="12" md="6">
+                    <v-col cols="12" class="pb-0">
+                        <h3>📌جعبه لایتنر</h3>
+                    </v-col>
+                    <v-simple-table
+                        fixed-header
+                        height="200px"
+                        class="tbl-nowrap"
+                    >
+                        <template v-slot:default>
+                            <thead>
+                            <tr>
+                                <th>شماره جعبه</th>
+                                <th>تعداد کل</th>
+                                <th>تعداد لغات/عبارات/گرامر</th>
+                                <th>آماده مرور</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr
+                                v-for="item in user.lightener_box_data"
+                                :key="item.status"
+                            >
+                                <td>{{ item.status + 1 }}</td>
+                                <td>{{ item.total_count }}</td>
+                                <td>{{ item.words_count }} لغت / {{ item.idioms_count }} عبارت / {{ item.grammars_count }} گرامر </td>
+                                <td>
+                                    <template v-if="item.status === 5">
+                                        یادگرفته شده
+                                    </template>
+                                    <template v-else>
+                                        {{ item.reviews_count }}
+                                    </template>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </template>
+                    </v-simple-table>
+                </v-col>
+            </v-row>
+            <v-row>
+                <v-col cols="12" sm="12" md="6">
+                    <v-col cols="12" class="pb-0">
+                        <h3>📌سفارشات آهنگ ({{user.music_orders.length}})</h3>
+                    </v-col>
+                    <v-simple-table
+                        fixed-header
+                        :height="user.music_orders.length === 0 ? '0px' : '300px'"
+                        class="tbl-nowrap"
+                    >
+                        <template v-slot:default>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>نام آهنگ</th>
+                                <th>نام خواننده</th>
+                                <th>وضعیت</th>
+                                <th>تاریخ</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr
+                                v-for="item in user.music_orders"
+                                :key="item.id"
+                            >
+                                <td>{{ item.id }}</td>
+                                <td>{{ item.music_name }}</td>
+                                <td>{{ item.singer_name }}</td>
+                                <td>
+                                    <template v-if="parseInt(item.condition_order) === 0">
+                                        بررسی نشده
+                                    </template>
+                                    <template v-if="parseInt(item.condition_order) === 1">
+                                        قبول شده
+                                    </template>
+                                    <template v-if="parseInt(item.condition_order) === 2">
+                                        رد شده
+                                    </template>
+                                    <template v-if="parseInt(item.condition_order) === 3">
+                                        موجود
+                                    </template>
+                                </td>
+                                <td>{{ item.persian_created_at }}</td>
+                            </tr>
+                            </tbody>
+                        </template>
+                    </v-simple-table>
+                    <div v-if="user.music_orders.length === 0" class="py-4 text-center grey--text">
+                        لیست خالی است
+                    </div>
+                </v-col>
+                <v-col cols="12" sm="12" md="6">
+                    <v-col cols="12" class="pb-0">
+                        <h3>📌لیست پخش ها ({{user.playlists.length}})</h3>
+                    </v-col>
+                    <v-simple-table
+                        fixed-header
+                        :height="user.playlists.length === 0 ? '0px' : '300px'"
+                        class="tbl-nowrap"
+                    >
+                        <template v-slot:default>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>نام لیست پخش</th>
+                                <th>تاریخ</th>
+                                <th>آهنگ ها</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr
+                                v-for="item in user.playlists"
+                                :key="item.id"
+                            >
+                                <td>{{ item.id }}</td>
+                                <td>{{ item.name }}</td>
+                                <td>{{ item.persian_created_at }}</td>
+                                <td>
+                                    <v-btn fab small dark color="purple" dens @click="user_playlist_musics = item.musics , playlist_musics_modal = true">
+                                        <v-icon>mdi-information-outline</v-icon>
+                                    </v-btn>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </template>
+                    </v-simple-table>
+                    <div v-if="user.likes.length === 0" class="py-4 text-center grey--text">
+                        لیست خالی است
+                    </div>
+                </v-col>
+            </v-row>
+            <v-row>
+                <v-col cols="12" sm="12" md="6">
+                    <v-col cols="12" class="pb-0">
+                        <h3>📌نظرات ثبت شده ({{user.comments.length}})</h3>
+                    </v-col>
+                    <v-simple-table
+                        fixed-header
+                        :height="user.comments.length === 0 ? '0px' : '300px'"
+                        class="tbl-nowrap"
+                    >
+                        <template v-slot:default>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>متن نظر</th>
+                                <th>پاسخ</th>
+                                <th>نظر برای</th>
+                                <th>اطلاعات</th>
+                                <th>تاریخ</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr
+                                v-for="item in user.comments"
+                                :key="item.id"
+                            >
+                                <td>{{ item.id }}</td>
+                                <td :title="item.comment">
+                                    <span class="two-line-box">{{item.comment}}</span>
+                                </td>
+                                <td :title="item.reply">
+                                    <span class="two-line-box">{{item.reply}}</span>
+                                </td>
+                                <td>
+                                    <template v-if="item.commentable">
+                                        <template v-if="item.commentable_type === 'App\\Models\\Singer'">
+                                            خواننده
+                                        </template>
+                                        <template v-else-if="item.commentable_type === 'App\\Models\\Music'">
+                                            آهنگ
+                                        </template>
+                                        <template v-else-if="item.commentable_type === 'App\\Models\\Film'">
+                                            فیلم
+                                        </template>
+                                    </template>
+                                    <template v-else>
+                                        ---
+                                    </template>
+                                </td>
+                                <td>
+                                    <template v-if="item.commentable">
+                                        <template v-if="item.commentable_type === 'App\\Models\\Singer'">
+                                            <router-link :to="{name:'singers' , query:{english_name:item.commentable.english_name}}">{{item.commentable.english_name}}</router-link>
+                                        </template>
+                                        <template v-else-if="item.commentable_type === 'App\\Models\\Music'">
+                                            <router-link :to="{name:'edit_music' , params:{id:item.commentable.id}}">{{item.commentable.name}}</router-link>
+                                        </template>
+                                        <template v-else-if="item.commentable_type === 'App\\Models\\Film'">
+                                            <router-link :to="{name:'edit_movie' , params:{id:item.commentable.id}}">{{item.commentable.english_name}}</router-link>
+                                        </template>
+                                    </template>
+                                    <template v-else>
+                                        ---
+                                    </template>
+                                </td>
+                                <td>{{ item.persian_created_at }}</td>
+                            </tr>
+                            </tbody>
+                        </template>
+                    </v-simple-table>
+                    <div v-if="user.comments.length === 0" class="py-4 text-center grey--text">
+                        لیست خالی است
+                    </div>
+                </v-col>
+                <v-col cols="12" sm="12" md="6">
+                    <v-col cols="12" class="pb-0">
+                        <h3>📌لایک ها ({{user.likes.length}})</h3>
+                    </v-col>
+                    <v-simple-table
+                        fixed-header
+                        :height="user.likes.length === 0 ? '0px' : '300px'"
+                        class="tbl-nowrap"
+                    >
+                        <template v-slot:default>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>لایک برای</th>
+                                <th>اطلاعات</th>
+                                <th>تاریخ</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr
+                                v-for="item in user.likes"
+                                :key="item.id"
+                            >
+                                <td>{{ item.id }}</td>
+                                <td>
+                                    <template v-if="item.likeable">
+                                        <template v-if="item.likeable_type === 'App\\Models\\Singer'">
+                                            خواننده
+                                        </template>
+                                        <template v-else-if="item.likeable_type === 'App\\Models\\Music'">
+                                            آهنگ
+                                        </template>
+                                        <template v-else-if="item.likeable_type === 'App\\Models\\Film'">
+                                            فیلم
+                                        </template>
+                                    </template>
+                                    <template v-else>
+                                        ---
+                                    </template>
+                                </td>
+                                <td>
+                                    <template v-if="item.likeable">
+                                        <template v-if="item.likeable_type === 'App\\Models\\Singer'">
+                                            <router-link :to="{name:'singers' , query:{english_name:item.likeable.english_name}}">{{item.likeable.english_name}}</router-link>
+                                        </template>
+                                        <template v-else-if="item.likeable_type === 'App\\Models\\Music'">
+                                            <router-link :to="{name:'edit_music' , params:{id:item.likeable.id}}">{{item.likeable.name}}</router-link>
+                                        </template>
+                                        <template v-else-if="item.likeable_type === 'App\\Models\\Film'">
+                                            <router-link :to="{name:'edit_movie' , params:{id:item.likeable.id}}">{{item.likeable.english_name}}</router-link>
+                                        </template>
+                                    </template>
+                                    <template v-else>
+                                        ---
+                                    </template>
+                                </td>
+                                <td>{{ item.persian_created_at }}</td>
+                            </tr>
+                            </tbody>
+                        </template>
+                    </v-simple-table>
+                    <div v-if="user.likes.length === 0" class="py-4 text-center grey--text">
+                        لیست خالی است
+                    </div>
+                </v-col>
+            </v-row>
+
+            <br>
+            <br>
         </v-container>
+
+        <v-dialog
+            max-width="600"
+            v-model="playlist_musics_modal"
+        >
+            <v-card>
+                <v-toolbar
+                    color="accent"
+                    dark
+                >آهنگ های پلی لیست</v-toolbar>
+                <v-card-text class="pa-2">
+                    <v-simple-table
+                        fixed-header
+                        :height="user_playlist_musics.length === 0 ? '0px' : '500px'"
+                        class="tbl-nowrap"
+                    >
+                        <template v-slot:default>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>آهنگ</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr
+                                v-for="item in user_playlist_musics"
+                                :key="item.id"
+                            >
+                                <td>{{ item.id }}</td>
+                                <td>
+                                    <div class="d-flex align-center">
+
+                                        <div v-if="item.music_poster" class="d-flex ml-4">
+                                            <img :src="item.music_poster" class="item-profile m-1" alt="music poster">
+                                        </div>
+                                        <div v-else class="d-flex ml-4">
+                                            <img src="/assets/img/user.jpg" class="item-profile rounded-circle m-1" alt="music poster alt">
+                                        </div>
+
+                                        <div class="d-flex flex-column">
+                                            <span>
+                                                <router-link :to="{name:'edit_music' , params:{id:item.id}}">{{item.name}}</router-link>
+                                            </span>
+                                            <span>{{item.persian_name}}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </template>
+                    </v-simple-table>
+                    <div v-if="user_playlist_musics.length === 0" class="py-4 text-center grey--text">
+                        لیست خالی است
+                    </div>
+                </v-card-text>
+
+                <v-card-actions class="justify-end">
+                    <v-btn color="danger" dark @click="playlist_musics_modal = false">بستن</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
 
         <v-dialog
             transition="dialog-top-transition"
@@ -256,6 +627,8 @@ export default {
             title:''
         },
         errors:{},
+        playlist_musics_modal:false,
+        user_playlist_musics:[],
         form_data_notif:{},
         notif_id:null,
         create_notif_modal:false,

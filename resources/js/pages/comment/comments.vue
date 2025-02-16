@@ -33,6 +33,19 @@
                 <v-col cols="4" class="pb-0">
                 </v-col>
                 <v-col cols="4" class="pb-0">
+                    <v-select
+                        label="فیلتر"
+                        :items="[{text:'تایید نشده ها',value:'pending'},{text:'تایید شده ها',value:'confirmed'}]"
+                        v-model="filter.sort_by"
+                        item-text="text"
+                        item-value="value"
+                        append-outer-icon="mdi-filter"
+                        outlined
+                        clearable
+                        autocomplete
+                        dense
+                        @click:append-outer="reset()"
+                    ></v-select>
                 </v-col>
 
             </v-row>
@@ -53,8 +66,10 @@
                             <th>#</th>
                             <th>کاربر</th>
                             <th>متن نظر</th>
+                            <th>پاسخ</th>
                             <th>نظر برای</th>
                             <th>اطلاعات</th>
+                            <th>تاریخ</th>
                             <th>عملیات</th>
                         </tr>
                         </thead>
@@ -86,7 +101,12 @@
                                     ---
                                 </template>
                             </td>
-                            <td>{{item.comment}}</td>
+                            <td :title="item.comment">
+                                <span class="two-line-box">{{item.comment}}</span>
+                            </td>
+                            <td :title="item.reply">
+                                <span class="two-line-box">{{item.reply}}</span>
+                            </td>
                             <td>
                                 <template v-if="item.commentable">
                                     <template v-if="item.commentable_type === 'App\\Models\\Singer'">
@@ -94,6 +114,9 @@
                                     </template>
                                     <template v-else-if="item.commentable_type === 'App\\Models\\Music'">
                                         آهنگ
+                                    </template>
+                                    <template v-else-if="item.commentable_type === 'App\\Models\\Film'">
+                                        فیلم
                                     </template>
                                 </template>
                                 <template v-else>
@@ -108,11 +131,15 @@
                                     <template v-else-if="item.commentable_type === 'App\\Models\\Music'">
                                         <router-link :to="{name:'edit_music' , params:{id:item.commentable.id}}">{{item.commentable.name}}</router-link>
                                     </template>
+                                    <template v-else-if="item.commentable_type === 'App\\Models\\Film'">
+                                        <router-link :to="{name:'edit_movie' , params:{id:item.commentable.id}}">{{item.commentable.english_name}}</router-link>
+                                    </template>
                                 </template>
                                 <template v-else>
                                     ---
                                 </template>
                             </td>
+                            <td>{{ item.persian_created_at }}</td>
                             <td>
                                 <v-btn
                                     class="mx-2"
@@ -181,6 +208,9 @@
                     </template>
 
                 </v-card-text>
+                <div class="pa-4">
+                    <v-textarea v-if="comment_status === 1" rows="3" v-model="reply" outlined dense placeholder="در صورت نیاز برای کامنت پاسخ بنویسید"></v-textarea>
+                </div>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn
@@ -209,13 +239,16 @@ export default {
     name:'comments',
     data: () => ({
         list:[],
-        filter:{},
+        filter:{
+            sort_by:'pending'
+        },
         errors:{},
         current_page:1,
         per_page:0,
         last_page:1,
         comment_id:null,
         change_status_modal:false,
+        reply:'',
         fetch_loading:false,
         loading:false,
         comment_status : 0
@@ -228,10 +261,11 @@ export default {
     methods:{
         getList(){
             this.fetch_loading = true
-            this.$http.post(`user_comments/list` , this.filter)
+            this.$http.post(`user_comments/list?page=${this.current_page}` , this.filter)
                 .then(res => {
+                    this.list = res.data.data.data
+                    this.last_page = res.data.data.last_page;
                     this.fetch_loading = false
-                    this.list = res.data.data
                 })
                 .catch( () => {
                     this.fetch_loading = false
@@ -256,7 +290,7 @@ export default {
         },
         changeStatus(){
             this.loading = true
-            this.$http.post(`user_comments/change_status` , {id:this.comment_id , status:this.comment_status})
+            this.$http.post(`user_comments/change_status` , {id:this.comment_id , status:this.comment_status , reply:this.reply})
                 .then( () => {
                     this.reset()
                     this.loading = false

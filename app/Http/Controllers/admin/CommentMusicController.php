@@ -39,21 +39,22 @@ class CommentMusicController extends Controller
             return response()->json([
                 'data' => null,
                 'errors' => null,
-                'message' => "  ادمین وجود ندارد",
+                'message' => "ادمین وجود ندارد",
             ], 400);
         }
-        $comment = $this->getCommentById($request->id);
+        $comment = Comment::where('id', $request->id)->first();
         if(!$comment){
             return response()->json([
                 'data' => null,
                 'errors' => null,
-                'message' => "  کامنت وجود ندارد",
+                'message' => "کامنت وجود ندارد",
             ], 400);
         }
 
         if($request->status === 1){
             $comment->id_admin_confirmed = $admin->id;
             $comment->status = 1;
+            $comment->reply = $request->reply ?? null;
             $comment->save();
         }else{
             $comment->delete();
@@ -68,19 +69,24 @@ class CommentMusicController extends Controller
 
     public function getMusicCommentsNotConfirmed(Request $request)
     {
-        $data = Comment::where("status", 0)->with('commentable')->get();
+        $data = Comment::with('commentable');
+
+        if ($request->sort_by == 'pending') {
+            $data = $data->where("status", 0);
+        } else if ($request->sort_by == 'confirmed') {
+            $data = $data->where("status", 1);
+        }
+
+        $search_key = $request->search_key;
+        $data = $data->where(function ($query) use ($search_key) {
+            $query->where('comment', 'like', '%' . $search_key . '%')
+                ->orWhere('reply', 'like', '%' . $search_key . '%');
+        })->paginate(50);
 
         return response()->json([
             'data' => $data,
             'errors' => null,
             'message' => "دریافت لیست کامنت موفقیت آمیز بود",
         ]);
-    }
-
-    public function getCommentById($id)
-    {
-
-        return Comment::where('id', $id)->first();
-
     }
 }
