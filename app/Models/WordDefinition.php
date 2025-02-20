@@ -11,11 +11,16 @@ class WordDefinition extends Model
     use HasFactory;
     protected $guarded = [];
     protected $table = 'word_definitions';
-    protected $appends = [self::IMAGE_FILE_TYPE, 'joins_count'];
+    protected $appends = [self::IMAGE_FILE_TYPE, 'joins_count', 'links'];
 
     public const IMAGE_FILE_TYPE = 'word_definition_image';
 
     protected $with = ['word_definition_examples'];
+
+    public function word()
+    {
+        return $this->belongsTo(Word::class, 'word_id');
+    }
 
     public function word_definition_examples()
     {
@@ -32,6 +37,11 @@ class WordDefinition extends Model
         return $this->morphMany(TextJoin::class, 'joinable', 'joinable_type', 'joinable_id');
     }
 
+    public function categories()
+    {
+        return $this->morphToMany(Category::class, 'categorizeable');
+    }
+
     public function getWordDefinitionImageAttribute()
     {
         $path = File::getFileUploadPath($this->files, self::IMAGE_FILE_TYPE);
@@ -44,5 +54,10 @@ class WordDefinition extends Model
     public function getJoinsCountAttribute()
     {
         return $this->text_joins()->count();
+    }
+
+    public function getLinksAttribute()
+    {
+        return Link::get_links($this->id , 'word_definition');
     }
 }

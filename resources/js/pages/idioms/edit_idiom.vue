@@ -146,9 +146,40 @@
                                         dense :label="'توضیحات برای معنی ' + (key + 1)"
                                     ></v-textarea>
                                 </v-col>
+                                <v-col v-for="(link, key) in item.links" :key="key" cols="12" sm="12" class="pt-0">
+                                    <span class="pa-2">{{link.title}}:</span>
+                                    <v-chip v-for="(link_item, link_item_key) in link.list" :key="link_item_key" pill close @click:close="deleteLink(link_item.link_id)" class="mx-1">
+                                        {{link_item.text}}
+                                    </v-chip>
+                                </v-col>
+                                <v-col cols="12" sm="12" class="pt-0">
+                                    <v-chip
+                                        v-for="(category, key) in item.categories"
+                                        :key="key" pill
+                                        :outlined="category.mode ==='category'"
+                                        :color="category.color"
+                                        :text-color="category.mode ==='category' ? category.color : getTextColor(category.color)"
+                                        class="mx-1"
+                                    >
+                                        <v-avatar v-if="category.category_poster" left>
+                                            <v-img :src="category.category_poster"></v-img>
+                                        </v-avatar>
+                                        {{category.title}}
+                                    </v-chip>
+                                </v-col>
                                 <v-col cols="12" sm="12" class="py-0 mb-4 pb-2">
                                     <div class="d-flex justify-space-between">
-                                        <v-btn v-if="item.id" dark color="orange" small @click="joinable_id = item.id , join_modal = true">اتصال به متن</v-btn>
+                                        <div class="d-flex">
+                                            <v-btn v-if="item.id" dark color="orange" small @click="joinable_id = item.id , join_modal = true" class="ml-2">اتصال به متن</v-btn>
+                                            <select-category
+                                                v-if="item.id"
+                                                :categorizeable_id="item.id"
+                                                categorizeable_type="idiom_definitions"
+                                                :categories_selected_ids="item.categories_ids"
+                                                @refresh="refresh()"
+                                            ></select-category>
+                                            <select-link v-if="item.id" :link_from_id="item.id" link_from_type="idiom_definition" @refresh="refresh()"></select-link>
+                                        </div>
                                         <v-btn v-if="item.id && parseInt(item.joins_count) === 0" dark :loading="delete_loading" color="danger" small @click="deleteDefinition(item.id)">حذف این معنی</v-btn>
                                     </div>
                                 </v-col>
@@ -305,6 +336,9 @@ export default {
         joinable_id: null,
     }),
     methods:{
+        refresh(){
+            this.getIdiom(this.$route.params.id);
+        },
         addDefinition(){
             this.form_data.idiom_definitions.push({
                 definition:'',
@@ -464,6 +498,32 @@ export default {
                 }).finally(() => {
                 this.upload_loading = false;
             });
+        },
+        deleteLink(id){
+            if (confirm('از حذف لینک اطمینان دارید؟')){
+                this.$http.post(`links/delete` , {id})
+                    .then(res => {
+                        this.$fire({
+                            title: "موفق",
+                            text: res.data.message,
+                            type: "success",
+                            timer: 5000
+                        })
+                        this.getIdiom(this.$route.params.id);
+                    })
+                    .catch( err => {
+                        const e = err.response.data
+                        if(e.errors){ this.errors = e.errors }
+                        else if(e.message){
+                            this.$fire({
+                                title: "خطا",
+                                text: e.message,
+                                type: "error",
+                                timer: 5000
+                            })
+                        }
+                    });
+            }
         },
         goToTextsPage(join){
             let type = 'music';

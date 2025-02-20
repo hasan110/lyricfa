@@ -71,6 +71,11 @@ class Music extends Model
         return $this->morphMany(File::class, 'fileable', 'fileable_type', 'fileable_id');
     }
 
+    public function categories()
+    {
+        return $this->morphToMany(Category::class, 'categorizeable');
+    }
+
     public function getPermissionLabelAttribute()
     {
         if ($this->permission_type === 'free') {

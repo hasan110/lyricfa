@@ -23,6 +23,7 @@ class File extends Model
         Notification::IMAGE_FILE_TYPE,
         WordDefinition::IMAGE_FILE_TYPE,
         IdiomDefinition::IMAGE_FILE_TYPE,
+        Category::POSTER_FILE_TYPE,
     ];
 
     public const TYPES_PATH = [
@@ -36,6 +37,7 @@ class File extends Model
         Notification::IMAGE_FILE_TYPE => 'notifications',
         WordDefinition::IMAGE_FILE_TYPE => 'words',
         IdiomDefinition::IMAGE_FILE_TYPE => 'idioms',
+        Category::POSTER_FILE_TYPE => 'categories',
     ];
 
     public function fileable()

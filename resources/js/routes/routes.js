@@ -24,6 +24,11 @@ import albums from '../pages/album/albums.vue';
 import create_album from '../pages/album/create_album.vue';
 import edit_album from '../pages/album/edit_album.vue';
 
+import categories from '../pages/categories/categories.vue';
+import create_category from '../pages/categories/create_category.vue';
+import edit_category from '../pages/categories/edit_category.vue';
+import category_items from '../pages/categories/category_items.vue';
+
 import comments from '../pages/comment/comments.vue';
 
 import pays from '../pages/pay/pays.vue';
@@ -89,6 +94,11 @@ const allUrl = [
     { path: '/albums', name: 'albums', component: albums },
     { path: '/albums/create', name: 'create_album', component: create_album },
     { path: '/albums/edit/:id', name: 'edit_album', component: edit_album },
+
+    { path: '/categories', name: 'categories', component: categories },
+    { path: '/categories/create', name: 'create_category', component: create_category },
+    { path: '/categories/edit/:id', name: 'edit_category', component: edit_category },
+    { path: '/categories/items/:id', name: 'category_items', component: category_items },
 
     { path: '/sliders', name: 'sliders', component: sliders },
     { path: '/sliders/create', name: 'create_slider', component: create_slider },

@@ -104,17 +104,7 @@
                                 :error-messages="errors.poster"
                             ></v-file-input>
                         </v-col>
-                        <v-col cols="6" sm="3" class="pb-0">
-                            <v-text-field
-                                v-model="form_data.extension"
-                                outlined
-                                clearable
-                                dense
-                                :error-messages="errors.extension"
-                                label="پسوند فایل فیلم"
-                            ></v-text-field>
-                        </v-col>
-                        <v-col cols="6" sm="3" class="pb-0">
+                        <v-col cols="12" sm="6" class="pb-0">
                             <v-select
                                 v-model="form_data.permission_type"
                                 outlined dense
@@ -261,7 +251,6 @@ export default {
             data.type ? form.append('type', data.type) : '';
             form.append('parent', data.parent ? data.parent : 0);
             data.poster ? form.append('poster', data.poster) : '';
-            data.extension ? form.append('extension', data.extension) : '';
             data.priority ? form.append('priority', data.priority) : '';
             data.description ? form.append('description', data.description) : '';
             data.level ? form.append('level', data.level) : '';

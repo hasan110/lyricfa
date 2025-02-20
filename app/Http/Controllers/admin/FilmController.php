@@ -71,7 +71,7 @@ class FilmController extends Controller
 
     public static function getFilmById($id)
     {
-        return Film::where('id', $id)->first();
+        return Film::with('categories')->where('id', $id)->first();
     }
 
     public function filmCreate(Request $request)
@@ -81,7 +81,6 @@ class FilmController extends Controller
             'persian_name.required' => 'عنوان فارسی فیلم اجباری است',
             'type.required' => 'نوع فیلم لازم است.',
             'parent.required' => 'فیلم مرتبط را انتخاب کنید',
-            'extension.required' => 'پسوند فایل لازم است',
             'level.required' => 'سطح نمیتواند خالی باشد',
             'level.in' => 'سطح باید یکی از موارد: A1, A2, B1, B2, C1, C2 باشد',
             'permission_type.required' => 'نوع دسترسی نمیتواند خالی باشد',
@@ -103,7 +102,6 @@ class FilmController extends Controller
             'film_source_upload_path' => 'required_if:type,1,4,5',
             'type' => 'required|numeric',
             'parent' => 'required|numeric',
-            'extension' => 'required',
             'level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'permission_type' => 'required|in:paid,free,first_season_free,first_episode_free',
             'priority' => 'required_if:type,3,4,5',
@@ -124,7 +122,6 @@ class FilmController extends Controller
         $film->persian_name = $request->persian_name;
         $film->type = $request->type;
         $film->parent = $request->parent;
-        $film->extension = $request->extension;
         $film->level = $request->level;
         $film->permission_type = $request->permission_type;
         $film->description = $request->description;
@@ -179,7 +176,6 @@ class FilmController extends Controller
             'poster.file' => 'نوع پوستر باید فایل باشد',
             'poster.mimes' => 'نوع پوستر باید jpg باشد',
             'poster.dimensions' => 'پوستر باید 750 در 1000 باشد',
-            'extension.required' => 'پسوند فایل لازم است',
             'priority.required_if' => 'شماره قسمت الزامی است',
         );
 
@@ -190,7 +186,6 @@ class FilmController extends Controller
             'type' => 'required|numeric',
             'parent' => 'required|numeric',
             'film' => 'file|mimeTypes:video',
-            'extension' => 'required',
             'level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'permission_type' => 'required|in:paid,free,first_season_free,first_episode_free',
             'priority' => 'required_if:type,3,4,5',
@@ -218,7 +213,6 @@ class FilmController extends Controller
         $film->persian_name = $request->persian_name;
         $film->type = $request->type;
         $film->parent = $request->parent;
-        $film->extension = $request->extension;
         $film->level = $request->level;
         $film->permission_type = $request->permission_type;
         $film->description = $request->description;
@@ -236,6 +230,7 @@ class FilmController extends Controller
         }
 
         if ($request->hasFile('poster')) {
+            File::deleteFile($film->files, Film::POSTER_FILE_TYPE);
             File::createFile($request->poster, $film, Film::POSTER_FILE_TYPE);
         }
 
@@ -252,6 +247,7 @@ class FilmController extends Controller
         $film = $this->getFilmById($id);
 
         $film->parent_id = null;
+        $film->categories_ids = $film->categories->pluck('id')->toArray();
 
         if($film->type == 5){
             $parent = Film::where('id', $film->parent)->first();

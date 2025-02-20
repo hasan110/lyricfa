@@ -317,7 +317,7 @@ class WordController extends Controller
         $get = Word::with(['word_definitions' => function ($query) {
             $query->with(['text_joins' => function ($q) {
                 $q->with('text');
-            }]);
+            } , 'categories']);
         }])->find($request->id);
         if(!$get){
             return response()->json([
@@ -326,6 +326,11 @@ class WordController extends Controller
                 'message' => " لغت یافت نشد.",
             ], 404);
         }
+
+        foreach ($get->word_definitions as $word_definition) {
+            $word_definition->categories_ids = $word_definition->categories->pluck('id')->toArray();
+        }
+
         $english_word = WordEnEn::where('ci_word' , $get->english_word)->first();
         if($english_word){
             $get['english_definitions'] = $english_word->english_word_definitions;

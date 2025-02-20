@@ -67,7 +67,7 @@ class IdiomController extends Controller
         $get = Idiom::with(['idiom_definitions' => function ($query) {
             $query->with(['text_joins' => function ($q) {
                 $q->with('text');
-            }]);
+            } , 'categories']);
         }])->find($request->id);
         if(!$get){
             return response()->json([
@@ -75,6 +75,10 @@ class IdiomController extends Controller
                 'errors' => null,
                 'message' => " اصطلاح یافت نشد.",
             ], 404);
+        }
+
+        foreach ($get->idiom_definitions as $idiom_definition) {
+            $idiom_definition->categories_ids = $idiom_definition->categories->pluck('id')->toArray();
         }
 
         return response()->json([

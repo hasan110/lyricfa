@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\admin\AlbumController;
+use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\admin\CommentMusicController;
 use App\Http\Controllers\admin\FilmController;
 use App\Http\Controllers\admin\FilmTextController;
+use App\Http\Controllers\admin\LinkController;
 use App\Http\Controllers\admin\NotificationController;
 use App\Http\Controllers\admin\OrderMusicController;
 use App\Http\Controllers\admin\ReportController;
@@ -86,6 +88,21 @@ Route::middleware('CheckAdminApiAuthentication')->group(function () {
         Route::post('/single', [AlbumController::class, 'getAlbum'])->name('albums/single');
         Route::post("/create", [AlbumController::class, "albumsCreate"])->name('albums/create');
         Route::post("/update", [AlbumController::class, "albumsUpdate"])->name('albums/update');
+    });
+
+    Route::prefix('categories')->group(function () {
+        Route::post('/list', [CategoryController::class, 'categoriesList'])->name('categories/list');
+        Route::post('/single', [CategoryController::class, 'getCategory'])->name('categories/single');
+        Route::post("/create", [CategoryController::class, "categoryCreate"])->name('categories/create');
+        Route::post("/update", [CategoryController::class, "categoryUpdate"])->name('categories/update');
+        Route::post("/items", [CategoryController::class, "categoryItems"])->name('categories/items');
+        Route::post("/sync", [CategoryController::class, "categorySync"])->name('categories/sync');
+        Route::post("/add/group", [CategoryController::class, "categoryAddGroup"])->name('categories/add/group');
+    });
+
+    Route::prefix('links')->group(function () {
+        Route::post('/add', [LinkController::class, 'addLink'])->name('links/add');
+        Route::post('/delete', [LinkController::class, 'deleteLink'])->name('links/delete');
     });
 
     Route::prefix('users')->group(function () {

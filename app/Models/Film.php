@@ -59,4 +59,9 @@ class Film extends Model
         }
         return null;
     }
+
+    public function categories()
+    {
+        return $this->morphToMany(Category::class, 'categorizeable');
+    }
 }

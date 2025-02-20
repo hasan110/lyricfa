@@ -65,7 +65,6 @@ class SliderController extends Controller
         $slider->title = $request->title;
         $slider->description = $request->description;
         $slider->show_it = $request->show_it ? 1 : 0;
-        $slider->banner = "sliders/" . $request->id . '.jpg';
 
         $slider->save();
 
@@ -117,10 +116,6 @@ class SliderController extends Controller
         $slider->title = $request->title;
         $slider->description = $request->description;
         $slider->show_it = $request->show_it ? 1 : 0;
-
-        $slider->save();
-
-        $slider->banner = "sliders/" . $slider->id . '.jpg';
         $slider->save();
         if ($request->hasFile('banner')) {
             File::createFile($request->banner, $slider, Slider::BANNER_FILE_TYPE);

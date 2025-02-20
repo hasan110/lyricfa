@@ -100,6 +100,7 @@ export default {
             { id:12, parent_id:0,  title: 'فیلم ها', type:'item', link:'movies', icon: 'mdi-movie-settings-outline' },
             { id:4,  parent_id:0,  title: 'خواننده ها', type:'item', link:'singers', icon: 'mdi-account-voice' },
             { id:5,  parent_id:0,  title: 'آلبوم ها', type:'item', link:'albums', icon: 'mdi-album' },
+            { id:23, parent_id:0,  title: 'دسته بندی ها', type:'item', link:'categories', icon: 'mdi-grid' },
             { id:19, parent_id:0,  title: 'تنظیمات', type:'header', link:'', icon: '' },
             { id:9,  parent_id:0,  title: 'تنظیمات', type:'item', link:'settings', icon: 'mdi-cog-outline' },
             { id:6,  parent_id:0,  title: 'اسلایدر ها', type:'item', link:'sliders', icon: 'mdi-panorama-variant-outline' },

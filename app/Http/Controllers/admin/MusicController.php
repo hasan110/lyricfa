@@ -250,7 +250,8 @@ class MusicController extends Controller
     public function getMusicCompleteInfo(Request $request)
     {
         $id = $request->id;
-        $music = Music::where('id', $id)->first();
+        $music = Music::with('categories')->where('id', $id)->first();
+        $music->categories_ids = $music->categories->pluck('id')->toArray();
         $singer = (new SingerHelper())->getMusicSingers($id);
 
         $singers = [];

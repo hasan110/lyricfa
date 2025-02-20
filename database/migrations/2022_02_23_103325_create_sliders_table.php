@@ -20,7 +20,6 @@ class CreateSlidersTable extends Migration
             $table->integer('type')->nullable();// 1 is music, 2 is album, 3 is singer, 4 sum of musics
             $table->string('title')->default("");
             $table->text('description')->default("");
-            $table->text('banner')->default("");
             $table->boolean('show_it')->default(0);
             $table->timestamps();
         });

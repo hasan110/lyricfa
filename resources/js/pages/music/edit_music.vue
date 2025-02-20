@@ -59,6 +59,30 @@
                     </v-col>
                 </v-row>
             </div>
+            <div class="d-flex justify-space-between align-center my-4">
+                <div>
+                    <v-chip
+                        v-for="(category, key) in form_data.categories"
+                        :key="key" pill
+                        :outlined="category.mode ==='category'"
+                        :color="category.color"
+                        :text-color="category.mode ==='category' ? category.color : getTextColor(category.color)"
+                        class="mx-1"
+                    >
+                        <v-avatar v-if="category.category_poster" left>
+                            <v-img :src="category.category_poster"></v-img>
+                        </v-avatar>
+                        {{category.title}}
+                    </v-chip>
+                </div>
+                <select-category
+                    v-if="form_data.id"
+                    :categorizeable_id="form_data.id"
+                    categorizeable_type="musics"
+                    :categories_selected_ids="form_data.categories_ids"
+                    @refresh="refresh()"
+                ></select-category>
+            </div>
 
             <hr>
             <br>
@@ -251,6 +275,9 @@ export default {
         }
     },
     methods:{
+        refresh(){
+            this.getMusic();
+        },
         getSingers(){
             this.singers_filter.singer_ids = this.form_data.singers;
             this.$http.post(`singers/list?page=1` , this.singers_filter)

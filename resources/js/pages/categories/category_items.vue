@@ -1,41 +1,36 @@
 <template>
     <div>
-
         <div class="page-head">
-            <div class="titr">اسلایدر ها</div>
+            <div class="titr">آیتم های دسته بندی با شناسه {{category_id}}</div>
             <div class="back">
-                <router-link :to="{ name : 'dashboard' }">بازگشت
+                <router-link :to="{ name : 'categories' }">بازگشت
                     <v-icon>
                         mdi-chevron-left
                     </v-icon>
                 </router-link>
             </div>
         </div>
-
         <v-container>
             <v-row class="md-section">
-
                 <v-col cols="4" class="pb-0">
-
                     <v-text-field
                         v-model="filter.search_key"
                         :append-outer-icon="'mdi-magnify'"
                         outlined
                         clearable
-                        dense
+                        dense disabled
                         label="جست و جو"
                         type="text"
                         @click:append-outer="reset()"
                         @keyup.enter="reset()"
                     ></v-text-field>
-
                 </v-col>
                 <v-col cols="4" class="pb-0">
                 </v-col>
                 <v-col cols="4" class="pb-0">
                     <v-select
                         label="مرتب سازی بر اساس"
-                        :items="sort_by_list"
+                        :items="[{text:'نمایش همه',value:'all'},{text:'سطح بندی شده ها',value:'has_level'},{text:'سطح بندی نشده ها',value:'not_has_level'}]"
                         v-model="filter.sort_by"
                         item-text="text"
                         item-value="value"
@@ -47,17 +42,9 @@
                         @click:append-outer="reset()"
                     ></v-select>
                 </v-col>
-
             </v-row>
-
             <div class="sm-section">
-
-                <v-btn color="success" dens @click="$router.push({name:'create_slider'})">
-                    افزودن اسلایدر جدید
-                </v-btn>
-
             </div>
-
             <div class="main-section">
                 <v-simple-table
                     fixed-header
@@ -67,54 +54,41 @@
                     <template v-slot:default>
                         <thead>
                         <tr>
-                            <th>#</th>
-                            <th>بنر</th>
+                            <th>تصویر</th>
+                            <th>عنوان</th>
                             <th>نوع</th>
-                            <th>نمایش</th>
+                            <th>سطح</th>
                             <th>عملیات</th>
                         </tr>
                         </thead>
                         <div class="fetch-loading">
                             <v-progress-linear
-                                v-if="fetch_loading"
+                                v-if="loading"
                                 indeterminate
                                 color="cyan"
                             ></v-progress-linear>
                         </div>
                         <tbody>
                         <tr
-                            v-for="item in list"
-                            :key="item.id"
+                            v-for="(item, key) in list"
+                            :key="key"
                         >
-                            <td>{{ item.id }}</td>
                             <td>
-                                <div v-if="item.slider_banner" class="d-flex align-center">
-                                    <img :src="item.slider_banner" style="width:60px;height:auto">
+                                <div v-if="item.category_item_poster" class="d-flex ml-1 py-1">
+                                    <img :src="item.category_item_poster" class="rounded m-1" height="40" alt="category item poster">
                                 </div>
                             </td>
                             <td>
-                                <template v-if="item.type === 1">آهنگ</template>
-                                <template v-if="item.type === 2">آلبوم</template>
-                                <template v-if="item.type === 3">خواننده</template>
-                                <template v-if="item.type === 4">چند آهنگ</template>
+                                <div class="d-flex flex-column">
+                                    <span>{{item.title}}</span>
+                                    <span>{{item.subtitle}}</span>
+                                </div>
                             </td>
+                            <td>{{item.type}}</td>
+                            <td>{{item.level}}</td>
                             <td>
-                                <template v-if="item.show_it">
-                                    <v-icon>
-                                        mdi-eye
-                                    </v-icon>
-                                </template>
-                                <template v-else>
-                                    <v-icon>
-                                        mdi-eye-off
-                                    </v-icon>
-                                </template>
-                            </td>
-                            <td>
-                                <v-btn color="primary" dens>
-                                    <router-link :to="{ name:'edit_slider' , params:{ id:item.id } }">
-                                        ویرایش
-                                    </router-link>
+                                <v-btn color="primary" dens small @click="goTo(item.related_id, item.type)">
+                                    جزئیات
                                 </v-btn>
                             </td>
                         </tr>
@@ -122,73 +96,82 @@
                     </template>
                 </v-simple-table>
             </div>
-
-            <div class="sm-section">
-                <v-pagination
-                    v-model="current_page"
-                    :length="last_page"
-                    :total-visible="7"
-                ></v-pagination>
-            </div>
-
         </v-container>
     </div>
 </template>
 <script>
 export default {
-    name:'sliders',
+    name:'create_movie',
     data: () => ({
-        list:[],
+        category_id: null,
+        list: [],
         filter:{
-            sort_by : 'newest'
+            sort_by:'all'
         },
         errors:{},
-        sort_by_list: [
-            {text: 'جدید ترین ها',value: 'newest'},
-            {text: 'قدیمی ترین ها',value: 'oldest'},
-        ],
         current_page:1,
-        per_page:0,
-        last_page:1,
-        fetch_loading:false,
+        last_page:0,
+        loading: false,
     }),
     watch:{
         current_page(){
-            this.getList();
+            this.getCategoryItems();
         }
     },
     methods:{
-        getList(){
-            this.fetch_loading = true
-            this.$http.post(`sliders/list?page=${this.current_page}` , this.filter)
+        getCategoryItems(){
+            this.loading = true;
+            this.filter.category_id = this.category_id;
+            this.$http.post(`categories/items?page=${this.current_page}` , this.filter)
                 .then(res => {
-                    this.list = res.data.data.data
-                    this.last_page = res.data.data.last_page;
-                    this.fetch_loading = false
+                    this.list = res.data.data
+                    this.loading = false
                 })
                 .catch( () => {
-                    this.fetch_loading = false
+                    this.loading = false
                 });
         },
         Search(e){
             if (e.keyCode === 13) {
                 this.current_page = 1
                 this.list = []
-                this.getList()
+                this.getCategoryItems()
             }
         },
         reset(){
             this.current_page = 1
             this.list = []
-            this.getList()
+            this.getCategoryItems()
         },
+        goTo(id, type){
+            let route = null;
+            if (type === 'grammer') {
+                route = this.$router.resolve({'name':'edit_grammer' , params:{id}})
+            }
+            if (type === 'music') {
+                route = this.$router.resolve({'name':'edit_music' , params:{id}})
+            }
+            if (type === 'film') {
+                route = this.$router.resolve({'name':'edit_movie' , params:{id}})
+            }
+            if (type === 'word_definition') {
+                route = this.$router.resolve({'name':'edit_word' , params:{id}})
+            }
+            if (type === 'idiom_definition') {
+                route = this.$router.resolve({'name':'edit_idiom' , params:{id}})
+            }
+            if (route) {
+                window.open(route.href, '_blank');
+            }
+        }
     },
     mounted(){
-        this.getList()
+        this.category_id = this.$route.params.id;
+        this.getCategoryItems();
     },
     beforeMount(){
         this.checkAuth()
-        this.setPageTitle('اسلایدر ها')
+        this.setPageTitle('آیتم های دسته بندی')
     }
 }
 </script>

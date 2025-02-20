@@ -30,4 +30,9 @@ class Grammer extends Model
     {
         return $this->hasMany(GrammerSection::class, 'grammer_id')->orderBy('priority');
     }
+
+    public function categories()
+    {
+        return $this->morphToMany(Category::class, 'categorizeable');
+    }
 }

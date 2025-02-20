@@ -115,9 +115,41 @@
                                         dense :label="'توضیحات برای معنی ' + (key + 1)"
                                     ></v-textarea>
                                 </v-col>
+                                <v-col v-for="(link, key) in item.links" :key="key" cols="12" sm="12" class="pt-0">
+                                    <span class="pa-2">{{link.title}}:</span>
+                                    <v-chip v-for="(link_item, link_item_key) in link.list" :key="link_item_key" pill class="mx-1" close @click:close="deleteLink(link_item.link_id)">
+                                        {{link_item.text}}
+                                    </v-chip>
+                                </v-col>
+                                <v-col v-if="item.categories.length > 0" cols="12" sm="12" class="pt-0">
+                                    <v-chip
+                                        v-for="(category, key) in item.categories"
+                                        :key="key"
+                                        pill
+                                        :outlined="category.mode ==='category'"
+                                        :color="category.color"
+                                        :text-color="category.mode ==='category' ? category.color : getTextColor(category.color)"
+                                        class="mx-1"
+                                    >
+                                        <v-avatar v-if="category.category_poster" left>
+                                            <v-img :src="category.category_poster"></v-img>
+                                        </v-avatar>
+                                        {{category.title}}
+                                    </v-chip>
+                                </v-col>
                                 <v-col cols="12" sm="12" class="py-0 mb-6">
                                     <div class="d-flex justify-space-between">
-                                        <v-btn v-if="item.id" dark color="orange" small @click="joinable_id = item.id , join_modal = true">اتصال به متن</v-btn>
+                                        <div class="d-flex">
+                                            <v-btn v-if="item.id" dark color="orange" small @click="joinable_id = item.id , join_modal = true" class="ml-2">اتصال به متن</v-btn>
+                                            <select-category
+                                                v-if="item.id"
+                                                :categorizeable_id="item.id"
+                                                categorizeable_type="word_definitions"
+                                                :categories_selected_ids="item.categories_ids"
+                                                @refresh="refresh()"
+                                            ></select-category>
+                                            <select-link v-if="item.id" :link_from_id="item.id" link_from_type="word_definition" @refresh="refresh()"></select-link>
+                                        </div>
                                         <v-btn v-if="item.id && parseInt(item.joins_count) === 0" dark :loading="delete_loading" color="danger" small @click="deleteDefinition(item.id)">حذف این معنی</v-btn>
                                     </div>
                                 </v-col>
@@ -315,6 +347,9 @@ export default {
         }
     },
     methods:{
+        refresh(){
+            this.getWord(this.$route.params.id);
+        },
         addDefinition(type){
             if(type === 1){
                 this.form_data.word_definitions.push({
@@ -354,9 +389,9 @@ export default {
             this.form_data.word_definitions[definition_key].word_definition_examples.splice(example_key , 1)
             return true;
         },
-        getWord(id){
+        getWord(id) {
             this.$store.commit('SHOW_APP_LOADING' , 1)
-            this.$http.post(`words/single` , {id:id})
+            this.$http.post(`words/single` , {id})
                 .then(res => {
                     this.form_data = res.data.data
                     if (this.form_data.word_types) {
@@ -455,6 +490,32 @@ export default {
                     })
                     .catch( err => {
                         this.delete_loading = false;
+                        const e = err.response.data
+                        if(e.errors){ this.errors = e.errors }
+                        else if(e.message){
+                            this.$fire({
+                                title: "خطا",
+                                text: e.message,
+                                type: "error",
+                                timer: 5000
+                            })
+                        }
+                    });
+            }
+        },
+        deleteLink(id){
+            if (confirm('از حذف لینک اطمینان دارید؟')){
+                this.$http.post(`links/delete` , {id})
+                    .then(res => {
+                        this.$fire({
+                            title: "موفق",
+                            text: res.data.message,
+                            type: "success",
+                            timer: 5000
+                        })
+                        this.getWord(this.$route.params.id);
+                    })
+                    .catch( err => {
                         const e = err.response.data
                         if(e.errors){ this.errors = e.errors }
                         else if(e.message){

@@ -55,6 +55,32 @@
                                     dense label="اولویت" outlined
                                 ></v-text-field>
                             </v-col>
+                            <v-col cols="12" class="py-0">
+                                <div class="d-flex justify-space-between align-center my-4">
+                                    <div>
+                                        <v-chip
+                                            v-for="(category, key) in form_data.categories"
+                                            :key="key" pill
+                                            :outlined="category.mode ==='category'"
+                                            :color="category.color"
+                                            :text-color="category.mode ==='category' ? category.color : getTextColor(category.color)"
+                                            class="mx-1"
+                                        >
+                                            <v-avatar v-if="category.category_poster" left>
+                                                <v-img :src="category.category_poster"></v-img>
+                                            </v-avatar>
+                                            {{category.title}}
+                                        </v-chip>
+                                    </div>
+                                    <select-category
+                                        v-if="form_data.id"
+                                        :categorizeable_id="form_data.id"
+                                        categorizeable_type="grammers"
+                                        :categories_selected_ids="form_data.categories_ids"
+                                        @refresh="refresh()"
+                                    ></select-category>
+                                </div>
+                            </v-col>
                             <v-col cols="12" xs="12" sm="12" class="pb-0">
                                 <v-textarea
                                     v-model="form_data.description"
@@ -344,6 +370,9 @@ export default {
         }
     },
     methods:{
+        refresh(){
+            this.getGrammer(this.$route.params.id);
+        },
         addSection(){
             this.form_data.grammer_sections.push({
                 title:'',

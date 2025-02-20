@@ -344,7 +344,7 @@ class GrammerController extends Controller
             ], 400);
         }
 
-        $get = Grammer::with(['grammer_sections' => function ($query) {
+        $get = Grammer::with(['categories','grammer_sections' => function ($query) {
             $query->with(['text_joins' => function ($q) {
                 $q->with('text');
             }])->orderBy('priority', 'asc')->orderBy('id', 'asc');
@@ -356,6 +356,7 @@ class GrammerController extends Controller
                 'message' => " گرامر یافت نشد.",
             ], 404);
         }
+        $get->categories_ids = $get->categories->pluck('id')->toArray();
         $get['prerequisite'] = $get->grammer_prerequisites()->pluck('id')->toArray();
         $rules = [];
         foreach ($get->grammer_rules()->get() as $item) {

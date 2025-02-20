@@ -104,17 +104,7 @@
                                 accept="image/*"
                             ></v-file-input>
                         </v-col>
-                        <v-col cols="6" sm="3" class="pb-0">
-                            <v-text-field
-                                v-model="form_data.extension"
-                                :error-messages="errors.extension"
-                                outlined
-                                clearable
-                                dense
-                                label="پسوند فایل فیلم"
-                            ></v-text-field>
-                        </v-col>
-                        <v-col cols="6" sm="3" class="pb-0">
+                        <v-col cols="12" sm="6" class="pb-0">
                             <v-select
                                 v-model="form_data.permission_type"
                                 outlined dense
@@ -134,9 +124,31 @@
                                 label="توضیحات فیلم"
                             ></v-textarea>
                         </v-col>
-
                     </v-row>
-
+                    <div class="d-flex justify-space-between align-center my-4">
+                        <div>
+                            <v-chip
+                                v-for="(category, key) in form_data.categories"
+                                :key="key" pill
+                                :outlined="category.mode ==='category'"
+                                :color="category.color"
+                                :text-color="category.mode ==='category' ? category.color : getTextColor(category.color)"
+                                class="mx-1"
+                            >
+                                <v-avatar v-if="category.category_poster" left>
+                                    <v-img :src="category.category_poster"></v-img>
+                                </v-avatar>
+                                {{category.title}}
+                            </v-chip>
+                        </div>
+                        <select-category
+                            v-if="form_data.id"
+                            :categorizeable_id="form_data.id"
+                            categorizeable_type="films"
+                            :categories_selected_ids="form_data.categories_ids"
+                            @refresh="refresh()"
+                        ></select-category>
+                    </div>
                     <v-row>
                         <v-col cols="12" sm="12" md="4" class="pb-0">
                             <v-select
@@ -239,6 +251,9 @@ export default {
         }
     },
     methods:{
+        refresh(){
+            this.getMovie();
+        },
         getMovie(){
             this.$store.commit('SHOW_APP_LOADING' , 1)
             this.$http.get(`movies/movie/${this.movie_id}`)
@@ -275,7 +290,6 @@ export default {
             form.append('parent', data.parent ? data.parent : 0);
             data.new_poster ? form.append('poster', data.new_poster) : '';
             data.priority ? form.append('priority', data.priority) : '';
-            data.extension ? form.append('extension', data.extension) : '';
             data.description ? form.append('description', data.description) : '';
             data.level ? form.append('level', data.level) : '';
             data.permission_type ? form.append('permission_type', data.permission_type) : '';
