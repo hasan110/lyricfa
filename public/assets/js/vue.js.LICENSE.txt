@@ -27,7 +27,7 @@
   */
 
 /*!
- * ApexCharts v4.4.0
+ * ApexCharts v4.5.0
  * (c) 2018-2025 ApexCharts
  * Released under the MIT License.
  */
@@ -53,6 +53,8 @@
 /*! ../../../mixins/colorable */
 
 /*! ../../../mixins/localable */
+
+/*! ../../../mixins/mouse */
 
 /*! ../../../mixins/themeable */
 
@@ -133,6 +135,8 @@
 /*! ../../mixins/menuable */
 
 /*! ../../mixins/mobile */
+
+/*! ../../mixins/mouse */
 
 /*! ../../mixins/overlayable */
 
@@ -580,6 +584,8 @@
 
 /*! ./VItem */
 
+/*! ./VItem.sass */
+
 /*! ./VItemGroup */
 
 /*! ./VItemGroup.sass */
@@ -946,8 +952,6 @@
 
 /*! ./monthChange */
 
-/*! ./mouse */
-
 /*! ./mutate */
 
 /*! ./nl */
@@ -1254,7 +1258,7 @@
 
 /*! exports provided: createItemTypeNativeListeners, createItemTypeListeners */
 
-/*! exports provided: createSimpleFunctional, directiveConfig, addOnceEventListener, passiveSupported, addPassiveEventListener, getNestedValue, deepEqual, getObjectValueByPath, getPropertyFromItem, createRange, getZIndex, escapeHTML, filterObjectOnKeys, convertToUnit, kebabCase, isObject, keyCodes, remapInternalIcon, keys, camelize, arrayDiff, upperFirst, groupItems, wrapInArray, sortItems, defaultFilter, searchItems, getSlotType, debounce, throttle, getPrefixedScopedSlots, getSlot, clamp, padEnd, chunk, humanReadableFileSize, camelizeObjectKeys, mergeDeep, fillArray, composedPath */
+/*! exports provided: createSimpleFunctional, directiveConfig, addOnceEventListener, passiveSupported, addPassiveEventListener, getNestedValue, deepEqual, getObjectValueByPath, getPropertyFromItem, createRange, getZIndex, filterObjectOnKeys, convertToUnit, kebabCase, isObject, keyCodes, remapInternalIcon, keys, camelize, arrayDiff, upperFirst, groupItems, wrapInArray, sortItems, defaultFilter, searchItems, getSlotType, debounce, throttle, getPrefixedScopedSlots, getSlot, clamp, padEnd, chunk, humanReadableFileSize, camelizeObjectKeys, mergeDeep, fillArray, composedPath */
 
 /*! exports provided: createSimpleTransition, createJavascriptTransition */
 
@@ -1541,6 +1545,10 @@
 /*!*********************************!*\
   !*** ./src/directives/index.ts ***!
   \*********************************/
+
+/*!***********************************!*\
+  !*** ./src/mixins/mouse/index.ts ***!
+  \***********************************/
 
 /*!***********************************!*\
   !*** ./src/services/goto/util.ts ***!
@@ -2415,6 +2423,10 @@
   \**********************************************/
 
 /*!**********************************************!*\
+  !*** ./src/components/VItemGroup/VItem.sass ***!
+  \**********************************************/
+
+/*!**********************************************!*\
   !*** ./src/components/VList/VListGroup.sass ***!
   \**********************************************/
 
@@ -2688,10 +2700,6 @@
 
 /*!**************************************************!*\
   !*** ./src/components/VAppBar/VAppBarNavIcon.ts ***!
-  \**************************************************/
-
-/*!**************************************************!*\
-  !*** ./src/components/VCalendar/mixins/mouse.ts ***!
   \**************************************************/
 
 /*!**************************************************!*\

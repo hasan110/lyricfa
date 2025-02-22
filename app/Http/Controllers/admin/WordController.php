@@ -85,7 +85,8 @@ class WordController extends Controller
         $word = new Word();
         $word->english_word = $request->english_word;
         $word->level = $request->level;
-        $word->pronunciation = $request->pronunciation;
+        $word->us_pronunciation = $request->us_pronunciation;
+        $word->uk_pronunciation = $request->uk_pronunciation;
         $word->word_types = $request->word_type ? implode(',', $request->word_type) : null;
 
         $word->save();
@@ -191,7 +192,8 @@ class WordController extends Controller
 
         $word->english_word = $request->english_word;
         $word->level = $request->level;
-        $word->pronunciation = $request->pronunciation;
+        $word->us_pronunciation = $request->us_pronunciation;
+        $word->uk_pronunciation = $request->uk_pronunciation;
         $word->word_types = $request->word_type ? implode(',', $request->word_type) : null;
         $word->save();
 

@@ -146,27 +146,31 @@
                                         dense :label="'توضیحات برای معنی ' + (key + 1)"
                                     ></v-textarea>
                                 </v-col>
-                                <v-col v-for="(link, key) in item.links" :key="key" cols="12" sm="12" class="pt-0">
-                                    <span class="pa-2">{{link.title}}:</span>
-                                    <v-chip v-for="(link_item, link_item_key) in link.list" :key="link_item_key" pill close @click:close="deleteLink(link_item.link_id)" class="mx-1">
-                                        {{link_item.text}}
-                                    </v-chip>
-                                </v-col>
-                                <v-col cols="12" sm="12" class="pt-0">
-                                    <v-chip
-                                        v-for="(category, key) in item.categories"
-                                        :key="key" pill
-                                        :outlined="category.mode ==='category'"
-                                        :color="category.color"
-                                        :text-color="category.mode ==='category' ? category.color : getTextColor(category.color)"
-                                        class="mx-1"
-                                    >
-                                        <v-avatar v-if="category.category_poster" left>
-                                            <v-img :src="category.category_poster"></v-img>
-                                        </v-avatar>
-                                        {{category.title}}
-                                    </v-chip>
-                                </v-col>
+                                <template v-if="item.links">
+                                    <v-col v-for="(link, key) in item.links" :key="key" cols="12" sm="12" class="pt-0">
+                                        <span class="pa-2">{{link.title}}:</span>
+                                        <v-chip v-for="(link_item, link_item_key) in link.list" :key="link_item_key" pill close @click:close="deleteLink(link_item.link_id)" class="mx-1">
+                                            {{link_item.text}}
+                                        </v-chip>
+                                    </v-col>
+                                </template>
+                                <template v-if="item.categories">
+                                    <v-col v-if="item.categories.length > 0" cols="12" sm="12" class="pt-0">
+                                        <v-chip
+                                            v-for="(category, key) in item.categories"
+                                            :key="key" pill
+                                            :outlined="category.mode ==='category'"
+                                            :color="category.color"
+                                            :text-color="category.mode ==='category' ? category.color : getTextColor(category.color)"
+                                            class="mx-1"
+                                        >
+                                            <v-avatar v-if="category.category_poster" left>
+                                                <v-img :src="category.category_poster"></v-img>
+                                            </v-avatar>
+                                            {{category.title}}
+                                        </v-chip>
+                                    </v-col>
+                                </template>
                                 <v-col cols="12" sm="12" class="py-0 mb-4 pb-2">
                                     <div class="d-flex justify-space-between">
                                         <div class="d-flex">
@@ -214,7 +218,7 @@
                             <div class="my-4">
                                 <small>مثال برای معنی</small>
                             </div>
-                            <div v-for="(example , example_key) in item.idiom_definition_examples">
+                            <div v-for="(example , example_key) in item.idiom_definition_examples" :key="example_key">
                                 <v-row>
                                     <v-col cols="12" xs="12" sm="6" class="pb-0">
                                         <v-textarea

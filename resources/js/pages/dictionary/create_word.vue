@@ -28,14 +28,22 @@
                             dense label="لغت"
                         ></v-text-field>
                     </v-col>
-                    <v-col cols="12" xs="12" sm="6" class="pb-0">
+                    <v-col cols="12" xs="6" sm="3" class="pb-0">
                         <v-text-field
-                            v-model="form_data.pronunciation"
-                            :error-messages="errors.pronunciation"
+                            v-model="form_data.us_pronunciation"
+                            :error-messages="errors.us_pronunciation"
                             outlined
-                            clearable
                             dense
-                            label="تلفظ"
+                            label="تلفظ (us)"
+                        ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" xs="6" sm="3" class="pb-0">
+                        <v-text-field
+                            v-model="form_data.uk_pronunciation"
+                            :error-messages="errors.uk_pronunciation"
+                            outlined
+                            dense
+                            label="تلفظ (uk)"
                         ></v-text-field>
                     </v-col>
                     <v-col cols="12" xs="12" sm="6" class="pb-0">
@@ -114,7 +122,7 @@
                             <div class="mt-4">
                                 <small>مثال برای معنی</small>
                             </div>
-                            <div v-for="(example , example_key) in item.definition_examples">
+                            <div v-for="(example , example_key) in item.definition_examples" :key="example_key">
                                 <v-row>
                                     <v-col cols="12" xs="12" sm="6" class="pb-0">
                                         <v-textarea
