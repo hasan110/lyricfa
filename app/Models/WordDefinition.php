@@ -11,7 +11,7 @@ class WordDefinition extends Model
     use HasFactory;
     protected $guarded = [];
     protected $table = 'word_definitions';
-    protected $appends = [self::IMAGE_FILE_TYPE, 'joins_count', 'links'];
+    protected $appends = [self::IMAGE_FILE_TYPE, 'joins_count', 'links', 'type_data'];
 
     public const IMAGE_FILE_TYPE = 'word_definition_image';
 
@@ -54,6 +54,11 @@ class WordDefinition extends Model
     public function getJoinsCountAttribute()
     {
         return $this->text_joins()->count();
+    }
+
+    public function getTypeDataAttribute()
+    {
+        return Word::getWordTypeDetails($this->type);
     }
 
     public function getLinksAttribute()

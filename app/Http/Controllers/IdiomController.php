@@ -66,9 +66,13 @@ class IdiomController extends Controller
             }
         }
 
-        $word_idioms = Idiom::with('idiom_definitions')->where('phrase_base' , 'regexp' , '\\b'.strtolower($word).'\\b')->get();
+        $word_idioms = Idiom::with(['idiom_definitions' => function ($q) {
+            $q->with('categories');
+        }])->where('phrase_base' , 'regexp' , '\\b'.strtolower($word).'\\b')->get();
         if($word_base){
-            $word_base_idioms = Idiom::with('idiom_definitions')->where('phrase_base' , 'regexp' , '\\b'.strtolower($word_base).'\\b')->get();
+            $word_base_idioms = Idiom::with(['idiom_definitions' => function ($q) {
+                $q->with('categories');
+            }])->where('phrase_base' , 'regexp' , '\\b'.strtolower($word_base).'\\b')->get();
         }else{
             $word_base_idioms = [];
         }
@@ -228,17 +232,22 @@ class IdiomController extends Controller
         }
 
         $get_en_word = WordENEN::where('ci_word' , $word)->orWhere('ci_word' , $lower_word)->orWhere('ci_word' , ucfirst($lower_word))->first();
-        if($get_word)
+        if ($get_word)
         {
             $word_data = [
                 'word' => $word,
+                'uk_pronunciation' => $get_word->uk_pronunciation,
+                'us_pronunciation' => $get_word->us_pronunciation,
+                'level' => $get_word->level,
                 'pronunciation' => $get_word->pronunciation,
-                'definitions' => $get_word->word_definitions,
+                'definitions' => $get_word->word_definitions()->with('categories')->get(),
                 'english_definitions' => $get_en_word ? $get_en_word->english_word_definitions : null,
-                'idioms' => Idiom::with('idiom_definitions')->where('base' , $word)->orWhere('base' , $lower_word)->get()
+                'idioms' => Idiom::with(['idiom_definitions' => function ($q) {
+                    $q->with('categories');
+                }])->where('base' , $word)->orWhere('base' , $lower_word)->get()
             ];
 
-        }else{
+        } else {
             $word_data = null;
         }
 
@@ -249,10 +258,15 @@ class IdiomController extends Controller
             if ($get_base_word) {
                 $base_word_data = [
                     'word' => $word_base,
+                    'uk_pronunciation' => $get_base_word->uk_pronunciation,
+                    'us_pronunciation' => $get_base_word->us_pronunciation,
+                    'level' => $get_base_word->level,
                     'pronunciation' => $get_base_word->pronunciation,
-                    'definitions' => $get_base_word->word_definitions,
+                    'definitions' => $get_base_word->word_definitions()->with('categories')->get(),
                     'english_definitions' => $get_base_en_word ? $get_base_en_word->english_word_definitions : null,
-                    'idioms' => Idiom::with('idiom_definitions')->where('base' , $word_base)->orWhere('base' , $lower_word_base)->get(),
+                    'idioms' => Idiom::with(['idiom_definitions' => function ($q) {
+                        $q->with('categories');
+                    }])->where('base' , $word_base)->orWhere('base' , $lower_word_base)->get(),
                 ];
             }
         }
@@ -285,7 +299,9 @@ class IdiomController extends Controller
             ], 400);
         }
 
-        $get_idiom = Idiom::with('idiom_definitions')->where('phrase' , $request->idiom)->first();
+        $get_idiom = Idiom::with(['idiom_definitions' => function ($q) {
+            $q->with('categories');
+        }])->where('phrase' , $request->idiom)->first();
 
         if ($get_idiom){
             $response = [

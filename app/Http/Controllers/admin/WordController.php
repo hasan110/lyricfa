@@ -157,7 +157,7 @@ class WordController extends Controller
         $validator = Validator::make($request->all(), [
             'id' => 'required',
             'english_word' => 'required',
-            'level' => 'required|in:A1,A2,B1,B2,C1,C2',
+            // 'level' => 'in:A1,A2,B1,B2,C1,C2',
             'word_definitions.*.definition' => 'filled',
             //'word_definitions.*.level' => 'filled',
             //'word_definitions.*.type' => 'filled',
@@ -191,7 +191,7 @@ class WordController extends Controller
         }
 
         $word->english_word = $request->english_word;
-        $word->level = $request->level;
+        $word->level = $request->level ?? null;
         $word->us_pronunciation = $request->us_pronunciation;
         $word->uk_pronunciation = $request->uk_pronunciation;
         $word->word_types = $request->word_type ? implode(',', $request->word_type) : null;
