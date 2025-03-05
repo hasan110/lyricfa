@@ -25,6 +25,7 @@ use App\Http\Controllers\UserSuggestionController;
 use App\Http\Controllers\OrderMusicController;
 use App\Http\Controllers\GrammerController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ViewController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/send-verify-code', [SmsVerifyController::class, 'sendVerifyCode']);
@@ -129,11 +130,15 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/insert_user_suggestion', [UserSuggestionController::class, 'insertUserSuggestion']);
 
     // order music
-    Route::post('/add_order_music', [OrderMusicController::class, 'addOrderMusic'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');;
+    Route::post('/add_order_music', [OrderMusicController::class, 'addOrderMusic'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');
 
     //score
     Route::post('/get_user_score', [ScoreMusicController::class, 'getUserScore']);
     Route::post('/add_music_score', [ScoreMusicController::class, 'addMusicScore']);
+
+    // view
+    Route::post('/view/add', [ViewController::class, 'addView']);
+    Route::post('/latest_views', [ViewController::class, 'latestViews']);
 
     // subscription list
     Route::post('/get_subscriptions', [SubscriptionController::class, 'getSubscriptions']);

@@ -47,4 +47,9 @@ class User extends Model
     {
         return $this->hasMany(PlayList::class, 'user_id')->latest();
     }
+
+    public function views()
+    {
+        return $this->hasMany(View::class, 'user_id');
+    }
 }

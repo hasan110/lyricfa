@@ -253,6 +253,79 @@
                     </v-simple-table>
                 </v-col>
             </v-row>
+
+            <v-row>
+                <v-col cols="12" class="pb-0">
+                    <h3>📌بازدید های اخیر</h3>
+                </v-col>
+                <v-col cols="12">
+                    <v-simple-table
+                        fixed-header
+                        :height="user.views.length === 0 ? '0px' : '300px'"
+                        class="tbl-nowrap"
+                    >
+                        <template v-slot:default>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>بازدید از</th>
+                                <th>اطلاعات</th>
+                                <th>پیشرفت</th>
+                                <th>تاریخ</th>
+                                <th>تاریخ بروزرسانی</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="(item , key) in user.views" :key="key">
+                                <td>{{item.id}}</td>
+                                <td>
+                                    <template v-if="item.viewable">
+                                        <template v-if="item.viewable_type === 'App\\Models\\Music'">
+                                            آهنگ
+                                        </template>
+                                        <template v-else-if="item.viewable_type === 'App\\Models\\Film'">
+                                            فیلم
+                                        </template>
+                                    </template>
+                                    <template v-else>
+                                        ---
+                                    </template>
+                                </td>
+                                <td>
+                                    <template v-if="item.viewable">
+                                        <template v-if="item.viewable_type === 'App\\Models\\Music'">
+                                            <router-link :to="{name:'edit_music' , params:{id:item.viewable.id}}">{{item.viewable.name}}</router-link>
+                                        </template>
+                                        <template v-else-if="item.viewable_type === 'App\\Models\\Film'">
+                                            <router-link :to="{name:'edit_movie' , params:{id:item.viewable.id}}">{{item.viewable.english_name}}</router-link>
+                                        </template>
+                                    </template>
+                                    <template v-else>
+                                        ---
+                                    </template>
+                                </td>
+                                <td>
+                                    <v-progress-circular
+                                        :rotate="-90"
+                                        :size="40"
+                                        :width="4"
+                                        :value="item.percentage"
+                                        color="purple darken-4"
+                                    >
+                                        {{ item.percentage }}%
+                                    </v-progress-circular>
+                                </td>
+                                <td>{{item.persian_created_at}}</td>
+                                <td>{{item.persian_updated_at}}</td>
+                            </tr>
+                            </tbody>
+                        </template>
+                    </v-simple-table>
+                    <div v-if="user.subscription.length === 0" class="py-4 text-center grey--text">
+                        لیست خالی است
+                    </div>
+                </v-col>
+            </v-row>
             <v-row>
                 <v-col cols="12" sm="12" md="6">
                     <v-col cols="12" class="pb-0">

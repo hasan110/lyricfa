@@ -47,8 +47,8 @@ class SettingController extends Controller
                 ];
             }
 
-            $albums = Album::orderBy('id', 'DESC')->take(24)->get();
-            $films = Film::orderBy('id', "DESC")->whereIn('type', [1, 2])->where('status' , 1)->inRandomOrder()->take(24)->get();
+            $albums = Album::inRandomOrder()->take(24)->get();
+            $films = Film::whereIn('type', [1, 2])->where('status' , 1)->inRandomOrder()->take(24)->get();
             $free_films = Film::orderBy('id', "DESC")->whereIn('type', [1, 2])->where('status' , 1)->whereIn('permission_type' , ['free','first_season_free','first_episode_free'])->take(24)->get();
 
             return [

@@ -229,6 +229,7 @@ class MusicController extends Controller
 
         $data = (new MusicHelper())->musicTemplate($music, $user->id);
         $data['texts'] = $texts;
+        $data['view'] = View::where('user_id' , $user->id)->where('viewable_type', Music::class)->where('viewable_id' , $music->id)->first();
 
         return response()->json([
             'data' => $data,
@@ -323,12 +324,6 @@ class MusicController extends Controller
 
         $music->views = $music->views + 1;
         $music->save();
-
-        $user = (new UserHelper())->getUserByToken($request->header("ApiToken"));
-
-        $music->views()->create([
-            'user_id' => $user->id,
-        ]);
 
         return response()->json([
             'data' => null,

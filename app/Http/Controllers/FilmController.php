@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Helpers\UserHelper;
 use App\Models\Film;
+use App\Models\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -53,12 +54,14 @@ class FilmController extends Controller
                 'message' => "فیلم یافت نشد."
             ], 400);
         }
+        $user = (new UserHelper())->getUserByToken($request->header("ApiToken"));
 
         $films = Film::orderBy('priority', "ASC")->where('parent', $request->id)->whereIn('type', [3, 4, 5])->where('status' , 1)->get();
 
         $film['items'] = $films;
         $film['items_count'] = $films->count();
         $film['texts'] = [];
+        $film['view'] = View::where('user_id' , $user->id)->where('viewable_type', Film::class)->where('viewable_id' , $film->id)->first();
 
         if (((new UserHelper())->isUserSubscriptionValid($request->header("ApiToken")) && $request->with_text) || $film->permission_type === 'free') {
             $film['texts'] = $film->texts()->orderBy("start_time")->get();

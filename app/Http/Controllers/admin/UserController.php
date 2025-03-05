@@ -112,7 +112,7 @@ class UserController extends Controller
 
         $tokens = $user->tokens()->latest()->get();
         foreach ($tokens as &$token) {
-            $token->persian_last_used_at = Jalalian::forge($token->last_used_at)->addMinutes(3.5*60)->format('%Y-%m-%d H:i') . ' - ' . Jalalian::forge($token->last_used_at)->ago();
+            $token->persian_last_used_at = $token->last_used_at ? Jalalian::forge($token->last_used_at)->addMinutes(3.5*60)->format('%Y-%m-%d H:i') . ' - ' . Jalalian::forge($token->last_used_at)->ago() : '-';
             $token->persian_created_at = Jalalian::forge($token->created_at)->addMinutes(3.5*60)->format('%Y-%m-%d H:i') . ' - ' . Jalalian::forge($token->created_at)->ago();
         }
         $user->access_tokens = $tokens;
@@ -127,6 +127,7 @@ class UserController extends Controller
             $diff = $now->diff($expiredAt);
             $user->days_remain = $diff->days;
         }
+        $user->views = $user->views()->with('viewable')->orderBy('updated_at', 'desc')->take(100)->get();
 
         return response()->json([
             'data' => $user,

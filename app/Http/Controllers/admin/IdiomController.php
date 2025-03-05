@@ -120,7 +120,7 @@ class IdiomController extends Controller
             ], 422);
         }
 
-        if (in_array(intval($request->type) , [0,1,2,3,4,5])) {
+        if (in_array(intval($request->type) , [0,1,2,3,4,5,6,7])) {
             $type = intval($request->type);
         } else {
             $type = 0;
@@ -194,7 +194,7 @@ class IdiomController extends Controller
             ], 422);
         }
 
-        if (in_array(intval($request->type) , [0,1,2,3,4,5])) {
+        if (in_array(intval($request->type) , [0,1,2,3,4,5,6,7])) {
             $type = intval($request->type);
         } else {
             $type = 0;
