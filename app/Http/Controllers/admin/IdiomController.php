@@ -104,10 +104,10 @@ class IdiomController extends Controller
 
         $validator = Validator::make($request->all(), [
             'phrase' => 'required|unique:idioms',
-            'level' => 'required|in:A1,A2,B1,B2,C1,C2',
+            // 'level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'base' => 'required',
             'idiom_definitions.*.definition' => 'filled',
-            'idiom_definitions.*.level' => 'filled',
+            //'idiom_definitions.*.level' => 'filled',
             'idiom_definitions.*.idiom_definition_examples.*.definition' => 'filled',
             'idiom_definitions.*.idiom_definition_examples.*.phrase' => 'filled',
         ], $messages);
@@ -128,7 +128,7 @@ class IdiomController extends Controller
 
         $idiom = new Idiom();
         $idiom->phrase = $request->phrase;
-        $idiom->level = $request->level;
+        $idiom->level = $request->level ?? null;
         $idiom->phrase_base = (new IdiomHelper())->convertPhraseToBase($request->phrase);
         $idiom->base = $request->base;
         $idiom->type = $type;
@@ -139,7 +139,7 @@ class IdiomController extends Controller
             $idiom_definition = new IdiomDefinition();
             $idiom_definition->idiom_id = $idiom->id;
             $idiom_definition->definition = $definition['definition'];
-            $idiom_definition->level = $definition['level'];
+            $idiom_definition->level = $definition['level'] ?? null;
             $idiom_definition->description = $definition['description'] ?? null;
             $idiom_definition->priority = $key + 1;
             $idiom_definition->save();
@@ -178,10 +178,10 @@ class IdiomController extends Controller
         $validator = Validator::make($request->all(), [
             'id' => 'required',
             'phrase' => 'required',
-            'level' => 'required|in:A1,A2,B1,B2,C1,C2',
+            //'level' => 'required|in:A1,A2,B1,B2,C1,C2',
             'base' => 'required',
             'idiom_definitions.*.definition' => 'filled',
-            'idiom_definitions.*.level' => 'filled',
+            // 'idiom_definitions.*.level' => 'filled',
             'idiom_definitions.*.idiom_definition_examples.*.definition' => 'filled',
             'idiom_definitions.*.idiom_definition_examples.*.phrase' => 'filled',
         ], $messages);
@@ -209,7 +209,7 @@ class IdiomController extends Controller
             ], 404);
         }
         $idiom->phrase = $request->phrase;
-        $idiom->level = $request->level;
+        $idiom->level = $request->level ?? null;
         $idiom->phrase_base = (new IdiomHelper())->convertPhraseToBase($request->phrase);
         $idiom->base = $request->base;
         $idiom->type = $type;
@@ -232,7 +232,7 @@ class IdiomController extends Controller
                 $idiom_definition->idiom_id = $idiom->id;
             }
             $idiom_definition->definition = $definition['definition'];
-            $idiom_definition->level = $definition['level'];
+            $idiom_definition->level = $definition['level'] ?? null;
             $idiom_definition->description = $definition['description'] ?? null;
             $idiom_definition->priority = $key + 1;
             $idiom_definition->save();

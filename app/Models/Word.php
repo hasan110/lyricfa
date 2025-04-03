@@ -89,7 +89,7 @@ class Word extends Model
                 'title' => 'حرف ندا'
             ],
             'determiner' => [
-                'color' => '#333',
+                'color' => '#333333',
                 'title' => 'تخصیص گر'
             ],
             'superlative' => [

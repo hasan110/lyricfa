@@ -432,13 +432,13 @@ class CategoryController extends Controller
                 $id_list[] = intval($item);
             }
         }
-        if (count($id_list) > 100) {
+        if (count($id_list) > 300) {
             return response()->json([
                 'data' => [],
                 'errors' => [
-                    'category_list_ids'=>['نمی توانید در هر درخواست بیشتر از 100 شناسه اضافه کنید']
+                    'category_list_ids'=>['نمی توانید در هر درخواست بیشتر از 300 شناسه اضافه کنید']
                 ],
-                'message' => "نمی توانید در هر درخواست بیشتر از 100 شناسه اضافه کنید",
+                'message' => 'نمی توانید در هر درخواست بیشتر از 300 شناسه اضافه کنید',
             ], 400);
         }
         $type = $request->input('category_type');
