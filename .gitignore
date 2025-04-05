@@ -5,6 +5,7 @@
 /bootstrap/cache
 /storage/*.key
 /vendor
+/resources/js/config.js
 .env
 .env.backup
 .phpunit.result.cache
