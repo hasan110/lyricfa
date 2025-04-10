@@ -14,36 +14,10 @@ class ViewController extends Controller
     public function latestViews(Request $request)
     {
         $user = (new UserHelper())->getUserByToken($request->header("ApiToken"));
-        $views = $user->views()->where('percentage' , '<' , 100)->with('viewable')->orderBy('updated_at', 'desc')->take(20)->get();
-        $final_list = [];
-
-        foreach ($views as $view) {
-            if ($view->viewable_type === Film::class) {
-                $film = $view->viewable;
-                $final_list[] = [
-                    'id' => $film->id,
-                    'type' => Film::class,
-                    'persian_title' => $film->persian_name,
-                    'english_title' => $film->english_name,
-                    'poster' => $film->film_poster,
-                    'percentage' => $view->percentage,
-                ];
-            }
-            if ($view->viewable_type === Music::class) {
-                $music = $view->viewable;
-                $final_list[] = [
-                    'id' => $music->id,
-                    'type' => Music::class,
-                    'persian_title' => $music->persian_name,
-                    'english_title' => $music->name,
-                    'poster' => $music->music_poster,
-                    'percentage' => $view->percentage,
-                ];
-            }
-        }
+        $latest_views = (new UserHelper())->getLatestViews($user);
 
         return response()->json([
-            'data' => $final_list,
+            'data' => $latest_views,
             'errors' => null,
             'message' => "اطلاعات با موفقیت دریافت شد"
         ]);

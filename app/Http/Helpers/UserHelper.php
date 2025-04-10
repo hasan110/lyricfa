@@ -2,7 +2,10 @@
 
 namespace App\Http\Helpers;
 
+use App\Models\Film;
+use App\Models\Music;
 use App\Models\Report;
+use App\Models\Setting;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Models\UserWord;
@@ -11,7 +14,6 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\PersonalAccessToken;
-use Morilog\Jalali\Jalalian;
 
 class UserHelper extends Helper
 {
@@ -107,6 +109,7 @@ class UserHelper extends Helper
         $user->phone_number = $phone_number;
         $user->prefix_code = $prefix;
         $user->expired_at = Carbon::now();
+        $user->last_subscription_warning = Carbon::now();
         $user->code_introduce = $code_introduce;
         $user->referral_code = $referral_code;
         $user->corridor = $corridor;
@@ -136,6 +139,7 @@ class UserHelper extends Helper
         $user = new User();
         $user->email = $email;
         $user->expired_at = Carbon::now();
+        $user->last_subscription_warning = Carbon::now();
         $user->code_introduce = $code_introduce;
         $user->referral_code = $referral_code;
         $user->corridor = $corridor;
@@ -185,6 +189,18 @@ class UserHelper extends Helper
         } else {
             $user->new_user = false;
         }
+
+        $timing = Setting::getItem('subscription_warning_timing');
+        if (Carbon::parse($user->last_subscription_warning)->addHours($timing) < Carbon::now() && $user->minutes_remain === 0) {
+            $user->show_warning = true;
+            User::whereKey($user->getKey())->update(['last_subscription_warning' => Carbon::now()]);
+        } else {
+            $user->show_warning = false;
+        }
+
+        $user->latest_views = $this->getLatestViews($user);
+        $user->word_review_count = $this->getLightenerBox($user->id , true);
+        $user->notifications = [];
 
         return $user;
     }
@@ -316,9 +332,10 @@ class UserHelper extends Helper
         return $subscriptions->orderBy('id', 'DESC')->take(100)->get();
     }
 
-    public function getLightenerBox($user_id)
+    public function getLightenerBox($user_id, $all_reviews_count = false)
     {
         $box_data = [];
+        $all_reviews = 0;
         for($i = 0 ; $i <= 5 ; $i++)
         {
             $count = UserWord::where('user_id', $user_id)->where('status', $i)->count();
@@ -349,6 +366,7 @@ class UserHelper extends Helper
                     break;
             }
 
+            $all_reviews += $reviews_count;
             $data = [
                 'status' => $i,
                 'total_count' => $count,
@@ -361,6 +379,43 @@ class UserHelper extends Helper
             $box_data[$i] = $data;
         }
 
+        if ($all_reviews_count) {
+            return $all_reviews;
+        }
+
         return $box_data;
+    }
+
+    public function getLatestViews($user)
+    {
+        $views = $user->views()->where('percentage' , '<' , 100)->with('viewable')->orderBy('updated_at', 'desc')->take(20)->get();
+        $final_list = [];
+
+        foreach ($views as $view) {
+            if ($view->viewable_type === Film::class) {
+                $film = $view->viewable;
+                $final_list[] = [
+                    'id' => $film->id,
+                    'type' => Film::class,
+                    'persian_title' => $film->persian_name,
+                    'english_title' => $film->english_name,
+                    'poster' => $film->film_poster,
+                    'percentage' => $view->percentage,
+                ];
+            }
+            if ($view->viewable_type === Music::class) {
+                $music = $view->viewable;
+                $final_list[] = [
+                    'id' => $music->id,
+                    'type' => Music::class,
+                    'persian_title' => $music->persian_name,
+                    'english_title' => $music->name,
+                    'poster' => $music->music_poster,
+                    'percentage' => $view->percentage,
+                ];
+            }
+        }
+
+        return $final_list;
     }
 }

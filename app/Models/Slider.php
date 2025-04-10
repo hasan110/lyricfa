@@ -9,6 +9,7 @@ class Slider extends Model
 {
     use HasFactory;
     protected $appends = [self::BANNER_FILE_TYPE];
+    protected $guarded = [];
 
     public const BANNER_FILE_TYPE = 'slider_banner';
 

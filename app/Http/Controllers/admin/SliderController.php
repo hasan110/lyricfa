@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 class SliderController extends Controller
 {
-    public function slidersList(Request $request)
+    public function slidersList()
     {
         $sliders = Slider::orderBy("id")->paginate(25);
         return response()->json([
@@ -20,75 +20,12 @@ class SliderController extends Controller
         ]);
     }
 
-    public function sliderUpdate(Request $request)
-    {
-        $messages = array(
-            'id.required' => 'id نمی تواند خالی باشد',
-            'id_singer_music_album.required' => 'id_singer_music_album نمی تواند خالی باشد',
-            'id.numeric' => 'id باید فقط شامل عدد باشد',
-            'id_singer_music_album.numeric' => 'id_singer_music_album باید فقط شامل عدد باشد',
-            'type.required' => 'type نمی تواند خالی باشد',
-            'type.numeric' => 'type باید فقط شامل عدد باشد',
-            'show_it.required' => 'show_it نمی تواند خالی باشد',
-            'banner.file' => 'نوع عکس باید فایل باشد',
-            'banner.mimes' => 'نوع فایل باید jpg باشد',
-            'banner.dimensions' => 'عکس باید 1024 در 575 باشد',
-        );
-
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|numeric',
-            'id_singer_music_album' => 'required|numeric',
-            'type' => 'required|numeric',
-            'show_it' => 'required',
-            'banner' => 'file|mimes:jpg|dimensions:min_width=1024,min_height=575,max_width=1024,max_height=575'
-
-        ], $messages);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'data' => null,
-                'errors' => $validator->errors(),
-                'message' => " ویرایش اسلایدر شکست خورد",
-            ], 400);
-        }
-
-        $slider = $this->getSliderById($request->id);
-        if (!$slider) {
-            return response()->json([
-                'data' => null,
-                'errors' => null,
-                'message' => "این خواننده وجود ندارد برای به روز رسانی"
-            ], 400);
-        }
-        $slider->id_singer_music_album = $request->id_singer_music_album;
-        $slider->type = $request->type;
-        $slider->title = $request->title;
-        $slider->description = $request->description;
-        $slider->show_it = $request->show_it ? 1 : 0;
-
-        $slider->save();
-
-        if ($request->hasFile('banner')) {
-            File::createFile($request->banner, $slider, Slider::BANNER_FILE_TYPE);
-        }
-
-        return response()->json([
-            'data' => $slider,
-            'errors' => null,
-            'message' => "اسلایدر موفقیت به روز رسانی شد"
-        ]);
-    }
-
-
     public function sliderCreate(Request $request)
     {
         $messages = array(
-
-            'id_singer_music_album.required' => 'id_singer_music_album نمی تواند خالی باشد',
-            'id_singer_music_album.numeric' => 'id_singer_music_album باید فقط شامل عدد باشد',
-            'type.required' => 'type نمی تواند خالی باشد',
-            'show_it.required' => 'show_it نمی تواند خالی باشد',
-            'show_it.numeric' => 'show_it باید فقط شامل عدد باشد',
+            'action.required' => 'نوع اسلایدر نمی تواند خالی باشد',
+            'action.in' => 'نوع اسلایدر باید یکی از موارد: no-action, internal-link, external-link باشد',
+            'title.required' => 'عنوان نمی تواند خالی باشد',
             'banner.required' => 'عکس اسلایدر اجباری است',
             'banner.file' => 'نوع عکس باید فایل باشد',
             'banner.mimes' => 'نوع فایل باید jpg باشد',
@@ -96,9 +33,8 @@ class SliderController extends Controller
         );
 
         $validator = Validator::make($request->all(), [
-            'id_singer_music_album' => 'required|numeric',
-            'type' => 'required|numeric',
-            'show_it' => 'required',
+            'action' => 'required|in:no-action,internal-link,external-link',
+            'title' => 'required',
             'banner' => 'required|file|mimes:jpg|dimensions:min_width=1024,min_height=575,max_width=1024,max_height=575'
         ], $messages);
 
@@ -109,13 +45,47 @@ class SliderController extends Controller
                 'message' => " ایجاد اسلایدر شکست خورد",
             ], 400);
         }
+        $linkable_id = null;
+        $link = null;
+
+        if ($request->action === "external-link") {
+            if (filter_var($request->link, FILTER_VALIDATE_URL)) {
+                return response()->json([
+                    'data' => null,
+                    'errors' => $validator->errors(),
+                    'message' => "لینک واردشده نامعتبر است",
+                ], 400);
+            }
+            $link = $request->link;
+        }
+
+        if ($request->action === "internal-link") {
+            if (!in_array($request->link, ['subscription','dictionary','media','category','music','film','singer'])) {
+                return response()->json([
+                    'data' => null,
+                    'errors' => null,
+                    'message' => "لینک انتخاب شده نامعتبر است",
+                ], 400);
+            }
+
+            if (in_array($request->link , ['category','music','film','singer']) && !$request->linkable_id) {
+                return response()->json([
+                    'data' => null,
+                    'errors' => null,
+                    'message' => "شناسه مرتبط با لینک را وارد نمایید",
+                ], 400);
+            } else {
+                $linkable_id = $request->linkable_id;
+            }
+            $link = $request->link;
+        }
 
         $slider = new Slider();
-        $slider->id_singer_music_album = $request->id_singer_music_album;
-        $slider->type = $request->type;
+        $slider->action = $request->action;
+        $slider->link = $link;
+        $slider->linkable_id = $linkable_id;
         $slider->title = $request->title;
-        $slider->description = $request->description;
-        $slider->show_it = $request->show_it ? 1 : 0;
+        $slider->status = $request->status ? 1 : 0;
         $slider->save();
         if ($request->hasFile('banner')) {
             File::createFile($request->banner, $slider, Slider::BANNER_FILE_TYPE);
@@ -124,10 +94,24 @@ class SliderController extends Controller
         return response()->json([
             'data' => $slider,
             'errors' => null,
-            'message' => "اسلایدر موفقیت به روز رسانی شد"
+            'message' => "اسلایدر موفقیت ایجاد شد"
         ]);
     }
 
+    public function sliderUpdate(Request $request)
+    {
+        $slider = Slider::find($request->input('id'));
+        if ($slider) {
+            $slider->update([
+                'status' => intval($request->input('status')) === 0 ? 0 : 1,
+            ]);
+        }
+        return response()->json([
+            'data' => null,
+            'errors' => null,
+            'message' => "اسلایدر موفقیت به روز رسانی شد"
+        ]);
+    }
 
     public static function getSlider(Request $request)
     {
@@ -164,53 +148,24 @@ class SliderController extends Controller
         ]);
     }
 
-    public static function getSliderById($id)
-    {
-
-        $slider = Slider::where('id', $id)->first();
-
-        return $slider;
-
-    }
-
-
     public function removeSlider(Request $request)
     {
-        $messages = array(
-            'id.required' => 'شناسه کامنت الزامی است',
-            'id.numeric' => 'شناسه کامنت باید شامل عدد باشد'
-        );
-
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|numeric'
-        ], $messages);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'data' => null,
-                'errors' => $validator->errors(),
-                'message' => "  حذف کامنت شکست خورد",
-            ], 400);
-        }
-
-        $slider = $this->getSliderById($request->id);
-        if (isset($slider)) {
+        $slider = Slider::find($request->input('id'));
+        if ($slider) {
             $slider->delete();
-            $this->deleteFile('sliders/' . $slider->id . '.jpg');
+            File::deleteFile($slider->files, Slider::BANNER_FILE_TYPE);
         } else {
             return response()->json([
                 'data' => null,
                 'errors' => null,
-                'message' => "این کامنت وجود ندارد",
+                'message' => "این اسلایدر وجود ندارد",
             ], 400);
         }
 
         return response()->json([
             'data' => null,
             'errors' => null,
-            'message' => "حذف کامنت موفقیت آمیز بود",
+            'message' => "حذف اسلایدر موفقیت آمیز بود",
         ]);
     }
-
-
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Helpers\UserHelper;
+use App\Models\Slider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -49,6 +50,8 @@ class UserController extends Controller
     public function getUser(Request $request)
     {
         $user = (new UserHelper())->getUserDetailByToken($request->header("ApiToken"));
+        $user->sliders = Slider::where('status', 1)->orderBy("updated_at", "desc")->get();
+
         if ($user) {
             return response()->json([
                 'data' => $user,
@@ -58,7 +61,7 @@ class UserController extends Controller
         } else {
             return response()->json([
                 'data' => null,
-                'errors' => ['id' => "لطفا شناسه را وارد کنید"],
+                'errors' => [],
                 'message' => "خطا در گرفتن اطلاعات",
             ], 400);
         }

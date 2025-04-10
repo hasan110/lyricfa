@@ -4,6 +4,7 @@ use App\Http\Controllers\AlbumController;
 use App\Http\Controllers\FilmController;
 use App\Http\Controllers\FilmTextController;
 use App\Http\Controllers\IdiomController;
+use App\Http\Controllers\IndexController;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\MusicController;
 use App\Http\Controllers\PlayListController;
@@ -41,6 +42,8 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::get('/get_user', [UserController::class, 'getUser']);
     Route::post('/save_fcm_refresh_token', [UserController::class, 'saveFcmRefreshTokenInServer']);
     Route::get('/get_home_page_data', [SettingController::class, 'getHomePageData']);
+    Route::get('/app_data', [IndexController::class, 'appData']);
+    Route::post('/search', [IndexController::class, 'search']);
 
     //music
     Route::post('/music/list', [MusicController::class, 'getMusics']);
