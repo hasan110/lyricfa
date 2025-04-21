@@ -25,6 +25,16 @@ class Film extends Model
         return $this->morphMany(Text::class, 'textable', 'textable_type', 'textable_id');
     }
 
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable', 'commentable_type', 'commentable_id');
+    }
+
+    public function likes()
+    {
+        return $this->morphMany(Like::class, 'likeable', 'likeable_type', 'likeable_id');
+    }
+
     public function files()
     {
         return $this->morphMany(File::class, 'fileable', 'fileable_type', 'fileable_id');

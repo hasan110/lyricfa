@@ -123,8 +123,6 @@ class CategoryController extends Controller
             'permission_type.in' => 'نوع دسترسی باید یکی از موارد: paid, free باشد',
             'type.numeric' => 'نوع فیلم عدد می باشد',
             'parent.numeric' => 'فیلم مرتبط باید عدد باشد',
-            'film.file' => 'نوع فایل آپلودی باید فایل باشد',
-            'film.mimetypes' => 'نوع فایل فیلم باید ویدئو باشد',
             'poster.required' => 'پوستر باید انتخاب شود',
             'poster.file' => 'نوع پوستر باید فایل باشد',
             'poster.mimes' => 'نوع پوستر باید png,jpg باشد',
@@ -141,7 +139,7 @@ class CategoryController extends Controller
                 'description' => 'required',
                 'belongs_to' => 'required|in:grammers,musics,films,word_definitions,idiom_definitions',
                 'priority' => 'required|numeric',
-                'poster' => 'required|mimes:jpg,png|dimensions:min_width=200,min_height=200,max_width=200,max_height=200',
+                'poster' => 'mimes:jpg,png|dimensions:min_width=200,min_height=200,max_width=200,max_height=200',
                 'permission_type' => 'required|in:paid,free',
             ];
         } else {
@@ -215,8 +213,6 @@ class CategoryController extends Controller
             'permission_type.in' => 'نوع دسترسی باید یکی از موارد: paid, free باشد',
             'type.numeric' => 'نوع فیلم عدد می باشد',
             'parent.numeric' => 'فیلم مرتبط باید عدد باشد',
-            'film.file' => 'نوع فایل آپلودی باید فایل باشد',
-            'film.mimetypes' => 'نوع فایل فیلم باید ویدئو باشد',
             'poster.required' => 'پوستر باید انتخاب شود',
             'poster.file' => 'نوع پوستر باید فایل باشد',
             'poster.mimes' => 'نوع پوستر باید png,jpg باشد',

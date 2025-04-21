@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Helpers\UserHelper;
+use App\Models\Category;
 use App\Models\Film;
 use App\Models\Music;
 use App\Models\View;
@@ -74,6 +75,10 @@ class ViewController extends Controller
         else if ($request->input('viewable_type') === 'film') {
             $model = Film::find($id);
             $model_type = Film::class;
+        }
+        else if ($request->input('viewable_type') === 'category') {
+            $model = Category::find($id);
+            $model_type = Category::class;
         }
         else {
             return response()->json([

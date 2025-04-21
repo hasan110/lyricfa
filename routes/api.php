@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\AlbumController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FilmController;
 use App\Http\Controllers\FilmTextController;
 use App\Http\Controllers\IdiomController;
 use App\Http\Controllers\IndexController;
+use App\Http\Controllers\LikeController;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\MusicController;
 use App\Http\Controllers\PlayListController;
@@ -18,6 +20,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserWordController;
 use App\Http\Controllers\WordController;
 use App\Http\Controllers\CommentMusicController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeMusicController;
 use App\Http\Controllers\LikeSingerController;
 use App\Http\Controllers\SettingController;
@@ -45,6 +48,11 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::get('/app_data', [IndexController::class, 'appData']);
     Route::post('/search', [IndexController::class, 'search']);
 
+    Route::get('/category/media', [IndexController::class, 'media']);
+    Route::get('/category/dictionary', [IndexController::class, 'dictionary']);
+    Route::get('/category/grammar', [IndexController::class, 'grammar']);
+    Route::post('/category/get_data', [CategoryController::class, 'getCategoryData']);
+
     //music
     Route::post('/music/list', [MusicController::class, 'getMusics']);
     Route::post('/get_music_all_info', [MusicController::class, 'getMusicCompleteInfo']);
@@ -53,7 +61,7 @@ Route::middleware('CheckApiAuthentication')->group(function () {
     Route::post('/get_last_music_list', [MusicController::class, 'getLastMusicList']);
     Route::post('/get_music_hardest', [MusicController::class, 'getMusicWithHardest']);
     Route::post('/get_n_last_music_list', [MusicController::class, 'getNLastMusicList']);
-    Route::post('/add_view', [MusicController::class, 'addMusicViewOne'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');;
+    Route::post('/add_view', [MusicController::class, 'addMusicViewOne'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');
     Route::post('/get_singer_musics', [MusicController::class, 'getSingerMusics']);
     Route::post('/get_album_musics', [MusicController::class, 'getAlbumMusics']);
     Route::post('/get_singer_musics_no_paging', [MusicController::class, 'getSingerMusicsNoPaging']);
@@ -73,18 +81,25 @@ Route::middleware('CheckApiAuthentication')->group(function () {
 
     //comment music
     Route::post('/get_comment_music', [CommentMusicController::class, 'getMusicComment']);
-    Route::post('/add_comment_music', [CommentMusicController::class, 'addMusicComment'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');;
+    Route::post('/add_comment_music', [CommentMusicController::class, 'addMusicComment'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');
+
+    //comment
+    Route::post('/comments/list', [CommentController::class, 'getComments']);
+    Route::post('/comments/add', [CommentController::class, 'addComment'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');
+
+    //like
+    Route::post('/like/toggle', [LikeController::class, 'toggleLike']);
 
     //lightener
     Route::post('/get_user_words', [UserWordController::class, 'getUserWordsById']);
     Route::post('/get_user_words_review', [UserWordController::class, 'getUserWordsReviews']);
     Route::post('/get_lightener_box_data', [UserWordController::class, 'getLightenerBoxData']);
-    Route::post('/add_word_user', [UserWordController::class, 'insertUserWord'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');;
+    Route::post('/add_word_user', [UserWordController::class, 'insertUserWord'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');
     Route::post('/edit_words_user', [UserWordController::class, 'editWordsUser']);
     Route::post('/remove_word_user', [UserWordController::class, 'removeWordUser']);
 
     //playlist
-    Route::post('/insert_user_play_list', [PlayListController::class, 'insertUserPlayList'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');;
+    Route::post('/insert_user_play_list', [PlayListController::class, 'insertUserPlayList'])->withoutMiddleware('throttle:api')->middleware('throttle:6,1');
     Route::post('/get_user_play_list', [PlayListController::class, 'getUserPlayList']);
     Route::post('/remove_play_list_by_id', [PlayListController::class, 'removePlayListById']);
     Route::post('/edit_play_list_by_id', [PlayListController::class, 'editPlayListById']);

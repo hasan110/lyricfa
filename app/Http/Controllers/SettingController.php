@@ -17,8 +17,11 @@ class SettingController extends Controller
 {
     public function getSetting()
     {
+        $setting = Setting::fetch(false);
+        $setting['sliders'] = Slider::where('status', 1)->orderBy("updated_at", "desc")->get();
+
         return response()->json([
-            'data' => Setting::fetch(false),
+            'data' => $setting,
             'errors' => null,
             'message' => "اطلاعات با موفقیت گرفته شد"
         ]);

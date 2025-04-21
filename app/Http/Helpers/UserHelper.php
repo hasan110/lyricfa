@@ -2,6 +2,7 @@
 
 namespace App\Http\Helpers;
 
+use App\Models\Category;
 use App\Models\Film;
 use App\Models\Music;
 use App\Models\Report;
@@ -411,6 +412,17 @@ class UserHelper extends Helper
                     'persian_title' => $music->persian_name,
                     'english_title' => $music->name,
                     'poster' => $music->music_poster,
+                    'percentage' => $view->percentage,
+                ];
+            }
+            if ($view->viewable_type === Category::class) {
+                $category = $view->viewable;
+                $final_list[] = [
+                    'id' => $category->id,
+                    'type' => Category::class,
+                    'persian_title' => $category->subtitle,
+                    'english_title' => $category->title,
+                    'poster' => $category->category_poster,
                     'percentage' => $view->percentage,
                 ];
             }

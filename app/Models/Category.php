@@ -65,6 +65,21 @@ class Category extends Model
         return $this->morphedByMany(IdiomDefinition::class, 'categorizeable');
     }
 
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable', 'commentable_type', 'commentable_id');
+    }
+
+    public function likes()
+    {
+        return $this->morphMany(Like::class, 'likeable', 'likeable_type', 'likeable_id');
+    }
+
+    public function views()
+    {
+        return $this->morphMany(View::class, 'viewable', 'viewable_type', 'viewable_id');
+    }
+
     public function files()
     {
         return $this->morphMany(File::class, 'fileable', 'fileable_type', 'fileable_id');
@@ -72,8 +87,8 @@ class Category extends Model
 
     public function getPermissionLabelAttribute()
     {
-        if ($this->permission_type === 'free') {
-            return 'رایگان';
+        if ($this->permission_type === 'paid') {
+            return 'اشتراکی';
         }
         return null;
     }

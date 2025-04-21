@@ -50,7 +50,6 @@ class UserController extends Controller
     public function getUser(Request $request)
     {
         $user = (new UserHelper())->getUserDetailByToken($request->header("ApiToken"));
-        $user->sliders = Slider::where('status', 1)->orderBy("updated_at", "desc")->get();
 
         if ($user) {
             return response()->json([
