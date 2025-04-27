@@ -366,8 +366,9 @@ class UserHelper extends Helper
                     $reviews_count = UserWord::where('user_id', $user_id)->where('status', $i)->where('updated_at', '<=' , $date->subDays(16))->count();
                     break;
             }
-
-            $all_reviews += $reviews_count;
+            if ($i !== 5) {
+                $all_reviews += $reviews_count;
+            }
             $data = [
                 'status' => $i,
                 'total_count' => $count,

@@ -47,12 +47,11 @@ class IndexController extends Controller
             ]);
         }
 
-        $musics = Music::orderBy('views', 'DESC')->
-            where("status", 1)->
-            where('name', 'LIKE', "%{$search_text}%")->
+        $musics = Music::orderBy('views', 'DESC')->where("status", 1)->where(function ($query) use ($search_text) {
+            $query->where('name', 'LIKE', "%{$search_text}%")->
             orWhere('persian_name', 'LIKE', "%{$search_text}%")->
-            orWhere('id', $search_text)
-        ->take(5)->get();
+            orWhere('id', $search_text);
+        })->take(5)->get();
 
         $singers = Singer::where('english_name', 'LIKE', "%{$search_text}%")->orWhere('persian_name', 'LIKE', "%{$search_text}%")->take(5)->get();
         $singer_list = [];
@@ -67,9 +66,13 @@ class IndexController extends Controller
             ];
         }
 
-        $films = Film::whereIn('type', [1, 2])->where('status' , 1)->where('english_name', 'LIKE', "%{$search_text}%")->orWhere('persian_name', 'LIKE', "%{$search_text}%")->take(5)->get();
+        $films = Film::whereIn('type', [1, 2])->where('status' , 1)->where(function ($query) use ($search_text) {
+            $query->where('english_name', 'LIKE', "%{$search_text}%")->orWhere('persian_name', 'LIKE', "%{$search_text}%");
+        })->take(5)->get();
 
-        $categories = Category::where('status', 1)->where('mode', 'category')->where('title', 'LIKE', "%{$search_text}%")->orWhere('subtitle', 'LIKE', "%{$search_text}%")->take(5)->get();
+        $categories = Category::where('status', 1)->where('mode', 'category')->where('is_parent', 1)->where(function ($query) use ($search_text) {
+            $query->where('title', 'LIKE', "%{$search_text}%")->orWhere('subtitle', 'LIKE', "%{$search_text}%");
+        })->take(5)->get();
 
         $data = [
             'musics' => (new MusicHelper())->prepareMusicsTemplate($musics),
