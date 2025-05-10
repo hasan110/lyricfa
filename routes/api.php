@@ -23,7 +23,6 @@ use App\Http\Controllers\CommentMusicController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeMusicController;
 use App\Http\Controllers\LikeSingerController;
-use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SmsVerifyController;
 use App\Http\Controllers\UserSuggestionController;
 use App\Http\Controllers\OrderMusicController;
@@ -38,17 +37,17 @@ Route::post('/send-verify-code/email', [SmsVerifyController::class, 'sendEmailVe
 Route::post('/check-verify-code/email', [SmsVerifyController::class, 'checkEmailVerifyCode']);
 
 //setting
-Route::get('/get_setting', [SettingController::class, 'getSetting']);
+Route::get('/get_setting', [IndexController::class, 'getSetting']);
 
 Route::middleware('CheckApiAuthentication')->group(function () {
 
     Route::get('/get_user', [UserController::class, 'getUser']);
     Route::post('/save_fcm_refresh_token', [UserController::class, 'saveFcmRefreshTokenInServer']);
-    Route::get('/get_home_page_data', [SettingController::class, 'getHomePageData']);
-    Route::get('/app_data', [IndexController::class, 'appData']);
+    Route::get('/get_home_page_data', [IndexController::class, 'getHomePageData']);
     Route::post('/search', [IndexController::class, 'search']);
 
-    Route::get('/category/media', [IndexController::class, 'media']);
+    Route::get('/category/music', [IndexController::class, 'music']);
+    Route::get('/category/film', [IndexController::class, 'film']);
     Route::get('/category/dictionary', [IndexController::class, 'dictionary']);
     Route::get('/category/grammar', [IndexController::class, 'grammar']);
     Route::post('/category/get_data', [CategoryController::class, 'getCategoryData']);

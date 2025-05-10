@@ -9,7 +9,7 @@ class Film extends Model
 {
     use HasFactory;
     protected $table = 'films';
-    protected $appends = [self::POSTER_FILE_TYPE,self::SOURCE_FILE_TYPE,'permission_label'];
+    protected $appends = [self::POSTER_FILE_TYPE,self::SOURCE_FILE_TYPE,'permission_label','parent_name'];
 
     public const POSTER_FILE_TYPE = 'film_poster';
     public const SOURCE_FILE_TYPE = 'film_source';
@@ -19,6 +19,11 @@ class Film extends Model
         'persian_subtitle'=>'integer',
         'status'=>'integer',
     ];
+
+    public function film_parent()
+    {
+        return $this->belongsTo(Film::class, 'parent');
+    }
 
     public function texts()
     {
@@ -66,6 +71,21 @@ class Film extends Model
             return 'قسمت اول رایگان';
         } else if ($this->permission_type === 'first_season_free') {
             return 'فصل اول رایگان';
+        }
+        return null;
+    }
+
+    public function getParentNameAttribute()
+    {
+        if ($this->film_parent) {
+            if (intval($this->type) === 4) {
+                return $this->film_parent->english_name;
+            } else if (intval($this->type) === 5) {
+                $upper_parent = $this->film_parent->film_parent;
+                if ($upper_parent) {
+                    return $upper_parent->english_name;
+                }
+            }
         }
         return null;
     }
